@@ -55,6 +55,17 @@ done
 echo
 echo "Score: $score/$total"
 
+# CI is stack-conditional, so it's reported separately from the core score rather
+# than as a fixed checklist item: only expected when a manifest exists to test.
+if [[ -f "$TARGET/Cargo.toml" || -f "$TARGET/pyproject.toml" || -f "$TARGET/setup.py" ]]; then
+  if find "$TARGET/.github/workflows" -maxdepth 1 -name 'ci-*.yml' 2>/dev/null | grep -q .; then
+    echo "[x] CI workflow (manifest present, workflow found)"
+  else
+    echo "[ ] CI workflow (manifest present but no .github/workflows/ci-*.yml — the"
+    echo "    'on green CI, merge' rule has nothing to gate on)"
+  fi
+fi
+
 # Presence != currency. If RELEASE_NOTES exists, flag that this check can't tell
 # whether it's up to date with the latest change — that's a human/agent judgment.
 if [[ -f "$TARGET/RELEASE_NOTES.md" ]]; then

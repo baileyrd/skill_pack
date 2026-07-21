@@ -1,0 +1,44 @@
+name: CI
+
+# Runs on every PR and on pushes to the default branch. The "on green CI, merge"
+# rule depends on this workflow being the required status check — set it as required
+# under branch protection (see references/ci-and-branch-protection.md).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        # Adjust to the project's actual layout — this assumes a pyproject.toml with
+        # dev/test extras. ruff + mypy + pytest match the stated quality bar
+        # (type hints always, tests for non-trivial logic).
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" || pip install ruff mypy pytest
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Format check
+        run: ruff format --check .
+
+      - name: Type check
+        run: mypy .
+
+      - name: Test
+        run: pytest

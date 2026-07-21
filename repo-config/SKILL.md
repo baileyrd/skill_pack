@@ -45,6 +45,14 @@ overwritten. Substitutes `{{OWNER_REPO}}` and `{{SECURITY_CONTACT}}` from the sc
 the Q&A answers, or the greenfield defaults — write a small config file first if you
 have values from steps 0–2 (see `references/scan-and-defaults.md` for the format).
 
+CI workflows are stack-selected, not copied blanket: `apply.sh` drops in
+`ci-rust.yml` if the target has a `Cargo.toml`, `ci-python.yml` if it has a
+`pyproject.toml`/`setup.py`, both for a polyglot repo, and neither (with a note) if
+there's no manifest yet — an always-red workflow is worse than none. After applying,
+the CI check only actually gates merges once it's set as a required status check in
+branch protection — see `references/ci-and-branch-protection.md`, and surface that as
+a manual follow-up in step 4.
+
 Two files are worth hand-adapting after the copy rather than leaving as scaffold:
 README's prose and ARCHITECTURE's boundary table. Match the tone in
 `references/examples.md` — terse, reasoning included, honest about limitations.
@@ -82,6 +90,10 @@ current only after that check, not on the strength of the presence score alone.
 ## Rules
 - Keep `RELEASE_NOTES.md` current, not just seeded — see "Ongoing maintenance"
   above.
+- Every change to a target repo lands through a PR against the default branch, never
+  a direct push. On green CI, merge with a **merge commit** (GitHub's "Create a merge
+  commit" — merge and sync) — never squash-merge or rebase-merge. Full history is
+  preserved deliberately. This is the standing workflow; don't re-ask it per repo.
 - Never overwrite an existing file without `--force`; report what was skipped either
   way.
 - Greenfield defaults are a starting point, not a final answer — say so in the
@@ -92,9 +104,12 @@ current only after that check, not on the strength of the presence score alone.
 - Match the tone the templates already model — see `references/examples.md`.
 
 ## Limitations
-- Governance-file scaffolding only. Unlike a public-launch OSS tool, this
-  deliberately doesn't touch LICENSE, `.gitignore`, CI workflows, or anything
-  aimed at going public — these are internal repos.
+- Governance-file scaffolding plus basic CI. Unlike a public-launch OSS tool, this
+  deliberately doesn't touch LICENSE, `.gitignore`, or anything aimed at going
+  public (badges, release automation, star growth) — these are internal repos.
+  CI *is* in scope, but only a basic per-stack test/lint/type gate so the "on green
+  CI, merge" rule has a real check to gate on — not multi-version matrices or
+  publish pipelines.
 - Greenfield defaults assume the standing engineering principles (modular monolith,
   ports-and-adapters, internal-only license line). A repo that intentionally
   deviates should say so at generation time — the defaults aren't a policy override,

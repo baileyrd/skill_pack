@@ -10,6 +10,40 @@ what's still open.
 
 ---
 
+## Add stack-selected CI workflows
+**2026-07-21**
+
+- **Added:** `ci-rust.yml` (fmt --check, clippy -D warnings, test) and
+  `ci-python.yml` (ruff lint + format check, mypy, pytest) to the template payload,
+  each triggered on PRs and pushes to `main`.
+- **Added:** `apply.sh` now stack-selects CI by manifest — `Cargo.toml` → rust,
+  `pyproject.toml`/`setup.py` → python, both for polyglot, neither (with a note) when
+  no manifest exists. CI is excluded from the blanket copy so a repo never gets a
+  workflow for a stack it doesn't have.
+- **Added:** `audit.sh` reports CI conditionally — expected only when a manifest is
+  present, so a no-manifest repo isn't dinged for missing a workflow it can't use.
+- **Added:** `references/ci-and-branch-protection.md` — the GitHub settings (required
+  status check, squash/rebase disabled, up-to-date-before-merge) that turn the
+  generated workflow and the merge-commit rule from convention into enforcement.
+- **Changed:** reversed the earlier decision to exclude CI entirely. Basic CI was out
+  of scope originally (copied from oss-launch's public-launch framing), but that
+  conflicted with the "on green CI, merge" rule added the same session — the rule
+  needs a check to gate on. Public-launch CI (matrices, publish pipelines) stays out.
+- **Why:** the repo owner expected CI setup and it was missing — the exclusion was
+  the wrong call once green-CI-gated merge became a standing rule.
+
+## Codify the PR + merge-commit workflow as a standing rule
+**2026-07-21**
+
+- **Added:** every change to a repo lands through a PR against the default branch;
+  on green CI, merge with a merge commit ("Create a merge commit" — merge and sync),
+  never squash or rebase. Full history is preserved deliberately.
+- Written into both the template `CONTRIBUTING.md` (human-facing convention, under a
+  renamed "Review & merge" section) and `SKILL.md`'s Rules (so the skill applies it
+  to its own repo work, not just documents it for others).
+- **Why:** this was a rule the repo owner kept having to restate by hand — making it
+  a standing rule means it stops needing to be re-asked per repo.
+
 ## Track RELEASE_NOTES currency, not just presence
 **2026-07-21**
 

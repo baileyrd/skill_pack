@@ -75,10 +75,29 @@ copy_one() {
   created=$((created + 1))
 }
 
+# Copy everything EXCEPT the CI workflows — those are stack-selected below, not
+# copied blanket (a Rust repo must not get a Python workflow that fails every run).
 while IFS= read -r -d '' f; do
   rel="${f#"$TEMPLATES_DIR"/}"
+  [[ "$rel" == .github/workflows/* ]] && continue
   copy_one "$f" "$rel"
 done < <(find "$TEMPLATES_DIR" -type f -print0)
+
+# CI workflow selection, driven by which manifests the target actually has.
+# A polyglot repo legitimately gets both. A repo with neither manifest gets none —
+# there's nothing for CI to run yet, and an always-red workflow is worse than none.
+ci_selected=0
+if [[ -f "$TARGET_DIR/Cargo.toml" ]]; then
+  copy_one "$TEMPLATES_DIR/.github/workflows/ci-rust.yml" ".github/workflows/ci-rust.yml"
+  ci_selected=$((ci_selected + 1))
+fi
+if [[ -f "$TARGET_DIR/pyproject.toml" || -f "$TARGET_DIR/setup.py" ]]; then
+  copy_one "$TEMPLATES_DIR/.github/workflows/ci-python.yml" ".github/workflows/ci-python.yml"
+  ci_selected=$((ci_selected + 1))
+fi
+if [[ "$ci_selected" -eq 0 ]]; then
+  echo "note   no Cargo.toml/pyproject.toml found — skipped CI workflows (nothing to run yet)"
+fi
 
 echo
 echo "OWNER_REPO used: $OWNER_REPO"

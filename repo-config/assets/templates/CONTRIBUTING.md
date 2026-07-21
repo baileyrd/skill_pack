@@ -23,7 +23,10 @@
 - Never commit or log secrets/credentials. Validate external input at the boundary.
 - Never silently swallow exceptions — handle, propagate with context, or log.
 
-## Review
-- CI must pass before merge.
+## Review & merge
+- Every change lands through a PR — no direct pushes to the default branch.
+- CI must be green before merge.
 - At least one approval required (see CODEOWNERS if present).
 - Reviewers: check for scope creep, missing tests, and unexplained non-obvious decisions.
+- Merge with a **merge commit** ("Create a merge commit" — merge and sync). Do **not**
+  squash-merge or rebase-merge: full commit history is preserved deliberately.
