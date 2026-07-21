@@ -1,6 +1,6 @@
 ---
 name: repo-config
-description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, and an ADR seed. Asks only what it can't infer from the scan, and falls back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license line) for a brand-new repo with nothing yet to scan. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together.
+description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, and an ADR seed. Asks only what it can't infer from the scan, and falls back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license line) for a brand-new repo with nothing yet to scan. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis, separate from initial setup — whenever a meaningful change is made to a repo that already has a RELEASE_NOTES.md, whether repo-config put it there or not, add a dated entry for that change before ending the turn, without being asked.
 ---
 
 # repo-config
@@ -54,7 +54,34 @@ Everything else in the set is close to drop-in once the tokens are substituted.
 and what's still manual (a placeholder security contact, README's Getting Started
 section, ARCHITECTURE's boundary table, the first real ADR replacing the seed).
 
+`audit.sh` checks file *presence*, not *currency* — a stale `RELEASE_NOTES.md`
+still scores as present. So step 4 also includes a judgment the script can't make:
+did any real change happen this session (setup counts, and so does any later fix or
+feature) that isn't yet logged in `RELEASE_NOTES.md`? If so, add the entry now
+before reporting done — see "Ongoing maintenance" below. Report RELEASE_NOTES as
+current only after that check, not on the strength of the presence score alone.
+
+## Ongoing maintenance — not just initial setup
+
+`RELEASE_NOTES.md` isn't a one-time drop. Once a repo has one, keep it current:
+
+- After any meaningful change to that repo — a fix, a feature, a behavior change,
+  not a typo or formatting-only edit — add a new entry at the top before ending
+  the turn. Don't wait to be asked. This applies whether or not repo-config was
+  what put the file there in the first place; any repo with a `RELEASE_NOTES.md`
+  qualifies.
+- Match the format already in the file: dated, bolded inline category tag
+  (`**Added:**` / `**Changed:**` / `**Fixed:**`), reasoning included, known
+  limitations stated plainly rather than glossed over — see `references/examples.md`.
+- Link the real commit/PR once the change is actually pushed; if it isn't pushed
+  yet, log it without a link rather than inventing one.
+- This was missed once already on repo-config's own `RELEASE_NOTES.md` — a real fix
+  shipped with no entry, caught only because the repo owner pointed it out. That's
+  the failure mode this rule exists to prevent.
+
 ## Rules
+- Keep `RELEASE_NOTES.md` current, not just seeded — see "Ongoing maintenance"
+  above.
 - Never overwrite an existing file without `--force`; report what was skipped either
   way.
 - Greenfield defaults are a starting point, not a final answer — say so in the

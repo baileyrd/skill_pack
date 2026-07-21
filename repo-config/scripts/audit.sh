@@ -54,3 +54,11 @@ done
 
 echo
 echo "Score: $score/$total"
+
+# Presence != currency. If RELEASE_NOTES exists, flag that this check can't tell
+# whether it's up to date with the latest change — that's a human/agent judgment.
+if [[ -f "$TARGET/RELEASE_NOTES.md" ]]; then
+  echo
+  echo "Note: RELEASE_NOTES.md is present but this audit checks presence only —"
+  echo "      confirm separately that its newest entry covers the latest change."
+fi

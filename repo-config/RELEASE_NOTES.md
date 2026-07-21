@@ -10,6 +10,26 @@ what's still open.
 
 ---
 
+## Track RELEASE_NOTES currency, not just presence
+**2026-07-21**
+
+- **Added:** `SKILL.md` now makes ongoing `RELEASE_NOTES.md` upkeep an explicit
+  rule — after any meaningful change to a repo that has the file, add a dated entry
+  before ending the turn, without being asked. New "Ongoing maintenance" section
+  plus a step-4 re-audit check for it.
+- **Changed:** step 4 now distinguishes file *presence* from *currency* — a stale
+  RELEASE_NOTES still scores as present in `audit.sh`, so the re-audit adds the
+  judgment the script can't: is the newest entry covering the latest change?
+- **Added:** `audit.sh` prints a caveat when RELEASE_NOTES.md is present, so a
+  standalone run (outside the skill) doesn't mistake a passing presence score for
+  an up-to-date file.
+- **Fixed:** a bare colon in the SKILL.md frontmatter `description` broke YAML
+  parsing — the packager's validator rejected it, a plain upload would have failed.
+  Reworded to drop the colon.
+- **Why this exists:** the currency gap was found the hard way — RELEASE_NOTES went
+  un-updated across several changes this session until the repo owner flagged it
+  three times. These changes make the omission structurally harder to repeat.
+
 ## Restore executable bit on scripts
 **2026-07-21** · [7c14141](https://github.com/baileyrd/skill_pack/commit/7c14141)
 
