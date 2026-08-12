@@ -10,6 +10,44 @@ what's still open.
 
 ---
 
+## Third occurrence of the same sync-gap pattern, now with concrete fallout
+**2026-08-12**
+
+- **Finding, not a source fix:** a session applying this skill to
+  `rusty_dbs` hit the same class of gap as "Record a sync-gap finding"
+  below, for the third time:
+  - `assets/templates/.github/` (PR templates, issue templates, CI
+    workflows) was entirely missing from that session's local sync —
+    confirmed present and correct in this repo directly.
+  - `scripts/apply.sh` and `scripts/audit.sh` had lost their executable
+    bit (`100755` → `100644`) in the same local sync — `git ls-tree`
+    against `HEAD` here confirms both are still `100755`, same check as
+    the standalone "Restore executable bit on scripts" entry below.
+- **New this time — concrete fallout, not just a metadata nuisance:**
+  with the real `.github/ISSUE_TEMPLATE/` missing, the session
+  hand-reconstructed issue templates for `rusty_dbs` from memory as plain
+  Markdown. The real templates (`bug_report.yml`, `feature_request.yml`,
+  `config.yml`) are GitHub issue-form YAML — structured fields, a
+  `labels:` block, form validation — not Markdown with HTML comments. The
+  hand-reconstructed version doesn't render as an issue form at all, so
+  this gap silently downgrades what a target repo actually gets, rather
+  than just being caught by a diff.
+- **Why three occurrences changes the framing:** one incident is noise,
+  two is "worth recording," three sharing the same two symptoms
+  (`.github/` directories vanishing, executable bits dropping) across two
+  different target repos is a pattern in whatever downloads/unpacks/syncs
+  this skill into a session — most likely a `.skill` zip install step
+  that doesn't preserve directory trees starting with `.` or POSIX
+  permission bits. Still not this repo's bug: `git ls-tree` against
+  `HEAD` confirms the templates and both scripts are correct and present
+  here, same as the first two times.
+- **No content or permission change made here** — recorded so a fourth
+  occurrence has three prior data points to compare against instead of
+  starting the diagnosis over. If it recurs again, the next step is
+  diagnosing the sync/packaging tool itself (starting with how it handles
+  dotfile-prefixed directories and stored Unix permission bits), not
+  re-auditing this repo a fourth time.
+
 ## v1.0.0 — Initial versioned release
 **2026-08-12**
 
