@@ -5,8 +5,8 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
-## Fix silent exec-bit loss in build_skill_zips.py
-**2026-08-12**
+## PR #4 — Fix silent exec-bit loss in build_skill_zips.py
+**2026-08-12** · [#4](https://github.com/baileyrd/skill_pack/pull/4)
 
 - **Fixed:** `scripts/build_skill_zips.py` shipped scripts non-executable
   (`0o644`) in the built zip whenever a `scripts/*.sh`/`*.py` file was
