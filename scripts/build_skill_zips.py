@@ -7,10 +7,14 @@ must be the skill directory itself (``zip -r name.zip name/``), so the
 archive can be uploaded as-is or unzipped straight into ``~/.claude/skills/``.
 
 Before zipping, it restores any executable bits git lost on the reorg (see
-`restore_exec_bits.py`), then reads file modes from the git index rather
-than the filesystem -- this repo runs with ``core.fileMode=false`` and is
-worked on from Windows, where the OS never reports a real Unix executable
-bit.
+`restore_exec_bits.py`). Executable status in the zip itself is decided by
+a file's shebang line first, since that's the one signal not tied to git's
+index or the filesystem's reported mode -- this repo runs with
+``core.fileMode=false`` and is worked on from Windows, where the OS never
+reports a real Unix executable bit, and a genuinely edited script can land
+in the index as non-executable with nothing to catch it (see
+`RELEASE_NOTES.md`). Falls back to the git index for the rare executable
+file with no shebang.
 
 Usage:
     python scripts/build_skill_zips.py
@@ -44,13 +48,31 @@ def find_skill_dirs(root: Path) -> list[Path]:
     return skills
 
 
-def git_file_mode(repo_root: Path, path: Path) -> int:
-    """Executable bit for `path` from the git index; defaults to non-exec.
+def has_shebang(path: Path) -> bool:
+    """True if `path` starts with `#!` -- a script meant to be run directly."""
+    try:
+        with path.open("rb") as fh:
+            return fh.read(2) == b"#!"
+    except OSError:
+        return False
 
-    Falls back to 0o644 for files git doesn't know about yet (e.g. before
-    `git add`), since core.fileMode=false makes the working-tree bit
-    meaningless anyway.
+
+def git_file_mode(repo_root: Path, path: Path) -> int:
+    """Executable bit for `path`: a shebang first, git's index second.
+
+    A shebang is decisive on its own -- it means the file is meant to be run
+    directly, regardless of what git's index currently says. That matters
+    because the index isn't reliable here: `restore_exec_bits` only restores
+    +x for content that's byte-identical to a blob that was 100755 at HEAD,
+    so any real edit to a script (not just a move/copy) can land in the
+    index as 100644 with nothing to catch it -- confirmed shipping a 0o644
+    apply.sh in a built zip despite the script being unmistakably a script.
+    Falls back to the git-index check for the rare executable with no
+    shebang (e.g. a compiled binary), and to 0o644 for files git doesn't
+    know about yet (e.g. before `git add`).
     """
+    if has_shebang(path):
+        return 0o755
     rel = path.relative_to(repo_root).as_posix()
     result = subprocess.run(
         ["git", "ls-files", "-s", "--", rel],
