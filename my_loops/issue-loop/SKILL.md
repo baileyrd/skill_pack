@@ -1,0 +1,178 @@
+---
+name: issue-loop
+description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable pure addition/fix vs. breaking-change vs. needs-new-dependency vs. not actionable), checks the widened platform-repo directory for something to port before hand-rolling, implements against the two development-standards repos where they apply, then works each actionable issue end-to-end (branch, implement, test, PR, wait for green CI, merge with a merge commit, sync) — looping until no actionable issues remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop that isn't scoped to a specific issue label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
+version: 1.0.0
+---
+
+# issue-loop
+
+Turns "clear the open issues on this repo" into a bounded, autonomous loop:
+triage → reuse-check → implement per development standards → PR → merge on
+green CI → sync → repeat. Unlike `parity-loop`, this skill doesn't generate
+its own issues — it works whatever's already open in the target repo,
+regardless of label or origin (human-filed, filed by another loop skill,
+whatever).
+
+This skill has no issue-body template of its own — it consumes issues, it
+doesn't file them. `references/` describes the loop's supporting data
+(platform directory, standards pointer); `scripts/` are the loop's tools.
+
+## Run (when invoked)
+
+**0. Scope**
+- `TARGET_REPO` — whose open issues are being worked.
+- **repo-config prerequisite**: run `repo-config`'s `scripts/audit.sh
+  <TARGET_REPO>` first. If the standard governance-file score is
+  low/missing, run repo-config on the target before doing any issue-loop
+  work — the PR mechanics and RELEASE_NOTES convention this skill leans on
+  assume it's already there. Skip only if a prior step in the same session
+  already confirmed it.
+- **Harness mode**: check the `LOOP_HARNESS_MODE` environment variable
+  (`auto` or unset/anything else = `interactive`) — see "Harness mode"
+  below for what it changes here.
+- If step 0 can't be fully answered (no `TARGET_REPO` given, or the
+  environment can't resolve it) and no one's available to ask (auto mode,
+  headless), halt and report what's blocking start rather than guessing.
+
+**1. Triage** — read-only, no code yet. Pull every open issue
+(`gh issue list --state open --json number,title,body,labels`) and classify
+each:
+- **not actionable** — a question, discussion, duplicate, or something that
+  needs a design decision this skill can't make on its own judgment. Skip;
+  note it in the wrap-up report rather than silently dropping it. Label it
+  `needs-human` if it isn't already, so `next_issue.sh` stops re-surfacing
+  it every run.
+- **breaking-change** — implementing it would change an existing public
+  signature or documented behavior. Flagged, never auto-implemented — see
+  step 3.
+- **needs-new-dependency** — implementing it would require a new
+  third-party (or new internal platform-repo) dependency. Flagged, never
+  auto-implemented — see step 3.
+- **actionable** — a bug fix or additive feature that doesn't touch existing
+  public surface and doesn't need a new dependency. This is the only
+  category the loop implements unattended.
+
+Judgment call, same caveat as the sibling skills' classification steps: read
+the issue (and the relevant code, if the description is thin) rather than
+trusting the title or existing labels alone. Report the triage table before
+step 2 runs — number, title, classification, one-line reasoning — it's the
+checkpoint to catch a wrong call before 20 issues get worked.
+
+**2. Reuse check, per actionable issue** — before implementing, check
+`references/platform-directory.md` (both `baileyrd/rusty_*` and
+`Rusty-Mill/*`) via `scripts/scan_platform_repos.sh <keyword...> --repos
+<repo1,repo2,...>` for an existing implementation of what the issue asks
+for. A hit is a strong reason to port instead of hand-roll — same
+"candidate list, not a verdict" caveat as the sibling skills: read the
+actual source before trusting a name/keyword match.
+
+**3. Work the loop** — repeat until no open actionable issues remain, a
+stop condition below fires, or the user says stop:
+1. Check for a stop condition first (see "Stop conditions"). If one's live,
+   halt cleanly — don't abandon a half-pushed branch mid-step.
+2. Pick the next open issue (`scripts/next_issue.sh`) — skips anything
+   labeled `blocked` or `needs-human`.
+3. **breaking-change or needs-new-dependency** → don't implement
+   automatically, in either harness mode. Stop, explain what the fix would
+   touch or what dependency it needs, and ask.
+4. Branch off the latest default branch: `issue/<issue-number>-<slug>`.
+5. Check step 2's reuse-check result for this issue. A match → port that
+   implementation in, adapted to this repo's conventions (`Result` + `?`,
+   no `unwrap()`/`expect()` outside tests, doc-comments, tests), noting the
+   source repo in the commit message — copying code in is a pure addition;
+   *depending on* the source repo as a crate instead is its own
+   stop-and-ask, same as any new dependency. No match → check
+   `references/development-standards.md` for an applicable requirement from
+   either standards repo before falling back to this repo's own
+   conventions; implement fresh either way.
+6. Local gate before pushing (fail fast): the target's own test/lint/build
+   commands — `cargo build && cargo test && cargo clippy -- -D warnings &&
+   cargo fmt --check` for Rust, the ecosystem equivalent otherwise (see
+   `parity-loop`'s "Adapting to other stacks" for the general pattern).
+7. If the repo has `RELEASE_NOTES.md`, add the dated entry now.
+8. Commit (`Closes #<N>` in the message), push, `gh pr create` against the
+   default branch — use repo-config's PR template.
+9. `scripts/watch_and_merge.sh <pr-number>`: waits for CI, and on green,
+   merges with a **merge commit** and syncs. On red, one bounded fix-up
+   attempt before surfacing the failure — never force a merge, never drop
+   the issue silently.
+10. Confirm the issue actually closed.
+11. Back to step 1's issue list (a re-triage isn't needed unless new issues
+    were filed since the last pass — check for new ones each loop-around).
+
+**4. Wrap up** — report: issues worked and merged, still open and why
+(blocked on CI, needs-human, breaking-change, needs-new-dependency, marked
+not-actionable), and anything triage deliberately left out of scope.
+
+## Harness mode
+
+`LOOP_HARNESS_MODE=auto` doesn't change step 3's merge behavior — actionable
+issues already proceed to PR/merge unattended in both modes, same as
+`parity-loop`. What it changes:
+- If step 0 or step 1 needs a judgment call only a human can make (an
+  issue whose actionability is genuinely ambiguous) and no one's available,
+  auto mode logs it as `needs-human` and moves on rather than blocking the
+  whole loop; interactive mode asks.
+- breaking-change and needs-new-dependency issues **always** stop and wait,
+  in both modes — auto mode is not a bypass for those.
+
+## Stop conditions
+
+- No open actionable issues left (skipping `blocked`/`needs-human`) → done.
+- User says stop, in chat or (headless mode) via a `.issue-loop-stop` file
+  at the repo root — checked each iteration, removed on graceful halt.
+  Honored in both harness modes.
+- A PR's CI stays red after the fix-up retry budget → pause on that issue,
+  leave the PR open, report it, don't skip ahead silently.
+- A breaking-change or needs-new-dependency issue → pause and ask (step
+  3.3), in both harness modes.
+
+## Rules
+
+- Never implement a breaking-change or needs-new-dependency issue
+  automatically, regardless of harness mode — stop and ask.
+- Same standing workflow as the sibling skills: PR against default branch,
+  never a direct push; merge with a **merge commit** on green CI, never
+  squash/rebase-merge.
+- Check `references/platform-directory.md` (both namespaces) before
+  hand-rolling anything an issue asks for — prefer porting a match over
+  writing new code, held to this repo's own conventions regardless of
+  source.
+- Check `references/development-standards.md` for an applicable requirement
+  before falling back to generic conventions.
+- If the repo has `RELEASE_NOTES.md`, keep it current — one entry per merged
+  PR from this loop.
+- Never force a merge on red CI, and never abandon an issue silently — a
+  stuck issue gets reported, not dropped.
+- A `not actionable` issue gets labeled `needs-human` and reported, not
+  silently skipped on every re-run without a trace.
+
+## Limitations
+
+- Triage is judgment on the issue's own text (and code, if thin) — a
+  terse or ambiguous issue can be misclassified. The triage table in step 1
+  is the checkpoint to catch that before implementation starts.
+- The platform-repo reuse check is keyword/grep-surfaced candidates plus
+  judgment, same caveat as the sibling skills — it can miss a match hiding
+  under different naming, and `references/platform-directory.md` can drift
+  from the live orgs; confirm rather than assume it's complete.
+- No issue-sizing control like `parity-loop`'s gap-analysis step — an issue
+  that's really ten unrelated asks stays one issue unless the user splits it
+  first; this skill doesn't split issues on its own.
+- Assumes `gh` is authenticated and CI is a required status check on the
+  default branch, same as the sibling skills.
+- Rust/cargo-shaped by default for the local gate command; swap for the
+  target ecosystem's equivalent same as `parity-loop`'s "Adapting to other
+  stacks."
+
+## Scripts
+
+| Script | Purpose | Args |
+| --- | --- | --- |
+| `next_issue.sh` | Picks the next open issue (any label), skipping `blocked`/`needs-human` | `[--repo <owner/repo>]` |
+| `watch_and_merge.sh` | Waits for a PR's CI, merges (merge commit) + syncs on green, retries once on red before surfacing failure | `<pr-number> [--retries N] [--repo <owner/repo>]` |
+| `scan_platform_repos.sh` | Greps platform repos (both namespaces) for an existing implementation | `<symbol> [keyword ...] --repos <repo1,repo2,...>` |
+
+All three shell out to `gh`/`git` only — no extra dependencies. They resolve
+paths relative to their own location, so they work whether this skill is
+installed or just checked out locally.
