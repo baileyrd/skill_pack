@@ -5,8 +5,8 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
-## Apply repo-config's standard governance file set to skill_pack itself
-**2026-08-12**
+## PR #2 — Apply repo-config's standard governance file set to skill_pack itself
+**2026-08-12** · [#2](https://github.com/baileyrd/skill_pack/pull/2)
 
 - **Added:** `.github/PULL_REQUEST_TEMPLATE/` (feature, bug_fix, docs, chore),
   `.github/ISSUE_TEMPLATE/` (bug_report, feature_request, config.yml),
