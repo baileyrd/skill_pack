@@ -10,6 +10,33 @@ what's still open.
 
 ---
 
+## Record a sync-gap finding: source was fine, a downstream install wasn't
+**2026-08-12**
+
+- **Finding, not a source fix:** a Claude Code session applying this skill to
+  `Rusty-Mill/rusty_knowledge` hit `apply.sh` crashing on a missing
+  `.github/workflows/ci-rust.yml` — the session's locally synced copy of this
+  skill was missing its entire `assets/templates/.github/` directory (PR
+  templates, issue templates, both CI workflows), and had also lost the
+  executable bit on `scripts/apply.sh`/`scripts/audit.sh`.
+- **Verified against this repo directly:** cloned `skill_pack` fresh and diffed
+  it against the session's synced copy — every file under
+  `repo-config/assets/templates/.github/` was present and correct here, and
+  `git ls-tree` confirmed both scripts are `100755` in the repo. The gap was
+  entirely in that session's local skill installation/sync step, not in
+  anything committed to this repo.
+- **Why this is worth recording rather than silently letting it pass:** it's
+  the same failure *class* as "Restore executable bit on scripts" below —
+  metadata (executable bits) or whole directories (dotfile-prefixed ones, like
+  `.github/`) going missing somewhere in a download/unpack/sync step outside
+  this repo's own git history. Two occurrences is a pattern worth a maintainer
+  knowing about, even though neither one was this repo's bug to fix.
+- No content or permission change was made here — this entry exists purely so
+  the incident isn't lost. If it recurs a third time, especially again around
+  a dotfile-prefixed directory or an executable bit, that's a signal to look
+  at whatever packages/syncs this skill into a session (e.g. a `.skill` zip
+  step), not at this repo.
+
 ## Add stack-selected CI workflows
 **2026-07-21**
 
