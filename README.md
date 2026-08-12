@@ -67,3 +67,15 @@ This repo runs with `core.fileMode=false` and is worked on from Windows, so `git
 - **Claude Code / OMP:** `python scripts/install_skills.py` (see above).
 - **claude.ai / Claude Desktop:** build zips with `python scripts/build_skill_zips.py`, then Settings → Skills → upload the relevant `zip/<name>.zip`.
 - **Manual:** copy any skill folder to `~/.claude/skills/<name>/` yourself.
+
+## Architecture
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the repo is organized and why it doesn't use a service-style boundary pattern.
+
+## Contributing
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## Security
+See [SECURITY.md](./SECURITY.md) to report a vulnerability.
+
+## License
+Internal — not for external distribution.
