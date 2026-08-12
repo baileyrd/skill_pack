@@ -10,6 +10,33 @@ what's still open.
 
 ---
 
+## Exec-bit half of the sync-gap pattern traced to a real bug, and fixed
+**2026-08-12**
+
+- Reopened the "Third occurrence" finding below on a lead: the zip that
+  installs this skill downstream is built by this repo's own
+  `scripts/build_skill_zips.py`, not an external unzip/install tool as
+  first assumed — worth checking the build script's own logic before
+  pointing further downstream.
+- Reproduced the exec-bit-loss symptom directly: `git_file_mode()` in
+  `build_skill_zips.py` trusted the git index's mode for a file, and its
+  only safety net (`restore_exec_bits.py`) restores `+x` by matching
+  unchanged *content* against a blob that was `100755` at `HEAD` — so any
+  real edit to `apply.sh`/`audit.sh` that loses its bit on `git add`
+  (expected on this repo's `core.fileMode=false` + Windows setup) ships
+  silently as `0o644` in the zip. Confirmed in a scratch clone before
+  touching anything real here.
+- **Fixed at the source** (`scripts/build_skill_zips.py`, not this
+  skill's own files) — full writeup in the root `RELEASE_NOTES.md`
+  entry "Fix silent exec-bit loss in build_skill_zips.py". Rebuilt this
+  skill's zip and confirmed `apply.sh`/`audit.sh` both land `0o755`.
+- **Still open:** the `.github/`-missing half of the pattern. Checked
+  `Path.rglob("*")`'s dotfile handling directly — it does traverse
+  `.github/` correctly in this repo's Python — so that symptom isn't in
+  the build script either. Next data point still points at a
+  stale/incomplete local clone at build time, unless a fourth occurrence
+  says otherwise.
+
 ## Third occurrence of the same sync-gap pattern, now with concrete fallout
 **2026-08-12**
 
