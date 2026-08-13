@@ -1,7 +1,7 @@
 ---
 name: parity-loop
 description: Runs an autonomous "close the capability gap" loop against a reference API surface — assess what a target codebase is missing relative to a reference (e.g. the `libc` crate, POSIX, another package/spec), check whether a sibling repo across the Rusty-Mill/baileyrd platform namespaces already implements the gap before writing anything from scratch, open one GitHub issue per gap, then work each issue end-to-end (implement or port, test, PR, wait for green CI, merge with a merge commit, sync) — looping until the gap list is empty or told to stop. Use whenever the user asks to assess a codebase for missing coverage against a reference library/spec and close the gaps, wants "parity" or "coverage" work automated as a repeatable issue-to-merged-PR loop, or references this by name (parity-loop, gap loop, coverage loop). Companion to the repo-config skill — assumes repo-config's PR/issue templates and RELEASE_NOTES.md convention if present, but works without them.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # parity-loop
@@ -41,6 +41,16 @@ before step 1 runs**
   explicitly out for this round. Don't default to a mechanical diff just
   because the tooling for one happens to exist — a diff produces *a*
   candidate list, not necessarily *the* list the user actually wants worked.
+- **Default posture: everything in the reference is in scope**, including
+  capabilities that would need a new subsystem, a different execution
+  model, or major rearchitecture in the target — "parity" was the word
+  the user chose, and a capability the target has no easy analog for is
+  still a gap, not an exemption. How much work a gap takes is a sizing
+  and sequencing question (split it smaller, tackle it later, ask for a
+  design decision on the target's own terms) — it is never, on its own,
+  a reason to leave something off the list. If step 1 later finds "this
+  needs a new subsystem," that's a `new-subsystem` tag on the gap (see
+  step 1/3), not an implicit exclusion nobody signed off on.
 - Platform floor — if the repo states one (e.g. rustils' RFC v2: `libc` floor
   on Linux, `windows-sys` floor on Windows), use it; otherwise it's part of
   the question above.
@@ -54,7 +64,7 @@ before step 1 runs**
 - Development standards — `references/development-standards.md` points at
   two external repos (`rusty_foundation_akb`,
   `Atlas_Engineering_Standards_Library`) that are the normative source for
-  architecture/implementation standards. Consult them in step 3.5 below
+  architecture/implementation standards. Consult them in step 3.6 below
   before falling back to this skill's own generic conventions.
 - Batch this into one question round; skip anything the repo's own docs
   already answer. Once scope is settled, note which of step 1's three
@@ -88,7 +98,15 @@ Across all three paths: categorize each surviving candidate (function / type
 / const / macro), note which platform(s) it applies to, flag anything whose
 fix would touch an *existing* public signature rather than purely add (a
 breaking-change flag, handled specially in step 3), and tag which path
-produced it. Then check each candidate against both platform namespaces
+produced it. Also flag — don't drop — anything that would need a new
+subsystem the target has no analog of (a `new-subsystem` tag, handled the
+same "stop and ask, don't silently implement or silently exclude" way as
+a breaking change in step 3). The instinct to reason "this is architecturally
+big, so it's out of scope" belongs to the user, not to this assessment pass —
+write the reasoning down as a tag on the candidate, not as a justification
+for leaving it out of `gap-analysis.md` altogether.
+
+Then check each candidate against both platform namespaces
 (`scripts/scan_rustymill_repos.sh <symbol> --repos rusty_json,rusty_http,...`
 — start from `references/platform-directory.md`'s purpose list to pick
 which siblings are worth checking for a given gap, rather than scanning
@@ -104,13 +122,18 @@ against the roadmap, before it becomes 40 issues.
 **2. Capture as issues**
 - One issue per gap, sized small (a function or a tight group of related
   functions — not "implement all of string.h"). Use
-  `assets/templates/issue-body.md`, filled from the gap-analysis row.
+  `assets/templates/issue-body.md`, filled from the gap-analysis row. A
+  `new-subsystem` gap doesn't get to skip this step for being big — file
+  it too, even if the honest sizing is "design/scoping issue: figure out
+  what a first slice looks like" rather than an implementation-ready
+  ticket. Capturing intent to revisit beats leaving it undocumented
+  outside a scope-notes file only this assessment pass will reread.
 - Before creating, search for an existing open/closed issue on the same symbol
   (`gh issue list --search "<symbol> in:title"`) to stay idempotent across
   re-runs of step 1.
 - Label every issue `parity-gap`, plus a platform label (`platform:linux` /
   `platform:windows` / `platform:both`) and, if step 1 flagged it,
-  `breaking-change`.
+  `breaking-change` and/or `new-subsystem`.
 - If the target repo has repo-config's issue templates already, prefer those over
   this skill's own template; don't run two competing conventions in one repo.
 
@@ -123,8 +146,18 @@ condition below fires, or the user says stop:
 3. **`breaking-change`-labeled issue** → don't implement automatically. Stop,
    explain what existing public API the fix would touch, and ask — this is the
    standing "ask before public API changes" rule, not a suggestion.
-4. Branch off the latest default branch: `parity/<issue-number>-<slug>`.
-5. Check the issue's `Existing RustyMill impl` field (from
+4. **`new-subsystem`-labeled issue** → same treatment as a breaking change,
+   for a different reason: it's too big to land as one PR as filed, *and*
+   it's not this loop's call to make the target's architecture bigger on
+   its own initiative. Stop, propose a decomposition (what a first real
+   slice would look like) or lay out the design question the target's
+   architecture needs answered, and don't proceed until the user has
+   actually weighed in — not once a justification for skipping it has
+   been written down. This is the direct fix for the failure mode
+   described in "Limitations" below: silently excluding a gap here is
+   exactly the mistake this step exists to prevent.
+5. Branch off the latest default branch: `parity/<issue-number>-<slug>`.
+6. Check the issue's `Existing RustyMill impl` field (from
    `gap-analysis.md`, carried into the issue body). If it names a sibling
    repo: port that implementation in — adapt it to this repo's conventions
    rather than assuming the source already complies (`Result` + `?`, no
@@ -144,41 +177,52 @@ condition below fires, or the user says stop:
    boundary/failure cases. A new third-party dependency needed to close the
    gap is its own stop-and-ask, same as a breaking change — don't add one
    silently.
-6. Local gate before pushing (fail fast, don't burn CI cycles):
+7. Local gate before pushing (fail fast, don't burn CI cycles):
    `cargo build && cargo test && cargo clippy -- -D warnings && cargo fmt --check`.
-7. If the repo has `RELEASE_NOTES.md`, add the dated entry now (repo-config's
+8. If the repo has `RELEASE_NOTES.md`, add the dated entry now (repo-config's
    ongoing-maintenance rule applies here too).
-8. Commit (`Closes #<N>` in the message), push, `gh pr create` against the
+9. Commit (`Closes #<N>` in the message), push, `gh pr create` against the
    default branch — use repo-config's PR template if present.
-9. `scripts/watch_and_merge.sh <pr-number>`: waits for CI, and on green, merges
-   with a **merge commit** (never squash/rebase) and syncs the local default
-   branch. On red, it makes one bounded fix-up attempt (see script header for
-   the retry count) before giving up and surfacing the failure instead of
-   forcing a merge or silently dropping the issue.
-10. Confirm the issue actually closed (merge with `Closes #N` should do it
+10. `scripts/watch_and_merge.sh <pr-number>`: waits for CI, and on green, merges
+    with a **merge commit** (never squash/rebase) and syncs the local default
+    branch. On red, it makes one bounded fix-up attempt (see script header for
+    the retry count) before giving up and surfacing the failure instead of
+    forcing a merge or silently dropping the issue.
+11. Confirm the issue actually closed (merge with `Closes #N` should do it
     automatically — verify rather than assume).
-11. Back to step 1.
+12. Back to step 1.
 
 **4. Wrap up** — when the loop ends for any reason, report: issues opened,
 merged, still open and why (blocked on CI, needs-human, breaking-change,
-out of gaps), and anything from step 1's candidate list that was deliberately
-left out of scope.
+new-subsystem, out of gaps). Keep two things separate in this report,
+not one merged "left out of scope" bucket — they mean different things:
+- **User-excluded**: candidates the user explicitly took off the list,
+  either in step 0's scope conversation or in answer to a `new-subsystem`/
+  `breaking-change` stop-and-ask — include their stated reason.
+- **Still open, awaiting a decision**: `new-subsystem` issues nobody has
+  actually resolved yet either way. These are not "out of scope" — they're
+  unfinished business this loop couldn't close alone, and reporting them
+  as settled would recreate the exact failure this skill now guards
+  against (see "Limitations").
 
 ## Harness mode
 
 Named here for consistency with the sibling skills (`sovereignty-loop`,
 `dedupe-loop`, `issue-loop`), which gate their checkpoint on it. This skill
 never had a per-row sign-off checkpoint to gate — step 3 already proceeds
-unattended on any non-breaking-change gap in both harness modes — so
-`LOOP_HARNESS_MODE=auto` changes nothing about step 3 or 4 here.
+unattended on any gap that isn't `breaking-change` or `new-subsystem` in
+both harness modes — so `LOOP_HARNESS_MODE=auto` changes nothing about
+step 3 or 4 here.
 
 What it does change: in **auto** mode, if step 0's scope questions can't be
 answered from the target's own docs and no one's available to ask, halt and
 report what's blocking start rather than guessing scope — same rule as the
 sibling skills. In **interactive** mode (default, or unset), ask as normal.
 
-The **breaking-change** stop in step 3.3 is never affected by harness mode
-— it pauses and asks in both.
+The **breaking-change** stop in step 3.3 and the **new-subsystem** stop in
+step 3.4 are never affected by harness mode — both pause and ask in both
+modes; `LOOP_HARNESS_MODE=auto` unblocks unattended *work*, not unattended
+*scope decisions*.
 
 
 
@@ -191,6 +235,8 @@ Check these every iteration, not just at start:
   leave the PR open, report it, don't skip ahead silently.
 - An issue is `breaking-change`-labeled → pause and ask (step 3.3), don't
   auto-implement or auto-skip.
+- An issue is `new-subsystem`-labeled → pause and ask (step 3.4), don't
+  auto-implement or auto-skip.
 
 ## Rules
 
@@ -201,16 +247,30 @@ Check these every iteration, not just at start:
   against the default branch, never a direct push; on green CI, merge with a
   **merge commit**, never squash/rebase-merge; full history preserved
   deliberately. Don't re-ask this per run.
-- A gap whose fix touches an *existing* public signature, or needs a new
-  third-party (or new internal RustyMill) dependency, is not auto-implemented
-  — stop and ask. Pure additions — hand-rolled or ported in from a sibling
-  repo — are the only thing this loop merges unattended.
+- A gap whose fix touches an *existing* public signature, needs a new
+  third-party (or new internal RustyMill) dependency, or needs a new
+  subsystem the target has no analog of, is not auto-implemented — stop and
+  ask. Pure additions — hand-rolled or ported in from a sibling repo — are
+  the only thing this loop merges unattended.
+- **A gap is never silently excluded from the backlog for being large or
+  needing new target-side infrastructure.** There are exactly two ways a
+  candidate leaves scope, and both require someone other than this loop to
+  say so: (a) the user explicitly excludes it, either in step 0's scope
+  conversation or in answer to a `new-subsystem` stop-and-ask (step 3.4) —
+  record their stated reason; or (b) it depends on a real external
+  system/account/service the target has no way to reach, in which case
+  propose a pragmatic partial translation using what the target already
+  has *before* treating the capability as unreachable, and still ask
+  rather than deciding alone. "This would take a lot of new
+  infrastructure" is a reason to flag and ask, never a reason to quietly
+  drop something from `gap-analysis.md` or leave it out of the wrap-up
+  report.
 - Check both platform namespaces (`Rusty-Mill/*` and `baileyrd/rusty_*`) for
   an existing implementation before hand-rolling a gap fix (step 1). Prefer
   porting a match over writing new code, but still hold it to this repo's
   own conventions rather than trusting the source as-is.
 - Check `references/development-standards.md` for an applicable requirement
-  before falling back to generic conventions (step 3.5).
+  before falling back to generic conventions (step 3.6).
 - Keep issues small; a "gap" that's really ten unrelated functions gets split
   before step 2, not lumped into one issue.
 - Pin the reference version for the whole run — don't let the target drift
@@ -222,6 +282,16 @@ Check these every iteration, not just at start:
 
 ## Limitations
 
+- **Why the `new-subsystem` stop-and-ask exists**: an earlier gap-closing
+  effort let the assessing/implementing agent unilaterally mark
+  architecturally-large items out of scope and record that reasoning only
+  in the target's own docs — the actual mandate was full parity, and the
+  pattern went uncorrected for many rounds before the user caught it and
+  had to explicitly push back. Well-written justification for an
+  exclusion is not the same thing as the user actually agreeing to it;
+  the `new-subsystem` label and its stop-and-ask (step 3.4) exist
+  specifically to make that decision visible per-gap, at the moment it's
+  made, instead of buried in a doc the user has no reason to reread.
 - On the diff path specifically: matching is by symbol name, not semantics —
   a same-named function with a different signature or behavior shows up as
   "present" when it may not actually match. Worth a spot-check on anything
