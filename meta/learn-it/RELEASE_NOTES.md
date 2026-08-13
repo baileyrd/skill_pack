@@ -9,6 +9,24 @@ still open.
 
 ---
 
+## v1.1.0 — Wire skill-retro into learn-it's own wrap-up (step 6)
+**2026-08-13**
+
+- **Added:** step 6, "Wrap-up retro" — regardless of how the run ended (a
+  new skill written, an existing one updated, a draft declined, or step 0's
+  qualify gate saying this didn't warrant a skill at all), runs a
+  `meta/skill-retro` pass on `learn-it` itself, grounded in how that run's
+  qualify gate, existing-skill search, draft, and report actually held up.
+  Read-only, safe to run unattended; applying anything found is still its
+  own separate, explicitly-approved follow-up.
+- Noted explicitly that this also triggers `skill-retro`'s own step 6 (it
+  self-checks on every run against another skill) — a second, distinct
+  report about `skill-retro` itself, not to be conflated with `learn-it`'s
+  own findings.
+- Third instance of the wiring pattern first used on `my_loops/rust-
+  migration` v1.1.0 and then on `skill-retro`'s own step 6 — a one-line
+  addition to a target skill's wrap-up, not a `settings.json` hook.
+
 ## v1.0.0 — Initial release
 **2026-08-13**
 
