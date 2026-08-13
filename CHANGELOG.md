@@ -21,6 +21,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   skill it drafts or improves by default (rather than wired in afterward
   as a separate change, the way the rest of this batch of changes had to
   be).
+- New `web_dev/` category: `web_dev/datastar-pro` — generates Datastar Pro
+  web apps, reviewed and imported from `baileyrd/datastar-pro-skill`'s
+  audited v1.0 milestone. Proprietary vendored library source
+  (`datastar-pro-main/`) and upstream development-process scaffolding
+  (`CLAUDE.md`, `.planning/`) deliberately excluded from the import.
 ### Changed
 - `my_loops/rust-migration` (v1.0.0 → v1.1.0) — step 4's wrap-up now runs a
   `meta/skill-retro` pass on the skill itself before ending the run.
@@ -39,6 +44,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   (v1.0.0 → v1.1.0, new step 8). `yt_research_for_cc/notebooklm`
   deliberately excluded — vendored from `notebooklm-py`, never
   hand-edited per this repo's own convention.
+### Removed
+- `need_to_productize/datastar-pro.skill` — superseded by
+  `web_dev/datastar-pro`, an updated, properly-authored version reviewed
+  from the actual upstream source rather than this repo's own stale,
+  never-reviewed export.
 ### Fixed
 ### Security
 
