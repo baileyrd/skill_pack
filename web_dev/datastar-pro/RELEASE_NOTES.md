@@ -48,9 +48,10 @@ still open.
   not a periodic sync target for `datastar-pro-skill` the way
   `yt_research_for_cc/notebooklm` is a live sync target for
   `notebooklm-py`. Future changes land and are versioned here directly.
-  (Assumption, not confirmed with the user beyond the import request
-  itself — flagging in case a sync-from-upstream model was actually
-  wanted instead.)
+  Confirmed, not just assumed: the user archived
+  [`baileyrd/datastar-pro-skill`](https://github.com/baileyrd/datastar-pro-skill)
+  on GitHub after this import (read-only, reversible) specifically so
+  there's no ambiguity about which copy is authoritative.
 - **Added per this repo's conventions**: `version: 1.0.0` frontmatter
   field (source repo's `SKILL.md` didn't carry one), a provenance note
   at the top of `SKILL.md` pointing back at the source repo and audit,
