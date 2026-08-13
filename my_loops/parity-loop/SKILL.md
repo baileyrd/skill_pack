@@ -1,7 +1,7 @@
 ---
 name: parity-loop
 description: Runs an autonomous "close the capability gap" loop against a reference API surface — assess what a target codebase is missing relative to a reference (e.g. the `libc` crate, POSIX, another package/spec), check whether a sibling repo across the Rusty-Mill/baileyrd platform namespaces already implements the gap before writing anything from scratch, open one GitHub issue per gap, then work each issue end-to-end (implement or port, test, PR, wait for green CI, merge with a merge commit, sync) — looping until the gap list is empty or told to stop. Use whenever the user asks to assess a codebase for missing coverage against a reference library/spec and close the gaps, wants "parity" or "coverage" work automated as a repeatable issue-to-merged-PR loop, or references this by name (parity-loop, gap loop, coverage loop). Companion to the repo-config skill — assumes repo-config's PR/issue templates and RELEASE_NOTES.md convention if present, but works without them.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # parity-loop
@@ -204,6 +204,15 @@ not one merged "left out of scope" bucket — they mean different things:
   unfinished business this loop couldn't close alone, and reporting them
   as settled would recreate the exact failure this skill now guards
   against (see "Limitations").
+
+**5. Wrap-up retro** — after step 4's report, run a `meta/skill-retro` pass
+on `parity-loop` itself, grounded in this run: did step 1's path selection
+(roadmap/diff/spec) fit cleanly, did a `breaking-change` or
+`new-subsystem` call in step 3 need something the instructions didn't
+cover, did the User-excluded/still-open split in step 4 actually capture
+what happened? Read-only, safe to run unattended in either harness mode —
+applying anything `skill-retro` finds is a separate, explicitly-approved
+follow-up, never bundled into the wrap-up report itself.
 
 ## Harness mode
 

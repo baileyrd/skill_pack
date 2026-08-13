@@ -1,7 +1,7 @@
 ---
 name: repo-config
 description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, and an ADR seed. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license) for a brand-new repo, deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` wherever they specify something more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis, separate from initial setup — whenever a meaningful change is made to a repo that already has a RELEASE_NOTES.md, whether repo-config put it there or not, add a dated entry before ending the turn, without being asked.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # repo-config
@@ -85,6 +85,14 @@ did any real change happen this session (setup counts, and so does any later fix
 feature) that isn't yet logged in `RELEASE_NOTES.md`? If so, add the entry now
 before reporting done — see "Ongoing maintenance" below. Report RELEASE_NOTES as
 current only after that check, not on the strength of the presence score alone.
+
+**5. Wrap-up retro** — after step 4's re-audit report, run a
+`meta/skill-retro` pass on `repo-config` itself, grounded in this run: did
+step 0's scan correctly infer what it should have, did step 2's questions
+actually cover what the scan couldn't answer, did `apply.sh`'s
+substitution or the greenfield defaults need something the instructions
+didn't cover? Read-only — applying anything `skill-retro` finds is a
+separate, explicitly-approved follow-up, not part of this run.
 
 ## Ongoing maintenance — not just initial setup
 

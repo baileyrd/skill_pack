@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # issue-loop
@@ -103,6 +103,14 @@ stop condition below fires, or the user says stop:
 **4. Wrap up** — report: issues worked and merged, still open and why
 (blocked on CI, needs-human, breaking-change, needs-new-dependency, marked
 not-actionable), and anything triage deliberately left out of scope.
+
+**5. Wrap-up retro** — after step 4's report, run a `meta/skill-retro` pass
+on `issue-loop` itself, grounded in this run: did step 1's triage
+classifications hold up, did step 2's reuse check actually surface what it
+should have, did a `breaking-change`/`needs-new-dependency` stop in step 3
+need something the instructions didn't cover? Read-only, safe to run
+unattended in either harness mode — applying anything `skill-retro` finds
+is a separate, explicitly-approved follow-up.
 
 ## Harness mode
 

@@ -23,6 +23,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   against recursing on a direct self-retro invocation.
 - `meta/learn-it` (v1.0.0 → v1.1.0) — new step 6 runs a `skill-retro` pass
   on `learn-it` itself at the end of every run, regardless of outcome.
+- `meta/skill-retro` wired into the wrap-up of every remaining `my_loops`
+  skill as a new step 5, "Wrap-up retro": `my_loops/dedupe-loop`
+  (v1.0.0 → v1.1.0), `my_loops/issue-loop` (v1.0.0 → v1.1.0),
+  `my_loops/parity-loop` (v1.1.0 → v1.2.0), `my_loops/repo-config`
+  (v1.0.0 → v1.1.0), `my_loops/sovereignty-loop` (v1.0.0 → v1.1.0).
 ### Fixed
 ### Security
 

@@ -1,7 +1,7 @@
 ---
 name: dedupe-loop
 description: Scans a set of platform repos for duplicate or near-duplicate implementations (e.g. every repo growing its own HTTP client wrapper) and proposes hoisting the genuine duplicates into a single common module on the platform layer, per the mechanism/policy split already established by ADR-011. Trigger on requests to find duplicated code across repos, consolidate common functionality, "do we have three versions of this," or hoist something into rustils/the platform layer. Companion to parity-loop and sovereignty-loop (same PR/CI/merge mechanics, same platform-repo scoping question) — checkpointed with per-cluster sign-off by default (this one spans repos, so a wrong call is costlier to unwind), but exact/near-duplicate clusters proceed unattended when `LOOP_HARNESS_MODE=auto`; a convergent-but-diverged cluster's behavioral question always still needs a human answer regardless of harness mode.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # dedupe-loop
@@ -149,6 +149,16 @@ regardless of harness setting:
 5. Once every approved consuming repo has adopted, close the tracking
    issues and note in the run summary which repos are done and which
    clusters were deferred.
+
+**5. Wrap-up retro** — regardless of how the run ended (clusters fully
+adopted, some deferred, or stopped mid-way), run a `meta/skill-retro` pass
+on `dedupe-loop` itself, grounded in this run: did step 2's clustering and
+classification (exact/near-duplicate vs. convergent-but-diverged vs.
+coincidental-similarity) hold up, did a convergent-but-diverged behavioral
+question in step 4.1 need something the instructions didn't cover, did the
+hoist-then-adopt sequencing actually work as described? Read-only, safe to
+run unattended in either harness mode — applying anything `skill-retro`
+finds is a separate, explicitly-approved follow-up, not part of this run.
 
 ## Stop conditions
 

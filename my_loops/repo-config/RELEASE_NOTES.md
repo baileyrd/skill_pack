@@ -10,6 +10,17 @@ what's still open.
 
 ---
 
+## v1.1.0 — Wire skill-retro into wrap-up (step 5)
+**2026-08-13**
+
+- **Added:** step 5, "Wrap-up retro" — after step 4's re-audit report, runs
+  a `meta/skill-retro` pass on `repo-config` itself, grounded in this run's
+  step 0 scan and step 2 questions. Read-only; applying anything found is a
+  separate, explicitly-approved follow-up.
+- Part of a batch wiring the same convention into every remaining
+  `my_loops` skill, following the pattern first used on
+  `my_loops/rust-migration` v1.1.0 and `meta/skill-retro`'s own step 6.
+
 ## Exec-bit half of the sync-gap pattern traced to a real bug, and fixed
 **2026-08-12**
 

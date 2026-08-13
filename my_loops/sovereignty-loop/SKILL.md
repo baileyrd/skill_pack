@@ -1,7 +1,7 @@
 ---
 name: sovereignty-loop
 description: Audits a repo's external dependencies, checks whether an existing repo, library, or component across the Rusty-Mill org or baileyrd's personal rusty_* repos already covers the same capability, and proposes a swap-to-internal or a scoped hand-rolled replacement for each — turning "we depend on too many external crates" into a bounded loop. Trigger on requests to reduce external dependencies, consolidate around the platform layer, check for supply-chain/sovereignty exposure, or "do we already have something for this" against the user's own repo ecosystem. Companion to parity-loop (same PR/CI/merge mechanics) and repo-config (same governance conventions) — checkpointed with per-row sign-off by default since replacing a dependency is a toolchain change, but proceeds unattended on pre-classified-safe rows when `LOOP_HARNESS_MODE=auto` (hand-roll L/XL and ambiguous rows always still wait).
-version: 1.0.0
+version: 1.1.0
 ---
 
 # sovereignty-loop
@@ -156,6 +156,16 @@ issue first (`assets/templates/issue-body.md`, labeled `dep-sovereignty`)
 before branching — same traceability convention as `parity-loop`, and it's
 what `Closes #N` in the PR needs. If the repo has `RELEASE_NOTES.md`, add
 the dated entry before opening the PR.
+
+**5. Wrap-up retro** — regardless of how the run ended (rows swapped,
+hand-rolled, some deferred, or stopped mid-way), run a `meta/skill-retro`
+pass on `sovereignty-loop` itself, grounded in this run: did step 3's
+classification (covered/partial/hand-roll/keep external) hold up, did the
+hand-roll size call (S/M vs. L/XL) in step 4 turn out right, did anything
+about the interactive/auto harness split need clarification this run
+actually hit? Read-only, safe to run unattended in either harness mode —
+applying anything `skill-retro` finds is a separate, explicitly-approved
+follow-up, not part of this run.
 
 ## Stop conditions
 
