@@ -10,6 +10,18 @@ still open.
 
 ---
 
+## v1.2.0 — Wire skill-retro into wrap-up (step 5)
+**2026-08-13**
+
+- **Added:** step 5, "Wrap-up retro" — after step 4's report, runs a
+  `meta/skill-retro` pass on `parity-loop` itself, grounded in this run's
+  step 1 path selection and step 3 breaking-change/new-subsystem calls.
+  Read-only, safe unattended in either harness mode; applying anything
+  found is a separate, explicitly-approved follow-up.
+- Part of a batch wiring the same convention into every remaining
+  `my_loops` skill, following the pattern first used on
+  `my_loops/rust-migration` v1.1.0 and `meta/skill-retro`'s own step 6.
+
 ## v1.1.0 — `new-subsystem` stop-and-ask
 **2026-08-13**
 

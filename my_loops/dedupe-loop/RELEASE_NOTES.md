@@ -10,6 +10,19 @@ still open.
 
 ---
 
+## v1.1.0 — Wire skill-retro into wrap-up (step 5)
+**2026-08-13**
+
+- **Added:** step 5, "Wrap-up retro" — after step 4 ends (clusters fully
+  adopted, some deferred, or stopped mid-way), runs a `meta/skill-retro`
+  pass on `dedupe-loop` itself, grounded in this run's step 2 clustering/
+  classification and step 4.1 behavioral calls. Read-only, safe unattended
+  in either harness mode; applying anything found is a separate,
+  explicitly-approved follow-up.
+- Part of a batch wiring the same convention into every remaining
+  `my_loops` skill, following the pattern first used on
+  `my_loops/rust-migration` v1.1.0 and `meta/skill-retro`'s own step 6.
+
 ## v1.0.0 — Initial versioned release
 **2026-08-12**
 
