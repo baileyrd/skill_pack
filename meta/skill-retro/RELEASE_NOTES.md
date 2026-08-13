@@ -9,6 +9,25 @@ still open.
 
 ---
 
+## v1.1.0 — Wire skill-retro into its own wrap-up (step 6, self-retro)
+**2026-08-13**
+
+- **Added:** step 6, "Self-retro" — after finishing a retro run on some
+  other skill B (step 5), `skill-retro` turns the same lens on itself,
+  grounded in how *this run* actually went (did step 0's evidence
+  identification have friction, did a finding fail to fit step 3's
+  categories, did the findings-table format need a column this run
+  actually needed, did an approved edit apply more messily than expected).
+  Reported as its own separate findings table, same read-only-before-write
+  discipline and explicit-approval gate as every other target.
+- **Guarded against recursion:** step 6 only fires when this run's B was
+  some *other* skill — a direct self-retro invocation (B already =
+  `skill-retro`) doesn't trigger a second self-retro pass on top of the one
+  that just ran.
+- Mirrors the same wiring pattern used for `my_loops/rust-migration` v1.1.0
+  (a one-line addition to a target skill's own wrap-up), applied here to
+  `skill-retro` checking itself rather than a sibling skill inviting it in.
+
 ## v1.0.0 — Initial release
 **2026-08-13**
 

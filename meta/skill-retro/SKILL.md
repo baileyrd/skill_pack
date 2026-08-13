@@ -1,7 +1,7 @@
 ---
 name: skill-retro
 description: Runs a post-execution retrospective on a skill (call it B) immediately after B finishes real work, treating what just happened as evidence about B's own instructions rather than about the task B was doing. Re-reads B's current SKILL.md/references/scripts on disk, reconstructs what actually happened in this session against them — every ambiguity resolved by guessing, every question asked that B's instructions should have pre-answered, every step skipped/reordered/improvised, every stale reference or script that errored — and reports each as a finding: what happened, which file/section it traces to, and a concrete proposed edit. Never edits B's files unprompted; applies findings only on explicit approval, then bumps B's version and RELEASE_NOTES.md per this repo's own versioning convention, through the normal PR workflow. Use immediately after finishing a task that leaned on another skill in this repo, when the user asks to retro/review/critique/post-mortem a skill that was just used, wants to close the loop on whether that skill's own instructions were good enough, or references this by name (skill-retro, meta-review).
-version: 1.0.0
+version: 1.1.0
 ---
 
 # skill-retro
@@ -109,6 +109,27 @@ batch:
   PR, green CI if configured, merge with a **merge commit** — same as
   `CONTRIBUTING.md` requires for any other change here.
 
+**6. Self-retro** — once step 5 finishes (whatever B was), turn the same
+lens on `skill-retro` itself, grounded in how *this run* actually went:
+did step 0's evidence-identification have any friction, did a real finding
+from step 2 fail to fit cleanly into step 3's categories, did
+`references/retro-findings-format.md`'s table lack a column this run
+actually needed, did applying an approved edit in step 5 turn out messier
+than the instructions implied? Report this as its own separate findings
+table — same format, same read-only-before-write discipline, same
+explicit-approval gate before touching anything — rather than merging it
+into B's report even on the run where B happened to be `skill-retro`
+itself.
+
+**Guard against recursing**: if step 0's `TARGET_SKILL` for this run
+already *was* `skill-retro` (someone invoked this skill directly on
+itself), step 6 does not fire a second time — the pass that just finished
+*is* the self-retro, and immediately re-running it would replay the same
+evidence against the same file for no new signal. Step 6 only fires when B
+was some *other* skill, so that every ordinary retro run also produces a
+lightweight check on this skill's own instructions as a side effect,
+without ever double-reporting on a direct self-retro invocation.
+
 ## Rules
 
 - Never edit a target skill's files without explicit approval — a report
@@ -126,6 +147,10 @@ batch:
   run, not just how the run in front of you happened to turn out — a
   guessed-and-got-lucky gap in a guardrail step is `could-have-caused-real-
   damage`, not `cosmetic`, even though this particular run was fine.
+- Step 6's self-retro follows the same approval gate as step 5 — running it
+  and reporting its findings is automatic and needs no permission, but
+  applying anything it finds to `skill-retro`'s own files is exactly as
+  gated as applying a finding to any other target skill.
 
 ## Limitations
 
@@ -140,13 +165,17 @@ batch:
 - Judgment-heavy in the same way the rest of this repo's assessment steps
   are (`parity-loop` step 1, `dedupe-loop`'s clustering, etc.) — a
   candidate list, read before trusting.
-- Doesn't wire itself into anything automatically. Two ways to actually get
-  it invoked at the end of a skill's run: add one line to that skill's own
-  "Wrap up" step inviting a `skill-retro` pass, or a `PostToolUse` hook in
-  `settings.json` matching the `Skill` tool (see this account's
-  `update-config` skill for how). Neither is set up by `skill-retro` itself
-  — it's meant to be run by request, or wired in deliberately, not to
-  silently attach itself to every skill in this repo.
+- Doesn't wire itself into an *other* skill's run automatically. Two ways
+  to actually get it invoked at the end of a skill B's run: add one line to
+  B's own "Wrap up" step inviting a `skill-retro` pass (done for
+  `rust-migration`), or a `PostToolUse` hook in `settings.json` matching
+  the `Skill` tool (see this account's `update-config` skill for how).
+  Neither is set up by `skill-retro` itself for a target skill — it's meant
+  to be run by request, or wired in deliberately, not to silently attach
+  itself to every skill in this repo. Step 6 is the one exception, and it's
+  narrowly scoped: `skill-retro` checks *itself* at the end of every run on
+  some other B, but that self-check never cascades into inviting a retro on
+  B in return, and never fires twice on a direct self-retro invocation.
 
 ## Scripts
 
