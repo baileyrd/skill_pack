@@ -9,6 +9,22 @@ still open.
 
 ---
 
+## v1.1.0 — Wire skill-retro into step 4's wrap-up
+**2026-08-13**
+
+- **Added:** step 4 now runs a `meta/skill-retro` pass on `rust-migration`
+  itself, evidence-grounded in the run that just finished, right after the
+  coverage-gated wrap-up report — regardless of whether the run ended in a
+  full migration, a partial one, or a stop. Read-only, runs unattended in
+  either harness mode; applying anything it finds is still its own
+  separate, explicitly-approved change, never bundled into finishing a
+  migration.
+- This is the first real instance of the wiring both `skill-retro` and
+  `learn-it`'s "Limitations" sections named as a deliberate follow-up
+  rather than something either meta-skill sets up on its own — a one-line
+  addition to a target skill's own "Wrap up" step, not a `settings.json`
+  hook.
+
 ## v1.0.0 — Initial release
 **2026-08-13**
 

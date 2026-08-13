@@ -16,6 +16,8 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   into a new or updated skill, same evidence-grounded discipline as
   skill-retro in the opposite direction).
 ### Changed
+- `my_loops/rust-migration` (v1.0.0 → v1.1.0) — step 4's wrap-up now runs a
+  `meta/skill-retro` pass on the skill itself before ending the run.
 ### Fixed
 ### Security
 

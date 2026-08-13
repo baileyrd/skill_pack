@@ -1,7 +1,7 @@
 ---
 name: rust-migration
 description: Runs an autonomous "migrate this repo/application to Rust" loop whose core job is preventing the recurring failure mode where a migration quietly treats an existing capability as optional and drops or downgrades it. Before any Rust code is written, exhaustively inventories every observable capability of the source repo (public APIs, CLI flags, HTTP routes, config/env surface, background jobs, file formats, error/exit behavior, and behavior implied by its existing tests) into a capability manifest where every row defaults to REQUIRED — an item can only move to OUT-OF-SCOPE through an explicit, written, user-attributed sign-off, never inferred by Claude. Files one issue per capability, checks platform siblings (Rusty-Mill/baileyrd rusty_* repos) for something to port before hand-rolling, implements per the development-standards repos, verifies behavioral parity against the source before closing, and won't report the migration "done" while any REQUIRED row is undone. Use whenever the user asks to migrate/port/rewrite a repo or application to Rust, wants a repeatable migration-to-merged-PR loop, or references this by name (rust-migration, migration loop). Companion to parity-loop/sovereignty-loop/dedupe-loop/issue-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # rust-migration
@@ -216,6 +216,21 @@ anything flagged in step 1 as a likely-dead candidate that the user hasn't
 yet ruled on. **Never report "migration complete" while
 `check_manifest_coverage.sh` fails** — a partial migration gets reported as
 partial, with the gap named, not rounded up.
+
+After that report — regardless of whether the run ended in a full
+migration, a partial one, or a stop — run a `meta/skill-retro` pass on
+**this skill itself**, evidence-grounded in the run that just happened: did
+`rust-migration`'s own steps hold up, or did something get skipped,
+reordered, or guessed that step 0-3's instructions should have covered
+without a guess? This is read-only and safe to run unattended in either
+harness mode — `skill-retro` never edits `rust-migration`'s own files
+without separate, explicit approval of its findings (see `skill-retro`'s
+own Rules); running the retro pass itself needs no such approval, only
+*applying* something it finds does. Surface its findings alongside the
+wrap-up report, not as an afterthought tacked on after the user has moved
+on. If the user approves any finding, that's its own follow-up change to
+`rust-migration` through the normal PR workflow — not part of finishing
+this migration, and not blocking on it either.
 
 ## Harness mode
 
