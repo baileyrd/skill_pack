@@ -10,6 +10,22 @@ still open.
 
 ---
 
+## v1.1.0 — Wire skill-retro into wrap-up (step 8)
+**2026-08-13**
+
+- **Added:** step 8, "Wrap-up retro" — after step 7's report-back, runs a
+  `meta/skill-retro` pass on `yt-pipeline` itself, grounded in this run's
+  step 1 selection/backup logic, step 3 ingestion-failure handling, and
+  step 5 deliverable generation. Read-only, safe unattended (this pipeline
+  already runs unattended end to end); applying anything found is a
+  separate, explicitly-approved follow-up.
+- Explicitly scoped to `yt-pipeline` itself, not `yt-search` or
+  `notebooklm` — `notebooklm` is vendored from `notebooklm-py` and this
+  repo's own convention says never hand-edit it (see
+  `yt_research_for_cc/README.md`); it stays outside this wiring entirely.
+- Part of extending the wrap-up-retro convention (first used on
+  `my_loops/rust-migration` v1.1.0) to `yt_research_for_cc`.
+
 ## v1.0.0 — Initial versioned release
 **2026-08-12**
 

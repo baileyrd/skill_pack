@@ -1,7 +1,7 @@
 ---
 name: yt-search
 description: Searches YouTube by query using yt-dlp and returns structured, human-readable video results — title, channel, subscriber count, view count, duration, upload date, URL, and a views-to-subscribers engagement ratio. Defaults to the top 20 results from the last 6 months. Use this skill whenever the user asks to search YouTube, find videos on a topic, research YouTube content, pull video stats/metadata, or wants to see which videos on a topic are overperforming (engagement ratio).
-version: 1.0.0
+version: 1.1.0
 ---
 
 # YouTube Search
@@ -92,3 +92,13 @@ raw integers, matching YouTube's own display convention.
 
 Always present the script's stdout to the user as-is — it is already formatted for
 direct display. Summarize stderr diagnostics (filtered count, search timing) only if useful context.
+
+## Wrap-up retro
+
+After presenting results, run a `meta/skill-retro` pass on `yt-search`
+itself, grounded in this invocation: did the flag handling in "Running a
+search" match what was actually needed, did an "Error handling" path fire
+that wasn't cleanly covered, did the engagement-ratio explanation hold up
+against this particular result set? Read-only, safe to run unattended —
+applying anything `skill-retro` finds is a separate, explicitly-approved
+follow-up, not part of this invocation.
