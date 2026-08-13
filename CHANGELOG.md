@@ -28,6 +28,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   (v1.0.0 → v1.1.0), `my_loops/issue-loop` (v1.0.0 → v1.1.0),
   `my_loops/parity-loop` (v1.1.0 → v1.2.0), `my_loops/repo-config`
   (v1.0.0 → v1.1.0), `my_loops/sovereignty-loop` (v1.0.0 → v1.1.0).
+- `meta/skill-retro` wired into `yt_research_for_cc/yt-search`
+  (v1.0.0 → v1.1.0) and `yt_research_for_cc/yt-pipeline`
+  (v1.0.0 → v1.1.0, new step 8). `yt_research_for_cc/notebooklm`
+  deliberately excluded — vendored from `notebooklm-py`, never
+  hand-edited per this repo's own convention.
 ### Fixed
 ### Security
 

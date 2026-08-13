@@ -1,7 +1,7 @@
 ---
 name: yt-pipeline
 description: End-to-end automated YouTube research pipeline for a topic — searches YouTube (via the yt-search skill), auto-selects the 5-8 best videos by relevance/engagement/recency/diversity, loads them into a new NotebookLM notebook (via the notebooklm skill), runs a trends/outliers/gaps analysis, presents key takeaways, and optionally generates a podcast, slide deck, or report. Runs fully unattended once given a topic — no confirmation pauses. Use when the user asks to "research X on YouTube", "run the YouTube pipeline on X", or wants a NotebookLM notebook built from YouTube sources on a topic.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # YouTube Research Pipeline
@@ -121,6 +121,20 @@ One final chat message: key takeaways (trends / outliers / gaps), the notebook l
 (flag any that failed to ingest), the deliverable file path if one was generated, and the
 vault note path from step 6. No intermediate check-ins before this — this is the single
 report-back point.
+
+### 8. Wrap-up retro
+
+After step 7's report-back, run a `meta/skill-retro` pass on `yt-pipeline`
+itself, grounded in this run: did step 1's selection/backup logic behave
+as described, did step 3's ~40% no-caption failure rate and backup
+recovery match what actually happened, did step 5's deliverable table
+cover what was asked for? Read-only, safe to run unattended (this pipeline
+already runs unattended end to end) — applying anything `skill-retro`
+finds is a separate, explicitly-approved follow-up, not part of this run.
+This retro targets `yt-pipeline` itself only — it does not extend to
+`yt-search` or `notebooklm`, which are separate skills with their own
+wrap-ups (`notebooklm` specifically is vendored and out of scope for any
+edit either skill's retro might propose; see `yt_research_for_cc/README.md`).
 
 ## Notes
 
