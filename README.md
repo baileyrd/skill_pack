@@ -32,14 +32,16 @@ Three skills that chain into an unattended YouTube research pipeline: search, cu
 ### [`meta/`](meta) — tooling about this repo's own skills
 
 Evidence-grounded, report-before-write passes aimed at the skills in this
-repo itself rather than at an external target repo — one closes the loop
-on an existing skill's own instructions, the other opens one by turning
-session experience into a new or updated skill.
+repo itself rather than at an external target repo — closing the loop on
+an existing skill's own instructions, opening one by turning session
+experience into a new or updated skill, or drafting one from scratch with
+that loop-closing step already built in.
 
 | Skill | Does |
 |---|---|
 | [`skill-retro/`](meta/skill-retro) | Post-execution retrospective on a skill just used: reconstructs what actually happened against its stated steps, reports friction as findings with concrete proposed edits, applies only on approval, then versions and logs the target skill. |
 | [`learn-it/`](meta/learn-it) | Distills a session's actual patterns/anti-patterns/gotchas into a new (or updated) skill matching this repo's own authoring conventions, reported for approval before anything is written. |
+| [`my-skill-creator/`](meta/my-skill-creator) | This repo's own fork of Anthropic's `skill-creator` (draft → test → eval → iterate → optimize description → package), with `skill_pack`'s own authoring conventions applied automatically and a `skill-retro` wrap-up step built into every skill it drafts or improves by default. |
 
 ## Versioning
 
