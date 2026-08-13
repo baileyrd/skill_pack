@@ -29,6 +29,18 @@ Three skills that chain into an unattended YouTube research pipeline: search, cu
 | [`notebooklm/`](yt_research_for_cc/notebooklm) | Full programmatic access to Google NotebookLM — notebooks, sources, chat, and every artifact type. Vendored from the third-party `notebooklm-py` package. |
 | [`yt-pipeline/`](yt_research_for_cc/yt-pipeline) | Orchestrates the two above: topic → search → auto-select best videos → NotebookLM notebook → analysis → optional deliverable. |
 
+### [`meta/`](meta) — tooling about this repo's own skills
+
+Evidence-grounded, report-before-write passes aimed at the skills in this
+repo itself rather than at an external target repo — one closes the loop
+on an existing skill's own instructions, the other opens one by turning
+session experience into a new or updated skill.
+
+| Skill | Does |
+|---|---|
+| [`skill-retro/`](meta/skill-retro) | Post-execution retrospective on a skill just used: reconstructs what actually happened against its stated steps, reports friction as findings with concrete proposed edits, applies only on approval, then versions and logs the target skill. |
+| [`learn-it/`](meta/learn-it) | Distills a session's actual patterns/anti-patterns/gotchas into a new (or updated) skill matching this repo's own authoring conventions, reported for approval before anything is written. |
+
 ## Versioning
 
 Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver, bumped by hand on meaningful changes), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.

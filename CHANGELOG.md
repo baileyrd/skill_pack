@@ -10,6 +10,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   written user sign-off moves one to OUT-OF-SCOPE) as the mechanism for
   the "capabilities treated as optional" failure mode this was built to
   close.
+- New `meta/` category: `meta/skill-retro` (post-execution retrospective on
+  a skill's own instructions — findings with proposed edits, applied only
+  on approval) and `meta/learn-it` (distills a session's actual patterns
+  into a new or updated skill, same evidence-grounded discipline as
+  skill-retro in the opposite direction).
 ### Changed
 ### Fixed
 ### Security
