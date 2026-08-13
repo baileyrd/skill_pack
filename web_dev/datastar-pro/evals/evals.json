@@ -1,0 +1,105 @@
+{
+  "skill_name": "datastar-pro",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build me a live character counter page using Datastar Pro. I want a textarea where users type a message, and below it shows the character count updating in real-time, with the count turning red when it exceeds 280 characters. Also add a 'Clear' button that resets the textarea. Just a single HTML file, no backend needed.",
+      "expected_output": "A single HTML file with the Datastar Pro script tag, data-signals for the message text, data-bind on a textarea, data-text showing character count, data-class or data-style for red color when over 280, and a clear button using data-on:click to reset the signal.",
+      "files": [],
+      "expectations": [
+        "The HTML includes a Datastar Pro script tag",
+        "A textarea is bound to a signal using data-bind",
+        "Character count is displayed reactively using data-text",
+        "The count changes color (red) when exceeding 280 characters using data-class or data-style",
+        "A clear button resets the message signal using data-on:click",
+        "Signals are declared using data-signals with correct syntax",
+        "The page is a complete, valid HTML document"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need a Datastar Pro app with a Python FastAPI backend that lets users search for books. There should be a search input with debounced typing that hits a /api/search endpoint. The server should return matching books as HTML cards using SSE. Also show a loading spinner while the request is in flight. Give me both the HTML file and the FastAPI server code using the datastar-py SDK.",
+      "expected_output": "Two files: (1) An HTML page with data-signals for the search query, data-bind on input, data-on:input with debounce modifier triggering @get, data-indicator for loading state, and a results container div. (2) A FastAPI Python file using datastar-py SDK (DatastarResponse, ReadSignals, ServerSentEventGenerator) that handles GET /api/search, reads the query from signals, and returns SSE events with datastar-patch-elements containing book card HTML.",
+      "files": [],
+      "expectations": [
+        "The HTML includes a Datastar Pro script tag",
+        "Search input uses data-bind and data-on with debounce modifier (__debounce)",
+        "The fetch action uses @get('/api/search') or similar",
+        "A loading indicator is shown using data-indicator and data-show",
+        "The FastAPI server uses DatastarResponse from datastar_py.fastapi",
+        "The server uses ReadSignals to read client signals",
+        "SSE response uses ServerSentEventGenerator (SSE.patch_elements) with correct selector, mode, and elements",
+        "Both HTML and Python files are provided"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Create a Datastar Pro settings page where users can toggle dark mode, adjust font size with a range slider, and pick an accent color. All preferences should persist across page reloads using localStorage. The page should apply the settings to itself in real-time so users see the effect immediately. Use data-style for the live preview and data-persist for storage. Single HTML file is fine.",
+      "expected_output": "A single HTML file using data-persist for localStorage, data-signals for theme/fontSize/color preferences, data-bind on checkbox (dark mode), range input (font size), and color input (accent color). data-style attributes apply the preferences to the page body or container in real-time. All styling is inline via data-style.",
+      "files": [],
+      "expectations": [
+        "The HTML includes a Datastar Pro script tag",
+        "data-persist attribute is used for localStorage persistence",
+        "Signals are declared for dark mode, font size, and accent color",
+        "A checkbox or toggle is bound to the dark mode signal",
+        "A range slider is bound to the font size signal",
+        "A color picker input is bound to the accent color signal",
+        "data-style is used to apply preferences to the page in real-time",
+        "The page is a complete, valid HTML document"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Build a Datastar Pro page with a portfolio-style card grid where each card fades in and slides up as the user scrolls down. Use data-animate for smooth opacity and transform transitions, and data-on-intersect to trigger the animation when each card enters the viewport. The cards should stagger their entrance — each card animates slightly after the previous one. Include at least 6 cards with placeholder content. Single HTML file, no backend.",
+      "expected_output": "A single HTML file with data-signals for each card's visibility state, data-on-intersect with __half and __once modifiers to trigger animations on scroll, data-animate for opacity and transform (translateY) with duration/easing modifiers, data-style for initial hidden state, and staggered delays (__delay modifier) across cards. Uses the Datastar Pro self-hosted script tag.",
+      "files": [],
+      "expectations": [
+        "The HTML includes a Datastar Pro script tag (self-hosted /static/datastar-pro.js)",
+        "data-on-intersect is used with __once modifier to trigger card visibility",
+        "data-animate:opacity is used for fade-in effect with duration and easing modifiers",
+        "data-animate:transform is used for slide-up effect (translateY)",
+        "data-style sets initial opacity to 0 and translateY to a positive offset",
+        "Staggered timing is achieved via __delay modifiers on data-animate",
+        "At least 6 cards are present with placeholder content",
+        "Signals are declared for each card's visibility state (e.g., data-signals:card1='false')",
+        "The page is a complete, valid HTML document"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Build a Datastar Pro dashboard that uses the Rocket component engine for reusable UI. Define a <template data-rocket:StatCard> component that accepts title, value, and trend props. Then render a grid of 4 StatCards showing different metrics. Also add a data-for loop that renders a list of recent activity items, and use data-if/data-else to show different icons based on the activity type. Use the Pro + Rocket bundle.",
+      "expected_output": "A single HTML file using the Pro + Rocket bundle (/static/datastar-pro-rocket.js). Defines a StatCard component with <template data-rocket:StatCard>, uses data-props for title/value/trend. Renders 4 instances with data-rocket='StatCard'. Includes a data-for loop iterating over activity items, with data-if/data-else-if/data-else for conditional rendering based on activity type.",
+      "files": [],
+      "expectations": [
+        "The HTML includes the Pro + Rocket bundle (/static/datastar-pro-rocket.js)",
+        "A component is defined using <template data-rocket:StatCard>",
+        "The component uses data-text to display prop values",
+        "Component instances pass props via data-props:title, data-props:value, data-props:trend",
+        "At least 4 StatCard component instances are rendered",
+        "data-for is used to iterate over an array of activity items",
+        "data-if and data-else (or data-else-if) are used for conditional rendering",
+        "Signals are declared for the activity items array",
+        "The page is a complete, valid HTML document"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Build a complete Datastar Pro todo application with a FastAPI backend using the datastar-py SDK. Requirements: (1) Add/delete todos via SSE endpoints, (2) todos persist in a server-side list, (3) new todos slide in with data-animate, (4) a dark mode toggle that persists across reloads using data-persist, (5) a loading indicator when communicating with the server. Give me both the HTML file and the FastAPI server code.",
+      "expected_output": "Two files: (1) An HTML page with data-signals for input/todos/darkMode, data-persist for dark mode preference, data-bind on input, data-on:click/@post for adding todos, @delete for removing, data-indicator for loading state, data-animate for slide-in animation on new items, data-style for dark mode theming. (2) A FastAPI server using DatastarResponse, ReadSignals, and SSE.patch_elements/patch_signals for add/delete endpoints that maintain a server-side todo list.",
+      "files": [],
+      "expectations": [
+        "The HTML includes a Datastar Pro script tag",
+        "data-persist is used for dark mode preference across reloads",
+        "data-bind is used on the todo input field",
+        "Server communication uses @post for adding and @delete for removing todos",
+        "data-indicator and data-show are used for loading state",
+        "data-animate is used for slide-in animation on new todo items",
+        "data-style applies dark mode theming reactively based on a signal",
+        "The FastAPI server uses DatastarResponse from datastar_py.fastapi",
+        "The server uses ReadSignals to read client signals",
+        "SSE responses use ServerSentEventGenerator for patch_elements and patch_signals",
+        "Both HTML and Python files are provided"
+      ]
+    }
+  ]
+}

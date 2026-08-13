@@ -43,6 +43,16 @@ that loop-closing step already built in.
 | [`learn-it/`](meta/learn-it) | Distills a session's actual patterns/anti-patterns/gotchas into a new (or updated) skill matching this repo's own authoring conventions, reported for approval before anything is written. |
 | [`my-skill-creator/`](meta/my-skill-creator) | This repo's own fork of Anthropic's `skill-creator` (draft → test → eval → iterate → optimize description → package), with `skill_pack`'s own authoring conventions applied automatically and a `skill-retro` wrap-up step built into every skill it drafts or improves by default. |
 
+### [`web_dev/`](web_dev) — web framework code generation
+
+Skills for generating applications in a specific web framework — reviewed
+and imported from their own standalone repos, then maintained here going
+forward.
+
+| Skill | Does |
+|---|---|
+| [`datastar-pro/`](web_dev/datastar-pro) | Generates Datastar Pro web apps — attribute-driven reactivity (`data-*`, `$signals`, `@actions`), SSE server communication, Rocket components, Stellar CSS theming. Imported from [`baileyrd/datastar-pro-skill`](https://github.com/baileyrd/datastar-pro-skill)'s audited v1.0 milestone. |
+
 ## Versioning
 
 Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver, bumped by hand on meaningful changes), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.
