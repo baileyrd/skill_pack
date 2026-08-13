@@ -18,6 +18,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 ### Changed
 - `my_loops/rust-migration` (v1.0.0 → v1.1.0) — step 4's wrap-up now runs a
   `meta/skill-retro` pass on the skill itself before ending the run.
+- `meta/skill-retro` (v1.0.0 → v1.1.0) — new step 6 self-retros
+  `skill-retro` itself at the end of every run on another skill, guarded
+  against recursing on a direct self-retro invocation.
 ### Fixed
 ### Security
 
