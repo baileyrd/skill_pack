@@ -15,6 +15,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   on approval) and `meta/learn-it` (distills a session's actual patterns
   into a new or updated skill, same evidence-grounded discipline as
   skill-retro in the opposite direction).
+- `meta/my-skill-creator` — this repo's own fork of Anthropic's
+  `skill-creator` example skill, with this repo's authoring conventions
+  applied automatically and a `skill-retro` wrap-up step built into every
+  skill it drafts or improves by default (rather than wired in afterward
+  as a separate change, the way the rest of this batch of changes had to
+  be).
 ### Changed
 - `my_loops/rust-migration` (v1.0.0 → v1.1.0) — step 4's wrap-up now runs a
   `meta/skill-retro` pass on the skill itself before ending the run.
