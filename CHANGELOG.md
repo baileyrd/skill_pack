@@ -5,6 +5,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `my_loops/rust-migration` skill — migrates a repo/application to Rust
+  with a capability manifest (every item defaults REQUIRED, only a
+  written user sign-off moves one to OUT-OF-SCOPE) as the mechanism for
+  the "capabilities treated as optional" failure mode this was built to
+  close.
 ### Changed
 ### Fixed
 ### Security
