@@ -21,6 +21,8 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 - `meta/skill-retro` (v1.0.0 → v1.1.0) — new step 6 self-retros
   `skill-retro` itself at the end of every run on another skill, guarded
   against recursing on a direct self-retro invocation.
+- `meta/learn-it` (v1.0.0 → v1.1.0) — new step 6 runs a `skill-retro` pass
+  on `learn-it` itself at the end of every run, regardless of outcome.
 ### Fixed
 ### Security
 

@@ -1,7 +1,7 @@
 ---
 name: learn-it
 description: Runs a post-session distillation pass that turns what actually happened in this session into a new (or updated) Claude skill, using the same evidence-grounded, report-before-write discipline as skill-retro — but pointed the opposite direction. Where skill-retro closes the loop on an existing skill's own instructions, learn-it opens one: it reconstructs the preferred patterns, anti-patterns, gotchas, and sequencing this session actually demonstrated, checks whether an existing skill in this repo already covers the ground (merge) or nothing does (create new), drafts a SKILL.md that matches this repo's own authoring conventions (frontmatter, versioning, category placement, RELEASE_NOTES), and reports the full draft for approval before writing anything. Use when a session's problem-solving revealed reusable behavioral guidance worth keeping past this conversation, when the user says "turn this into a skill", "save this as a skill", "capture what we just learned", "update the X skill with this", or references this by name (learn-it). Bias toward proposing a skill when genuinely reusable guidance surfaced — but never write one for a single one-off fact or fix specific to this task; qualify first.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # learn-it
@@ -123,6 +123,25 @@ written on this step.
 - No shortcut around the standing workflow: branch, PR, green CI if
   configured, merge with a **merge commit** — same as
   `CONTRIBUTING.md` requires for any other change here.
+
+**6. Wrap-up retro** — regardless of how this run ended (a new skill
+written, an existing one updated, a draft declined, or step 0's qualify
+gate saying this didn't warrant a skill at all), run a `meta/skill-retro`
+pass on `learn-it` itself, evidence-grounded in the run that just
+happened: did step 0's qualify gate hold up, did step 2's existing-skill
+search actually find what it should have, did the draft in step 3 need
+something `references/skill-authoring-conventions.md` didn't cover, did
+step 4's report format serve the approval decision well? Read-only, safe
+to run unattended — `skill-retro` never edits `learn-it`'s own files
+without separate, explicit approval of its findings (see `skill-retro`'s
+own Rules), same as any other target it's pointed at. Note that this also
+triggers `skill-retro`'s own step 6 (it self-checks at the end of every run
+on another skill) — that produces a second, separate report about
+`skill-retro` itself, not to be conflated with the findings about
+`learn-it` this step exists to surface. Report `learn-it`'s findings
+alongside whatever this run's primary outcome was; applying any of them is
+its own follow-up change through the normal PR workflow, not part of this
+run.
 
 ## Rules
 
