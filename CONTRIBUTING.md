@@ -14,11 +14,19 @@
    five checks CI runs (exec bits, line endings, doc references, skill
    manifests, packaging), and it's faster to fix locally than in review.
 4. Add tests for non-trivial logic — happy path and at least one
-   failure/boundary case. **There is no test harness in this repo yet**: no
-   runner, no test directory, nothing for CI to execute. Until there is, this
-   line applies to any code that arrives with one, and PRs should say plainly
-   that tests were not added rather than ticking a box that isn't real. The
-   repo lint above is not a substitute — it checks structure, not behavior.
+   failure/boundary case. `python3 -m unittest discover -s tests` runs the
+   suite; CI runs the same command. Stdlib `unittest`, no third-party runner,
+   so there's nothing to install first.
+
+   Two things the suite expects of a new test, both from ADR-0002's rules for
+   repo checks, which apply here for the same reason:
+   - **Name the bug it would have caught.** Coverage isn't the goal; the
+     specific mistakes this code has already proven it makes are.
+   - **Show it failing before you rely on it.** Revert the fix, watch the
+     test go red, restore. Two of the five CI checks silently passed their
+     first fault injection, and the mutation harness for these very tests was
+     itself broken on the first attempt — reporting `ImportError` as if it
+     were a caught regression.
 5. Add or update docstrings on any public surface you touched.
 6. Open a PR — pick the template that matches (feature / bug fix / docs / chore).
 

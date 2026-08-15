@@ -5,6 +5,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `tests/` — 44 stdlib `unittest` tests over `check_references.py`'s parsing
+  and classification logic and `check_repo.py`'s frontmatter parser, run by
+  CI as a step separate from the lint checks. Each regression test names the
+  bug it would have caught and was verified by reverting that fix and
+  watching it fail. Resolves `CONTRIBUTING.md`'s long-aspirational "add tests
+  for non-trivial logic" — the last open row from docs-loop's first run.
 - `docs/adr/0002-repo-checks-require-a-real-failure.md` — the ADR log's first
   real decision: why CI exists here as a deliberate exception to
   `repo-config`'s no-manifest rule, and the constraint that a check earns its

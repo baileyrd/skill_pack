@@ -2,7 +2,7 @@
 
 **Run:** 2026-08-15 against `462d704` · **Scope:** whole repo (95 tracked docs)
 **Counts at audit:** 3 stale · 1 missing · 1 orphaned · 3 aspirational · 0 unverifiable · 4 accurate
-**Status:** rows 1, 3, 4 and the new PyYAML row fixed; the `my_loops/README.md` stub deleted; `CONTRIBUTING.md`'s CI claim resolved by actually adding CI. **One row still open:** the test-harness question. The ADR log now has a real decision in it.
+**Status:** rows 1, 3, 4 and the new PyYAML row fixed; the `my_loops/README.md` stub deleted; `CONTRIBUTING.md`'s CI claim resolved by actually adding CI. **No rows open.** Every finding from this run is resolved, deferred with a written reason, or logged as an accepted non-finding.
 
 ## Findings
 
@@ -13,7 +13,7 @@
 | README.md | Repo tooling, L78 | "e.g. `zip/dedupe-loop-v1.0.0.zip`" | stale | dedupe-loop is v1.1.1; `build_skill_zips.py` now emits `dedupe-loop-v1.1.1.zip` | Drop the version from the example so it can't rot again | S |
 | ARCHITECTURE.md | Structure, L19 | "Four category folders (…), plus repo-wide tooling under `scripts/`" | missing | Accurate as far as it goes, but `need_to_productize/` (4 `.skill` archives) and `trying/` (3) are tracked top-level dirs named in **no doc at all** — `grep` across README/ARCHITECTURE/CONTRIBUTING/docs returns nothing | One sentence saying what they are and why they're not categories | S |
 | CONTRIBUTING.md | Review, L28 | "CI must be green before merge" | ~~aspirational~~ **resolved** | Was: no `.github/workflows/` at all. Now: `ci.yml` runs `scripts/check_repo.py` on every PR. The claim is true, with a caveat now stated in CONTRIBUTING — it only *reports* until set as a required status check in branch protection | done | S |
-| CONTRIBUTING.md | Standards, L13 | "Add tests for non-trivial logic — happy path and at least one failure/boundary case" | aspirational **(still open)** | No test directory, no runner, no test file anywhere. Adding CI did **not** resolve this: the five checks are lint over repo structure, not behavior | CONTRIBUTING now says plainly that no harness exists rather than implying one does — but the underlying question (build one, or drop the requirement) is unanswered | S |
+| CONTRIBUTING.md | Standards, L13 | "Add tests for non-trivial logic — happy path and at least one failure/boundary case" | ~~aspirational~~ **resolved — harness built** | Was: no test directory, no runner, no test file anywhere. Now: `tests/` with 44 stdlib `unittest` tests, run by CI as a step separate from the lint checks. Each regression test was verified by reverting its historical fix and watching it fail | done | M |
 | ARCHITECTURE.md | Key decisions, L25 | "See `docs/adr/` for the record of individual decisions and their tradeoffs" | ~~aspirational~~ **resolved** | Was: only `0001-template.md`, an unfilled seed. Now: ADR-0002 records the repo-checks decision, its three corollaries, four rejected alternatives, and what it forecloses. The log points at a real decision | done | M |
 | ARCHITECTURE.md | Non-goals, L29 | "`scripts/*.py` are one-shot tooling invoked by hand" | stale *(new — caused by adding CI)* | `check_repo.py` is now also invoked by `.github/workflows/ci.yml` on every push and PR. True for the other three scripts, no longer true as a blanket statement | Name which scripts are hand-invoked and which CI also runs | S |
 | README.md | Categories tables | all 14 skills listed | accurate | 14 `SKILL.md` files, 14 table rows, names match | none | — |

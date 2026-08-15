@@ -36,3 +36,11 @@ jobs:
       # decision to make explicitly, not to discover here.
       - name: Run repo checks
         run: python3 scripts/check_repo.py
+
+      # Deliberately a separate step, not a sixth check inside check_repo.py.
+      # ADR-0002 governs repo *checks* — lint over structure, admitted only
+      # for a failure that actually happened — and says in as many words that
+      # lint is not tests. Folding the suite in there would blur exactly the
+      # line that ADR draws.
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -v
