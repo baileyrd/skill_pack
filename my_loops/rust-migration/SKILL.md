@@ -1,7 +1,7 @@
 ---
 name: rust-migration
 description: Runs an autonomous "migrate this repo/application to Rust" loop whose core job is preventing the recurring failure mode where a migration quietly treats an existing capability as optional and drops or downgrades it. Before any Rust code is written, exhaustively inventories every observable capability of the source repo (public APIs, CLI flags, HTTP routes, config/env surface, background jobs, file formats, error/exit behavior, and behavior implied by its existing tests) into a capability manifest where every row defaults to REQUIRED — an item can only move to OUT-OF-SCOPE through an explicit, written, user-attributed sign-off, never inferred by Claude. Files one issue per capability, checks platform siblings (Rusty-Mill/baileyrd rusty_* repos) for something to port before hand-rolling, implements per the development-standards repos, verifies behavioral parity against the source before closing, and won't report the migration "done" while any REQUIRED row is undone. Use whenever the user asks to migrate/port/rewrite a repo or application to Rust, wants a repeatable migration-to-merged-PR loop, or references this by name (rust-migration, migration loop). Companion to parity-loop/sovereignty-loop/dedupe-loop/issue-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.1.0
+version: 1.1.1
 ---
 
 # rust-migration
@@ -331,6 +331,8 @@ Check these every iteration, not just at start:
 | `check_manifest_coverage.sh` | Fails if any `capability-manifest.md` row is neither `DONE` nor `OUT-OF-SCOPE` with a reason — the boundary contract's mechanical gate on step 4 | `<path-to-capability-manifest.md>` |
 
 All four shell out to `gh`/`git` (or plain text parsing for the coverage
-check) only — no extra dependencies. They resolve paths relative to their
+check), plus **`jq`** (required — `next_capability.sh` pipes `gh` output
+through it) and **`ripgrep`** (optional — `scan_platform_repos.sh` uses it
+when present, `grep` otherwise). They resolve paths relative to their
 own location, so they work whether this skill is installed or just checked
 out locally.

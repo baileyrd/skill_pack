@@ -1,7 +1,7 @@
 ---
 name: dedupe-loop
 description: Scans a set of platform repos for duplicate or near-duplicate implementations (e.g. every repo growing its own HTTP client wrapper) and proposes hoisting the genuine duplicates into a single common module on the platform layer, per the mechanism/policy split already established by ADR-011. Trigger on requests to find duplicated code across repos, consolidate common functionality, "do we have three versions of this," or hoist something into rustils/the platform layer. Companion to parity-loop and sovereignty-loop (same PR/CI/merge mechanics, same platform-repo scoping question) — checkpointed with per-cluster sign-off by default (this one spans repos, so a wrong call is costlier to unwind), but exact/near-duplicate clusters proceed unattended when `LOOP_HARNESS_MODE=auto`; a convergent-but-diverged cluster's behavioral question always still needs a human answer regardless of harness mode.
-version: 1.1.1
+version: 1.1.2
 ---
 
 # dedupe-loop
@@ -234,4 +234,6 @@ finds is a separate, explicitly-approved follow-up, not part of this run.
 
 `find_clusters.py` is stdlib-only Python (no third-party dependency, in
 keeping with the standing minimal-dependencies principle). Everything else
-shells out to `gh`/`git`/`ripgrep` only.
+shells out to `gh`/`git` plus **`jq`**, which `next_issue.sh` pipes its `gh`
+output through. No script here invokes `ripgrep` — an earlier version of this
+line claimed it did.

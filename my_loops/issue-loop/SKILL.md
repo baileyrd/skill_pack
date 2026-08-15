@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.1.0
+version: 1.1.1
 ---
 
 # issue-loop
@@ -181,6 +181,9 @@ issues already proceed to PR/merge unattended in both modes, same as
 | `watch_and_merge.sh` | Waits for a PR's CI, merges (merge commit) + syncs on green, retries once on red before surfacing failure | `<pr-number> [--retries N] [--repo <owner/repo>]` |
 | `scan_platform_repos.sh` | Greps platform repos (both namespaces) for an existing implementation | `<symbol> [keyword ...] --repos <repo1,repo2,...>` |
 
-All three shell out to `gh`/`git` only — no extra dependencies. They resolve
+All three shell out to `gh`/`git`, plus **`jq`** (required — `next_issue.sh`
+pipes `gh` output through it) and **`ripgrep`** (optional —
+`scan_platform_repos.sh` uses it when present and falls back to `grep`
+otherwise). They resolve
 paths relative to their own location, so they work whether this skill is
 installed or just checked out locally.

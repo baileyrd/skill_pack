@@ -10,6 +10,15 @@ still open.
 
 ---
 
+## v1.2.1 — Declare jq and ripgrep
+**2026-08-15**
+
+- **Fixed:** the Scripts note said "shell out to `gh` and `git` only — no
+  extra dependencies." `next_issue.sh:26` requires **`jq`**;
+  `scan_rustymill_repos.sh:56` uses **`ripgrep`** when present and `grep`
+  otherwise. Required vs. optional is now stated per tool.
+- Found by `docs-loop` row 5.
+
 ## v1.2.0 — Wire skill-retro into wrap-up (step 5)
 **2026-08-13**
 

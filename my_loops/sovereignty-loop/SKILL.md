@@ -1,7 +1,7 @@
 ---
 name: sovereignty-loop
 description: Audits a repo's external dependencies, checks whether an existing repo, library, or component across the Rusty-Mill org or baileyrd's personal rusty_* repos already covers the same capability, and proposes a swap-to-internal or a scoped hand-rolled replacement for each — turning "we depend on too many external crates" into a bounded loop. Trigger on requests to reduce external dependencies, consolidate around the platform layer, check for supply-chain/sovereignty exposure, or "do we already have something for this" against the user's own repo ecosystem. Companion to parity-loop (same PR/CI/merge mechanics) and repo-config (same governance conventions) — checkpointed with per-row sign-off by default since replacing a dependency is a toolchain change, but proceeds unattended on pre-classified-safe rows when `LOOP_HARNESS_MODE=auto` (hand-roll L/XL and ambiguous rows always still wait).
-version: 1.1.0
+version: 1.1.1
 ---
 
 # sovereignty-loop
@@ -234,5 +234,7 @@ follow-up, not part of this run.
 | `watch_and_merge.sh` | Waits for a PR's CI, merges (merge commit) + syncs on green, retries once on red before surfacing failure — identical to `parity-loop`'s copy | `<pr-number> [--retries N] [--repo <owner/repo>]` |
 | `next_issue.sh` | Picks the next open, approved issue to work, skipping `blocked`/`needs-human` | `[--label dep-sovereignty] [--repo <owner/repo>]` |
 
-All three shell out to `gh`/`git`/`ripgrep` only — no extra dependencies.
+All three shell out to `gh`/`git`, plus **`jq`** (required — `next_issue.sh`
+pipes `gh` output through it) and **`ripgrep`** (optional —
+`scan_platform_repos.sh` uses it when present, `grep` otherwise).
 They resolve paths relative to their own location.

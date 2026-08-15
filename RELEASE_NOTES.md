@@ -5,6 +5,42 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## docs-loop row 5: dependency declarations, six skills wide
+**2026-08-15**
+
+- **Fixed:** the row logged as "one line to declare PyYAML" turned out to be
+  a dependency-declaration defect in six skills, in both directions.
+  `meta/my-skill-creator` (v1.0.1) documented no dependency while
+  `scripts/quick_validate.py:8` does an unguarded `import yaml`. Five
+  `my_loops` skills — `dedupe-loop` (v1.1.2), `issue-loop` (v1.1.1),
+  `parity-loop` (v1.2.1), `rust-migration` (v1.1.1), `sovereignty-loop`
+  (v1.1.1) — each asserted "no extra dependencies" while requiring **`jq`**
+  in their issue-picking script.
+- **One went the other way:** `dedupe-loop` documented a `ripgrep`
+  dependency that **no script of its own has** — inherited when its Scripts
+  note was copied from a sibling. Overstating a dependency is the rarer
+  failure and the one a "just add the missing thing" fix would have left
+  untouched.
+- **Required vs. optional is now stated per tool**, because it differs:
+  `jq` is piped unguarded, so it's a hard requirement, while `ripgrep` is
+  guarded by `command -v rg` with a `grep` fallback in all four scripts that
+  use it. Documenting both as "dependencies" would be as wrong as omitting
+  them.
+- **Two near-misses, both caught by checking before writing.** `jq` appears
+  in every `watch_and_merge.sh` as `gh --jq` — gh's own built-in JSON flag,
+  needing no `jq` binary — so counting those would have invented a
+  dependency for `docs-loop`, which has none. And a draft sentence calling
+  PyYAML "the only third-party dependency anywhere in this repo's skills"
+  ignored `yt-dlp`, which `yt_research_for_cc` needs as an external binary;
+  the claim was narrowed to third-party *imports*, which is what the scan
+  actually establishes (17 tracked `.py` files, `yaml` the only one).
+- **Every citation verified** rather than asserted: each `jq` pipe and
+  `command -v rg` guard was read back at the exact line number quoted in the
+  six release notes.
+- This is the second consecutive fix pass where writing the fix surfaced a
+  larger finding than the audit row it came from — worth noting as a pattern
+  when judging how much a `docs-audit.md` row's size estimate is worth.
+
 ## docs-loop rows 1–3: fix the verifiable findings
 **2026-08-15**
 
