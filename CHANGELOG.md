@@ -77,6 +77,17 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- 18 tracked scripts were committed as `100644` despite starting with `#!` —
+  every script in `dedupe-loop`/`issue-loop`/`parity-loop`/`sovereignty-loop`,
+  both `yt_research_for_cc` scripts, and all three under `scripts/`. All now
+  `100755`.
+- `scripts/restore_exec_bits.py` — takes a shebang as an independent,
+  decisive signal (read from the staged blob), which is the only thing that
+  catches a *genuinely new* script; the content-match check couldn't, since
+  a new file has no prior blob at `HEAD`. PR #4 added this detection to
+  `build_skill_zips.py` only, so zips shipped correct while the index didn't.
+  It now also chmods the file on disk, so a `core.fileMode=true` clone
+  doesn't silently revert the fix on the next `git add -A`.
 - `.gitattributes` added with `* text=auto eol=lf` — the synced copy of
   `repo-config`'s `audit.sh` had CRLF endings and failed on Linux with
   `$'\r': command not found`. Forces LF in the working tree on every

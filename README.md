@@ -86,7 +86,14 @@ python scripts/build_skill_zips.py
 
 ### `scripts/restore_exec_bits.py`
 
-This repo runs with `core.fileMode=false` and is worked on from Windows, so `git add` never derives a file's executable bit from the OS — a moved or copied file lands in the index as `100644` even if the identical content was `100755` at `HEAD`. This script re-marks staged files `+x` by matching git blob content (not path) against `HEAD`'s tree, so it survives renames and directory reshuffles. Run standalone with `python scripts/restore_exec_bits.py [--dry-run]`, or let the other two scripts call it automatically.
+This repo runs with `core.fileMode=false` and is worked on from Windows, so `git add` never derives a file's executable bit from the OS — a new, moved, or copied file lands in the index as `100644` even when it's meant to be run. Two independent signals fix that, same precedence `build_skill_zips.py` uses:
+
+1. **A shebang** — decisive on its own, and the only signal that catches a *genuinely new* script. Signal 2 can't: a brand-new file has no prior blob to match, so until this check existed every new script shipped non-executable unless someone remembered `chmod +x` before `git add`. 18 tracked scripts were in exactly that state when it was added.
+2. **Content that was `100755` at `HEAD`** — matched by git blob sha, not path, so it survives renames and directory reshuffles. Still the only signal that helps an executable with no shebang.
+
+It fixes the index *and* the file on disk. On a `core.fileMode=true` clone (any Linux/macOS checkout) fixing only the index leaves git reporting an unstaged `old mode 100755 / new mode 100644`, which the documented `git add -A` workflow then silently reverts.
+
+Run standalone with `python scripts/restore_exec_bits.py [--dry-run]`, or let the other two scripts call it automatically.
 
 ### Line endings (`.gitattributes`)
 

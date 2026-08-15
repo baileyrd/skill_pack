@@ -5,6 +5,51 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Fix the exec-bit half: 18 scripts committed non-executable
+**2026-08-15**
+
+The line-ending fix in the two entries below is what prompted the obvious
+follow-up question — what about the executable bit? `.gitattributes` can't
+help: git has no attribute for permissions, the mode lives in the index, and
+there's no `eol=`-style equivalent. Different mechanism, different fix.
+
+- **Found:** 18 tracked files start with `#!` and were committed as
+  `100644` — every script in `dedupe-loop`, `issue-loop`, `parity-loop` and
+  `sovereignty-loop`, both `yt_research_for_cc` scripts, and all three of
+  this repo's own tooling scripts under `scripts/`. `restore_exec_bits.py`
+  could never have caught them: it restores `+x` only for content
+  byte-identical to a blob that was already `100755` at `HEAD`, and a
+  brand-new file has no prior blob to match.
+- **Root cause of the gap:** PR #4 added shebang detection, but only to
+  `build_skill_zips.py`. So zips shipped correct at `0o755` while the index
+  they were built from was wrong — which is why this went unnoticed. The
+  same two-line check never reached `restore_exec_bits.py`, the script whose
+  entire job is staging that bit.
+- **Fixed:** `restore_exec_bits.py` now takes a shebang as an independent,
+  decisive signal, read from the *staged blob* rather than the working-tree
+  file (what's about to be committed is what matters, and the two can
+  differ). The content-match check stays — it's still the only thing that
+  helps an executable with no shebang. Ran it: all 18 corrected, 35 files
+  now `100755`, re-run is a clean no-op.
+- **Fixed, second-order:** the script now also chmods the file on disk, not
+  just the index. On a `core.fileMode=true` clone — any Linux/macOS checkout,
+  including the one this ran on — fixing only the index leaves git reporting
+  an unstaged `old mode 100755 / new mode 100644`, which the documented
+  `git add -A && python scripts/install_skills.py` workflow then silently
+  reverts. The fix would have undone itself on the next run. Windows is a
+  no-op; there's no bit on disk to mirror.
+- **Verified** with a scratch file inside the repo (the script is pinned to
+  its own `REPO_ROOT`, so it can't be tested against an arbitrary target):
+  a new 644 shebang script goes to `100755` in the index *and* `755` on
+  disk, a non-script alongside it is left alone, and the fix survives a
+  subsequent `git add -A`.
+- **Still not fixed, and not fixable here:** the copies under
+  `~/.claude/skills/synced/`, which arrive `-rw-r--r--` even for scripts
+  that are correctly `100755` in the index. That's the claude.ai sync path,
+  not one this repo controls. `install_skills.py` is unaffected — it already
+  gets `0o755` via `git_file_mode`, which it imports from
+  `build_skill_zips.py`.
+
 ## repo-config v1.2.0 — .gitattributes joins the standard set
 **2026-08-15**
 
