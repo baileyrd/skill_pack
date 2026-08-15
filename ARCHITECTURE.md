@@ -26,5 +26,5 @@ See [docs/adr/](./docs/adr/) for the record of individual decisions and their tr
 
 ## Non-goals
 - Not a shared code library — skills intentionally don't import from one another, so there is no cross-skill API surface to keep stable.
-- Not a deployable service — nothing here runs continuously; `scripts/*.py` are one-shot tooling invoked by hand.
+- Not a deployable service — nothing here runs continuously. `scripts/*.py` are one-shot tooling: `install_skills.py`, `build_skill_zips.py` and `restore_exec_bits.py` are invoked by hand, and `check_repo.py` is invoked by hand *or* by `.github/workflows/ci.yml` on each push and pull request (see [ADR-0002](./docs/adr/0002-repo-checks-require-a-real-failure.md)). Triggered by an event is still not running continuously, but it is no longer accurate to say every script here waits for a human.
 - `notebooklm` is excluded from this repo's own versioning/authoring conventions — it's vendored from the third-party `notebooklm-py` package and should never be hand-edited (see [`yt_research_for_cc/README.md`](yt_research_for_cc/README.md)).
