@@ -5,6 +5,38 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## docs-loop's first real run — docs-audit.md checkpoint
+**2026-08-15**
+
+- **Added:** `docs-audit.md` — the checkpoint from `my_loops/docs-loop`'s
+  first end-to-end run against this repo. Committed rather than handed back
+  because the skill's own `references/docs-audit-format.md` says to: the
+  `accurate` and `unverifiable` rows persist so a re-run starts from the
+  last run's verdicts instead of re-litigating every claim.
+- **Found:** 7 real findings — 3 stale/missing facts, 1 orphaned stub
+  (`my_loops/README.md` contains the *root repo's* title and nothing else),
+  and 3 `aspirational`. **No doc edits made yet**; the run is paused at its
+  step-3 checkpoint with `LOOP_HARNESS_MODE` unset, so nothing proceeds
+  without a per-row pick.
+- **The aspirational three are the interesting result:** `CONTRIBUTING.md`
+  requires green CI (there are no workflows), requires tests for non-trivial
+  logic (there is no test harness), and `ARCHITECTURE.md` points at
+  `docs/adr/` "for the record of individual decisions" when that directory
+  holds one unfilled template. These were never true rather than having
+  rotted — and every PR merged today ticked "Tests added/updated: n/a"
+  against a CONTRIBUTING that requires them. Whether to build those
+  practices or document their absence is a decision, not a docs edit, which
+  is why all three wait in either harness mode.
+- **One code finding, reported not fixed** (docs-loop never edits code):
+  `scripts/build_skill_zips.py` ignores `--help` and builds all 14 zips
+  instead of printing usage. Both siblings handle it correctly.
+- **Logged against the run itself:** the auditor had already read `README.md`
+  and `ARCHITECTURE.md` earlier in the session before building ground truth
+  — precisely the confirmation-reading failure the skill's step order exists
+  to prevent. Every claim was re-derived from `git ls-files` and `SKILL.md`
+  frontmatter rather than recall, but a first run from a clean context would
+  be a stronger test of the skill than this one was.
+
 ## Fix the exec-bit half: 18 scripts committed non-executable
 **2026-08-15**
 

@@ -5,6 +5,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `docs-audit.md` — checkpoint from `my_loops/docs-loop`'s first end-to-end
+  run against this repo: 7 findings (3 stale/missing, 1 orphaned, 3
+  aspirational), no edits applied. Committed per the skill's own persistence
+  convention so a re-run starts from these verdicts.
 - `my_loops/docs-loop` skill — thorough documentation review/update loop
   against a repo's current state: ground truth built from the code before
   any prose doc is opened, a six-way classified `docs-audit.md` checkpoint,
