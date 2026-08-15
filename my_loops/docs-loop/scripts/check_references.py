@@ -34,6 +34,14 @@ Output is TSV on stdout — verdict, kind, doc:line, detail — with a summary o
 stderr. Broken rows only by default; --all adds ok/unchecked rows. Exit 0
 unless --strict is passed and at least one broken row was found.
 
+`--baseline FILE` accepts a set of already-known broken rows so CI can fail on
+NEW breakage only — without it, a repo with any of the structural
+false-positive class described above is red from day one, and an always-red
+check is worse than none. Each baseline line is `kind<TAB>doc<TAB>detail`,
+deliberately without the line number, so an accepted row doesn't come back as
+new when someone adds a paragraph above it. Entries that stop matching are
+reported as stale but never fail the run.
+
 Stdlib only, no third-party dependency, in keeping with the standing
 minimal-dependencies principle.
 """
@@ -376,9 +384,42 @@ def check_doc(root: Path, doc: Path, rows: list, basenames: set):
             )
 
 
+def baseline_key(kind: str, where: str, detail: str) -> str:
+    """Identity of a broken row for baseline matching: kind + doc + detail,
+    deliberately WITHOUT the line number. An accepted row shouldn't come back
+    as new just because someone added a paragraph above it."""
+    doc = where.rsplit(":", 1)[0]
+    return f"{kind}\t{doc}\t{detail}"
+
+
+def load_baseline(path: Path) -> set:
+    """Accepted broken rows, one `kind<TAB>doc<TAB>detail` per line.
+    Blank lines and `#` comments ignored."""
+    accepted = set()
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.rstrip("\n")
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            accepted.add(line)
+    except OSError as exc:
+        print(f"Cannot read baseline {path}: {exc}", file=sys.stderr)
+    return accepted
+
+
 def main(argv):
-    args = [a for a in argv if not a.startswith("--")]
-    flags = {a for a in argv if a.startswith("--")}
+    args, flags, baseline_path = [], set(), None
+    it = iter(argv)
+    for a in it:
+        if a == "--baseline":
+            baseline_path = next(it, None)
+            if baseline_path is None:
+                print("--baseline needs a file path", file=sys.stderr)
+                return 2
+        elif a.startswith("--"):
+            flags.add(a)
+        else:
+            args.append(a)
     unknown = flags - {"--all", "--strict", "--help", "-h"}
     if unknown or "--help" in flags or "-h" in flags or not args:
         print(__doc__, file=sys.stderr)
@@ -410,13 +451,36 @@ def main(argv):
     counts = {}
     for verdict, kind, _, _ in rows:
         counts[(verdict, kind)] = counts.get((verdict, kind), 0) + 1
-    broken = sum(n for (verdict, _), n in counts.items() if verdict == "broken")
+
+    broken_rows = [r for r in rows if r[0] == "broken"]
+    accepted, unused, new_broken = set(), set(), broken_rows
+    if baseline_path is not None:
+        accepted = load_baseline(Path(baseline_path))
+        seen = {baseline_key(k, w, d) for _, k, w, d in broken_rows}
+        new_broken = [r for r in broken_rows if baseline_key(r[1], r[2], r[3]) not in accepted]
+        unused = accepted - seen
+    broken = len(new_broken)
 
     print(f"\n--- {len(docs)} docs, {len(rows)} references ---", file=sys.stderr)
     for (verdict, kind), n in sorted(counts.items()):
         print(f"{verdict:>9}  {kind:<14} {n}", file=sys.stderr)
     if not show_all:
         print("(broken + unresolved rows shown above; --all to see ok/unchecked too)", file=sys.stderr)
+    if baseline_path is not None:
+        print(
+            f"baseline: {len(accepted)} accepted, {len(broken_rows) - broken} matched, "
+            f"{broken} NOT in baseline",
+            file=sys.stderr,
+        )
+        for row in new_broken:
+            print(f"  NEW: {row[1]}\t{row[2]}\t{row[3]}", file=sys.stderr)
+        if unused:
+            # Stale entries are a warning, not a failure: a baseline row whose
+            # finding got fixed should be deleted, but forgetting to is not a
+            # reason to block a merge.
+            print(f"  {len(unused)} baseline entr{'y' if len(unused)==1 else 'ies'} no longer match anything — safe to delete:", file=sys.stderr)
+            for entry in sorted(unused):
+                print(f"    STALE: {entry}", file=sys.stderr)
     print(
         "broken    = anchored in a directory that exists, so the claim is about\n"
         "            THIS tree and it is false — fix these.\n"

@@ -9,6 +9,21 @@ open.
 
 ---
 
+## v1.2.0 — --baseline, so the checker can gate CI
+**2026-08-15**
+
+- **Added:** `--baseline FILE` to `check_references.py`. Without it, wiring
+  the checker into CI makes the build red on day one for any repo with the
+  structural false-positive class this skill's own Limitations describe —
+  and an always-red check gets ignored, which is worse than no check.
+- Baseline entries are keyed on `kind + doc + detail`, deliberately
+  **without** the line number: an accepted row must not come back as "new"
+  because someone added a paragraph above it. Entries that stop matching are
+  reported as stale so they can be deleted, but never fail the run — a
+  forgotten baseline line isn't a reason to block a merge.
+- Proven against this repo: 3 accepted rows, and a genuinely new broken
+  reference still fails the run.
+
 ## v1.1.0 — Cut check_references.py's false positives 26 → 6
 **2026-08-15**
 
