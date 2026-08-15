@@ -5,6 +5,53 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## skill-retro on repo-config — and the wrap-up retro finally wired
+**2026-08-15**
+
+- **Ran** `meta/skill-retro` against `my_loops/repo-config`, grounded in this
+  session's `/repo-config` run. Stated up front in the report: that run
+  executed **v1.1.0** while the skill on disk was v1.2.1, so every finding was
+  re-checked against current text before being called real. All three
+  survived two intervening versions.
+- **Fixed (repo-config v1.3.0):** an early exit for the already-saturated
+  repo. The run scored 10/10, so steps 2, 2.5 and 3 were **silently skipped** —
+  three mandatory-looking steps skipped on a judgment the text didn't
+  sanction. Greenfield covers "nothing exists"; nothing covered "everything
+  exists," which is every re-run after the first.
+- **Fixed (repo-config v1.3.0):** a fallback when `audit.sh` won't run. Step 0
+  makes it the gateway and it *failed* this run — the synced copy had CRLF and
+  died on its shebang. The checklist is 11 named files; a dead script is not a
+  blocked run.
+- **The third finding is the one that mattered, and it indicted an earlier
+  fix.** Step 5's wrap-up retro didn't fire — the *second* occurrence, after
+  `docs-loop`'s identical step. **Twelve skills carry that step; it ran twice
+  today and fired zero times.** An hour earlier I'd "fixed" the docs-loop
+  instance by defining when a run has *ended*, which treated a symptom: the
+  step was never ambiguous, it was simply forgotten, by the same reader, twice.
+- **Wired instead of reworded:** `scripts/retro_reminder.py`, a `PostToolUse`
+  hook on the `Skill` tool in `.claude/settings.json`. It reads the payload,
+  finds the invoked skill's `SKILL.md`, and injects a reminder only if that
+  skill carries a retro step. Silent otherwise; silent for `skill-retro`
+  itself, whose own step 6 handles that and for which a reminder would be the
+  recursion its guard exists to stop; and it says the retro fires when the
+  *run* ends, not per invocation, so it doesn't become the noise that trains
+  you to ignore it.
+- **Pipe-tested across seven payload shapes before wiring** (skill with a
+  retro step, `skill-retro`, a skill without one, unknown skill,
+  `plugin:skill` form, malformed JSON, empty stdin), then validated with
+  `jq -e` against the settings schema. Eleven tests added — the recursion
+  guard's test was mutation-checked by removing the guard and watching it go
+  red. Suite now 55 tests.
+- **Two limits stated rather than glossed:** the hook is project-scoped, so it
+  fires when working *in this repo* — using one of these skills against an
+  external target from elsewhere needs the same block in
+  `~/.claude/settings.json`. And **the hook could not be proven to fire in
+  this session**: `.claude/` didn't exist when the session started, so the
+  settings watcher isn't watching it. Pipe-test and schema validation both
+  pass; live firing needs a `/hooks` open or a restart, which is the user's to
+  do. A hook can only remove "I forgot" as a failure mode — it cannot make the
+  retro run.
+
 ## skill-retro v1.1.1 — its own self-retro, one finding applied
 **2026-08-15**
 

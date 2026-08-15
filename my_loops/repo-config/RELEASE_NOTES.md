@@ -10,6 +10,34 @@ what's still open.
 
 ---
 
+## v1.3.0 — Findings from its own skill-retro
+**2026-08-15**
+
+Applied from a `meta/skill-retro` pass grounded in this session's
+`/repo-config` run. Note that run executed **v1.1.0**; both findings were
+re-checked against the current text before being called real, and both
+survived two intervening versions.
+
+- **Added:** an early exit at step 1 for the already-saturated repo. The run
+  scored 10/10, so steps 2, 2.5 and 3 had nothing to do and were **silently
+  skipped** — three mandatory-looking steps skipped on a judgment the
+  instructions didn't sanction. Step 0's greenfield check covers "nothing
+  exists yet"; nothing covered "everything already exists," which is the
+  common case on every re-run after the first.
+- **Added:** a fallback when `audit.sh` won't run. Step 0 makes it the
+  gateway to everything, and it **failed** — the synced copy had CRLF and
+  died on its shebang. The fallback was improvised. The CRLF cause is fixed
+  (v1.2.0's `.gitattributes`) but the missing-`+x` path can still produce the
+  same dead end, and the checklist is 11 named files that take a minute to
+  check by hand.
+- **Validated, unchanged:** the "Ongoing maintenance" rule. Every meaningful
+  change across ~14 PRs today got a `RELEASE_NOTES.md` entry unprompted. That
+  rule exists because it was missed once before; it held all day.
+- **Third finding handled elsewhere:** step 5's wrap-up retro didn't fire —
+  second occurrence of that pattern, after `docs-loop`. It's now wired as a
+  `PostToolUse` hook rather than reworded here; see the root `RELEASE_NOTES.md`
+  and `scripts/retro_reminder.py`.
+
 ## v1.2.1 — Cite ADR-0003 for the scope boundary
 **2026-08-15**
 

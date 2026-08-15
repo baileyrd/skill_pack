@@ -5,6 +5,14 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `scripts/retro_reminder.py` + `.claude/settings.json` — a `PostToolUse` hook
+  on the `Skill` tool that reminds when an invoked skill carries a wrap-up
+  `skill-retro` step. Twelve skills carry one; it fired zero times out of two
+  opportunities today, so the step is now wired rather than restated. Silent
+  for skills without one and for `skill-retro` itself. Project-scoped, and it
+  reminds rather than enforces — both limits documented.
+- `tests/test_retro_reminder.py` — 11 tests over the hook's silence
+  guarantees and its recursion guard (mutation-verified).
 - `docs/adr/0003-gitattributes-in-scope-gitignore-out.md` — records why
   `repo-config` admits `.gitattributes` but not `.gitignore`, as a reusable
   test (same-everywhere? loud or silent when wrong?) rather than a one-off
@@ -66,6 +74,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   (`datastar-pro-main/`) and upstream development-process scaffolding
   (`CLAUDE.md`, `.planning/`) deliberately excluded from the import.
 ### Changed
+- `my_loops/repo-config` (v1.2.1 → v1.3.0) — two findings from its own
+  skill-retro: an early exit when the audit is already at full marks (steps
+  2–3 have nothing to do, and were being silently skipped), and a fallback
+  when `audit.sh` itself won't run, which happened this session.
 - `my_loops/docs-loop` (v1.2.1 → v1.3.0) — six findings applied from the
   first `meta/skill-retro` pass on it. Chief among them: step 4 now stops and
   re-reports when an approved row outgrows its approval (row 5 was approved

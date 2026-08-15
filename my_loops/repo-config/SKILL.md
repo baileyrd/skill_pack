@@ -1,7 +1,7 @@
 ---
 name: repo-config
 description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, an ADR seed, and a `.gitattributes` that forces LF line endings so a Windows-authored repo stops handing Linux/macOS shell scripts that die on their own shebang. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license) for a brand-new repo, deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` wherever they specify something more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis, separate from initial setup — whenever a meaningful change is made to a repo that already has a RELEASE_NOTES.md, whether repo-config put it there or not, add a dated entry before ending the turn, without being asked.
-version: 1.2.1
+version: 1.3.0
 ---
 
 # repo-config
@@ -23,7 +23,11 @@ the two.
   and, by default, `{{SECURITY_CONTACT}}` too — the repo owner is the
   default security POC (see step 2).
 - Which standard files already exist — run `scripts/audit.sh <target>` first, it
-  doubles as the starting score
+  doubles as the starting score. **If it won't run**, the run isn't blocked:
+  the checklist is 11 named files, checkable by hand in a minute. A synced
+  copy arriving with CRLF (`$'\r': command not found`) or without its `+x`
+  bit has happened; say the script failed, check by hand, and carry on rather
+  than treating the gateway as a dependency.
 - Any stack manifest (`Cargo.toml` / `pyproject.toml` / `package.json`) → language,
   for README's dev-command section
 - **Greenfield check**: no manifest, no existing standard files, no git remote yet →
@@ -31,6 +35,14 @@ the two.
   (details: `references/scan-and-defaults.md`).
 
 **1. Report** the gap table from `audit.sh`.
+
+**If the audit is already at full marks, say so and skip to step 4.** Steps 2
+and 3 have nothing to ask and nothing to generate — a re-run against an
+already-configured repo is a *currency* check, not a setup pass, and that's
+the common case after the first run. Step 0's greenfield check handles the
+opposite end (nothing exists yet); this is the other one, and without it three
+mandatory-looking steps get skipped on a judgment the instructions don't
+sanction.
 
 **2. Ask only what the scan didn't answer** (skip entirely if greenfield):
 - One-line project description for README

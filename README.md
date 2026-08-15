@@ -60,7 +60,7 @@ Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver
 
 ## Repo tooling
 
-Four standalone scripts under `scripts/`, each usable on its own or chained — `install_skills.py` and `build_skill_zips.py` both call `restore_exec_bits.py` automatically, so a plain `git add -A && python scripts/install_skills.py` (or `build_skill_zips.py`) is enough day to day.
+Five standalone scripts under `scripts/`, each usable on its own or chained — `install_skills.py` and `build_skill_zips.py` both call `restore_exec_bits.py` automatically, so a plain `git add -A && python scripts/install_skills.py` (or `build_skill_zips.py`) is enough day to day.
 
 ### `scripts/install_skills.py`
 
@@ -83,6 +83,14 @@ python scripts/build_skill_zips.py
 ```
 
 `zip/` is generated output and is gitignored, not committed.
+
+### `scripts/retro_reminder.py`
+
+A `PostToolUse` hook on the `Skill` tool, wired in [`.claude/settings.json`](.claude/settings.json). Twelve skills here end with "run a `meta/skill-retro` pass on yourself"; measured across this repo's own use that step fired **zero times out of two opportunities** — forgotten twice, and the user had to ask both times. Instructions that reliably don't happen are the same problem as a doc claiming something untrue, so this wires the reminder rather than restating it.
+
+Narrow on purpose: silent for skills with no retro step, silent for `skill-retro` itself (its own step 6 handles that, and reminding it would be the recursion its guard exists to stop), and it says the retro fires when the *run* ends rather than after every invocation. Exits 0 and prints nothing on any error — a broken reminder must never break a skill call.
+
+**Two limits worth knowing.** It's project-scoped, so it fires when you're working *in this repo*; using one of these skills against an external target repo from elsewhere won't trigger it (copy the same block into `~/.claude/settings.json` for that). And a hook can only remind — it removes "I forgot" as a failure mode, which is the one that actually occurred, but it can't make the retro run.
 
 ### `scripts/check_repo.py`
 

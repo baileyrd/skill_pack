@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/retro_reminder.py\" 2>/dev/null || true",
+            "timeout": 10,
+            "statusMessage": "Checking for a wrap-up retro step"
+          }
+        ]
+      }
+    ]
+  }
+}
