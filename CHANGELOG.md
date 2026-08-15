@@ -39,6 +39,14 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   (`datastar-pro-main/`) and upstream development-process scaffolding
   (`CLAUDE.md`, `.planning/`) deliberately excluded from the import.
 ### Changed
+- `my_loops/repo-config` (v1.1.0 → v1.2.0) — `.gitattributes` joins the
+  standard governance set as `audit.sh`'s 11th item, prompted by this
+  skill's own synced `audit.sh` arriving with CRLF and failing on Linux.
+  The audit greps for `eol=lf` rather than mere presence, since a
+  binaries-only `.gitattributes` scores present while leaving the exact
+  problem in place. Limitations rewritten: `.gitignore` stays out of scope
+  (per-project, silent failure mode), `.gitattributes` comes in (one correct
+  answer everywhere, breaks scripts at a distance when wrong).
 - `my_loops/docs-loop` (v1.0.0 → v1.1.0) — `check_references.py` false
   positives cut 26 → 6 whole-repo (3 broken anchors → 0) via three fixes:
   component-relative path resolution (doc dir → nearest `SKILL.md`/manifest

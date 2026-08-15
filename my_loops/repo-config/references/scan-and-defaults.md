@@ -13,7 +13,7 @@
 
 A repo counts as greenfield when **all** of these hold:
 - No stack manifest (`Cargo.toml`, `pyproject.toml`, `package.json`, etc.)
-- None of the 10 standard items from `audit.sh` already present
+- None of the 11 standard items from `audit.sh` already present
 - No `git remote origin` configured yet
 
 When greenfield, skip the Q&A round in step 2 entirely — there's nothing to ask

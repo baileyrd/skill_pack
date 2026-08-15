@@ -1,14 +1,15 @@
 ---
 name: repo-config
-description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, and an ADR seed. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license) for a brand-new repo, deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` wherever they specify something more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis, separate from initial setup — whenever a meaningful change is made to a repo that already has a RELEASE_NOTES.md, whether repo-config put it there or not, add a dated entry before ending the turn, without being asked.
-version: 1.1.0
+description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, an ADR seed, and a `.gitattributes` that forces LF line endings so a Windows-authored repo stops handing Linux/macOS shell scripts that die on their own shebang. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license) for a brand-new repo, deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` wherever they specify something more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis, separate from initial setup — whenever a meaningful change is made to a repo that already has a RELEASE_NOTES.md, whether repo-config put it there or not, add a dated entry before ending the turn, without being asked.
+version: 1.2.0
 ---
 
 # repo-config
 
 Applies a standard governance-file set to a repo: two `.github/` template folders
-plus eight root/docs markdown files. Scans first, adapts to what's already there
-instead of overwriting, and falls back to greenfield defaults when there's nothing
+plus eight root/docs markdown files and a `.gitattributes`. Scans first, adapts to
+what's already there instead of overwriting, and falls back to greenfield defaults
+when there's nothing
 yet to scan.
 
 `assets/templates/` is the payload written into the TARGET repo. This skill's own
@@ -69,6 +70,13 @@ there's no manifest yet — an always-red workflow is worse than none. After app
 the CI check only actually gates merges once it's set as a required status check in
 branch protection — see `references/ci-and-branch-protection.md`, and surface that as
 a manual follow-up in step 4.
+
+`.gitattributes` is the one item in the set that is drop-in by design — it carries
+no tokens and needs no per-repo judgment, because the failure it prevents (a `.sh`
+file reaching a Linux harness with CRLF and dying on its own shebang) doesn't vary
+by project. If the target already has one, `apply.sh` skips it like any other
+existing file; check by hand whether that existing file actually sets `eol=lf`,
+since `audit.sh` will flag a present-but-toothless one but can't fix it.
 
 Two files are worth hand-adapting after the copy rather than leaving as scaffold:
 README's prose and ARCHITECTURE's boundary table. Match the tone in
@@ -135,8 +143,13 @@ separate, explicitly-approved follow-up, not part of this run.
 
 ## Limitations
 - Governance-file scaffolding plus basic CI. Unlike a public-launch OSS tool, this
-  deliberately doesn't touch LICENSE, `.gitignore`, or anything aimed at going
-  public (badges, release automation, star growth) — these are internal repos.
+  deliberately doesn't touch LICENSE or anything aimed at going public (badges,
+  release automation, star growth) — these are internal repos. `.gitignore` stays
+  out too: what's ignorable is genuinely per-project, and a wrong guess silently
+  stops a real file from being committed. `.gitattributes` is the one piece of
+  repo-level git config that *is* in scope, and only because it's the opposite
+  case — the correct content is the same for every repo here, and getting it
+  wrong breaks scripts at a distance, in a copy nobody is looking at.
   CI *is* in scope, but only a basic per-stack test/lint/type gate so the "on green
   CI, merge" rule has a real check to gate on — not multi-version matrices or
   publish pipelines.
@@ -150,7 +163,7 @@ separate, explicitly-approved follow-up, not part of this run.
 ## Scripts
 | Script | Purpose | Args |
 | --- | --- | --- |
-| `audit.sh` | Gap checklist against the 10 standard items, with a score | `[target-dir]` (default `.`) |
+| `audit.sh` | Gap checklist against the 11 standard items, with a score | `[target-dir]` (default `.`) |
 | `apply.sh` | Copies `assets/templates/` into target, substitutes placeholders, non-destructive by default | `<target-dir> [--config <file>] [--force]` |
 
 Both scripts resolve their own root relative to their own location, so they run
