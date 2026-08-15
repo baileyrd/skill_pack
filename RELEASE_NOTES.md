@@ -5,6 +5,38 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## repo-config v1.2.0 — .gitattributes joins the standard set
+**2026-08-15**
+
+- **Added:** `.gitattributes` to `repo-config`'s template set and to
+  `audit.sh` as its 11th checklist item, so every repo the skill touches
+  gets the fix this repo just applied to itself rather than each one
+  rediscovering it after a script fails somewhere downstream.
+- **Added:** a correctness check the other ten items don't get. Presence is
+  the wrong question here — a repo can carry a `.gitattributes` that only
+  marks binaries and still hand out CRLF shell scripts — so `audit.sh` greps
+  for `eol=lf` and warns when a present file doesn't enforce it. This is the
+  same presence-vs-currency gap the script already flags for
+  `RELEASE_NOTES.md`, applied to the one item where a wrong file is worse
+  than a missing one.
+- **Changed:** the skill's Limitations, which previously ruled out
+  repo-level git config wholesale. The line is now drawn on which kind of
+  file it is: `.gitignore` stays out because what's ignorable is genuinely
+  per-project and a wrong guess silently stops a real file from being
+  committed; `.gitattributes` comes in because there's one correct answer
+  for every repo here and getting it wrong breaks scripts at a distance, in
+  a copy nobody is looking at.
+- **Verified end to end** against a scratch repo rather than assumed: a
+  template-root dotfile was the real risk in `apply.sh`'s `find -type f`
+  copy loop, so that got tested first. `apply.sh` delivers it, `audit.sh`
+  scores 11/11, a binaries-only `.gitattributes` triggers the warning, a
+  second run skips it non-destructively, and a committed CRLF `.sh` comes
+  back from `git checkout` as LF.
+- Template also handles what this repo's own copy didn't need to: `.bat`,
+  `.cmd` and `.ps1` are pinned to `eol=crlf`, since Windows-native scripts
+  genuinely want it, and a blanket LF rule would break them on the way to
+  fixing the shell scripts.
+
 ## Add .gitattributes — force LF working-tree line endings
 **2026-08-15**
 

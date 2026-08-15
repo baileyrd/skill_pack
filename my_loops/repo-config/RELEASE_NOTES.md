@@ -10,6 +10,41 @@ what's still open.
 
 ---
 
+## v1.2.0 — Add .gitattributes to the standard set (11th item)
+**2026-08-15**
+
+- **Added:** `assets/templates/.gitattributes` — `* text=auto eol=lf` plus
+  explicit `binary` marks for archives/images and `eol=crlf` for
+  `.bat`/`.cmd`/`.ps1`, which genuinely want CRLF. Drop-in by design: it
+  carries no `{{TOKENS}}` and needs no per-repo judgment, because the
+  failure it prevents doesn't vary by project.
+- **Why now:** this skill's *own* `audit.sh`, synced to
+  `~/.claude/skills/synced/repo-config/`, arrived with CRLF endings and
+  wouldn't run on Linux — `line 5: $'\r': command not found`. Caught when a
+  `/repo-config` invocation failed on its first command. The repo's copy was
+  clean LF the whole time, which is the trap: the index can be perfectly
+  normalized while the checkout that gets copied around is not.
+- **Added:** `.gitattributes` as `audit.sh`'s 11th checklist item, with a
+  correctness note the other ten don't get. A repo can carry a
+  `.gitattributes` that only marks binaries and still hand out CRLF shell
+  scripts, so the script greps for `eol=lf` and warns when a present file
+  doesn't enforce it. Presence is the wrong question for this one item.
+- **Changed:** Limitations no longer excludes repo-level git config wholesale.
+  `.gitignore` stays out — what's ignorable is genuinely per-project, and a
+  wrong guess silently stops a real file being committed. `.gitattributes` is
+  the opposite case: one correct answer for every repo here, and getting it
+  wrong breaks scripts at a distance, in a copy nobody is looking at.
+- **Verified end to end** against a scratch repo: `apply.sh` delivers the
+  dotfile (a template-root dotfile was the real risk — `find -type f` picks
+  it up, confirmed rather than assumed), `audit.sh` scores 11/11, a
+  binaries-only `.gitattributes` triggers the warning, a second `apply.sh`
+  run skips it non-destructively, and a committed CRLF `.sh` file comes back
+  from `git checkout` as LF.
+- **Doesn't fix an existing checkout.** A clone that already has CRLF files
+  needs one `git add --renormalize .`, and a copy already synced elsewhere
+  needs re-syncing. Same limitation logged against this repo's own
+  `.gitattributes`; adding the template doesn't change it.
+
 ## v1.1.0 — Wire skill-retro into wrap-up (step 5)
 **2026-08-13**
 

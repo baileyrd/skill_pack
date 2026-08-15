@@ -24,6 +24,7 @@ items=(
   "RELEASE_NOTES.md|RELEASE_NOTES"
   "ARCHITECTURE.md|ARCHITECTURE"
   "docs/adr|ADR log"
+  ".gitattributes|.gitattributes"
 )
 
 score=0
@@ -64,6 +65,16 @@ if [[ -f "$TARGET/Cargo.toml" || -f "$TARGET/pyproject.toml" || -f "$TARGET/setu
     echo "[ ] CI workflow (manifest present but no .github/workflows/ci-*.yml — the"
     echo "    'on green CI, merge' rule has nothing to gate on)"
   fi
+fi
+
+# Presence != correctness, and .gitattributes is the one item where a present-but-
+# wrong file leaves the exact problem it exists to prevent. A repo can carry a
+# .gitattributes that only marks binaries and still hand out CRLF shell scripts.
+if [[ -f "$TARGET/.gitattributes" ]] && ! grep -q 'eol=lf' "$TARGET/.gitattributes"; then
+  echo
+  echo "Note: .gitattributes is present but sets no 'eol=lf' — LF isn't enforced in"
+  echo "      the working tree, so a Windows checkout can still produce CRLF scripts"
+  echo "      that fail on their shebang. Presence alone doesn't fix that."
 fi
 
 # Presence != currency. If RELEASE_NOTES exists, flag that this check can't tell
