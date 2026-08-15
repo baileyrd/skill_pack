@@ -88,6 +88,12 @@ python scripts/build_skill_zips.py
 
 This repo runs with `core.fileMode=false` and is worked on from Windows, so `git add` never derives a file's executable bit from the OS — a moved or copied file lands in the index as `100644` even if the identical content was `100755` at `HEAD`. This script re-marks staged files `+x` by matching git blob content (not path) against `HEAD`'s tree, so it survives renames and directory reshuffles. Run standalone with `python scripts/restore_exec_bits.py [--dry-run]`, or let the other two scripts call it automatically.
 
+### Line endings (`.gitattributes`)
+
+Same root cause as the exec-bit problem above, different symptom: this repo is worked on from Windows, but its scripts are executed by Linux/macOS harnesses, and a `.sh` file that reaches disk with CRLF dies on its own shebang (`$'\r': command not found`). `.gitattributes` sets `* text=auto eol=lf`, which forces LF in the **working tree** on every platform — so a Windows checkout produces the same bytes a Linux one does, and anything copying files out of that checkout carries LF with it. `.skill`/`.zip` archives are marked `binary` so the rule can't touch them.
+
+Adding the file doesn't retroactively fix a checkout that already has CRLF files, and it can't reach a copy that was already synced elsewhere. In an existing clone, run `git add --renormalize .` once; for a skill already installed under `~/.claude/skills/`, re-run `python scripts/install_skills.py` (or re-sync) to overwrite it.
+
 ## Install
 
 - **Claude Code / OMP:** `python scripts/install_skills.py` (see above).
