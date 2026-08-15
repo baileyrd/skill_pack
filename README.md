@@ -17,6 +17,7 @@ Bounded, unattended "work the backlog" loops for the Rusty-Mill/baileyrd platfor
 | [`sovereignty-loop/`](my_loops/sovereignty-loop) | Audits external dependencies, checks whether the platform ecosystem already covers the same capability, proposes swap-to-internal or a scoped hand-rolled replacement. |
 | [`issue-loop/`](my_loops/issue-loop) | Clears a target repo's open GitHub issue backlog end-to-end — triage, reuse-check, implement, PR, merge on green CI, repeat. |
 | [`repo-config/`](my_loops/repo-config) | Scans a repo and applies the standard governance file set (PR/issue templates, README, CONTRIBUTING, SECURITY, CHANGELOG, ARCHITECTURE, ADR seed). |
+| [`docs-loop/`](my_loops/docs-loop) | Reviews a repo's docs against what the code actually does now — ground truth from the tree first, then a classified `docs-audit.md` checkpoint (stale / missing / orphaned / aspirational / unverifiable / accurate), then per-doc PRs. The currency counterpart to `repo-config`'s presence check. |
 | [`rust-migration/`](my_loops/rust-migration) | Migrates a repo/application (any source language) to Rust: inventories every existing capability into a manifest where each item defaults REQUIRED, files one issue per capability, implements with parity tests, and won't report the migration done while any required item is unresolved. |
 
 ### [`yt_research_for_cc/`](yt_research_for_cc) — YouTube research pipeline
