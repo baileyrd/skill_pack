@@ -2,14 +2,14 @@
 
 **Run:** 2026-08-15 against `462d704` · **Scope:** whole repo (95 tracked docs)
 **Counts at audit:** 3 stale · 1 missing · 1 orphaned · 3 aspirational · 0 unverifiable · 4 accurate
-**After the first fix pass:** rows 1, 3 and 4 fixed; one new `missing` row found *by* fixing row 1 (see below). 4 rows still awaiting a decision.
+**Status:** rows 1, 3, 4 and the new PyYAML row fixed; the `my_loops/README.md` stub deleted; `CONTRIBUTING.md`'s CI claim resolved by actually adding CI. **Two rows still open:** the test-harness question and the empty ADR log.
 
 ## Findings
 
 | Doc | Where | Claim | Classification | Ground truth | Fix | Size |
 | --- | --- | --- | --- | --- | --- | --- |
 | README.md | intro, L5 | "see each category's own README for dependencies specific to it" | stale | `meta/` and `web_dev/` have no README; `my_loops/README.md` is a 1-line stub. Only `yt_research_for_cc/README.md` (72 lines) delivers | Name the one category that has one, or write the two missing | S |
-| my_loops/README.md | whole file | `# skill_pack` | orphaned | It's a category folder, but the file contains the *root repo's* title and nothing else — a copy-paste stub never filled in | Write a real category README, or delete it | S |
+| my_loops/README.md | whole file | `# skill_pack` | ~~orphaned~~ **resolved — deleted** | Contained the *root repo's* title and nothing else, a copy-paste stub never filled in. Deleted on the repo owner's decision after the stop-and-ask; `my_loops/` now matches `meta/` and `web_dev/`, which have no category README either. No doc linked to it | done | S |
 | README.md | Repo tooling, L78 | "e.g. `zip/dedupe-loop-v1.0.0.zip`" | stale | dedupe-loop is v1.1.1; `build_skill_zips.py` now emits `dedupe-loop-v1.1.1.zip` | Drop the version from the example so it can't rot again | S |
 | ARCHITECTURE.md | Structure, L19 | "Four category folders (…), plus repo-wide tooling under `scripts/`" | missing | Accurate as far as it goes, but `need_to_productize/` (4 `.skill` archives) and `trying/` (3) are tracked top-level dirs named in **no doc at all** — `grep` across README/ARCHITECTURE/CONTRIBUTING/docs returns nothing | One sentence saying what they are and why they're not categories | S |
 | CONTRIBUTING.md | Review, L28 | "CI must be green before merge" | ~~aspirational~~ **resolved** | Was: no `.github/workflows/` at all. Now: `ci.yml` runs `scripts/check_repo.py` on every PR. The claim is true, with a caveat now stated in CONTRIBUTING — it only *reports* until set as a required status check in branch protection | done | S |

@@ -59,6 +59,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   problem in place. Limitations rewritten: `.gitignore` stays out of scope
   (per-project, silent failure mode), `.gitattributes` comes in (one correct
   answer everywhere, breaks scripts at a distance when wrong).
+- `my_loops/docs-loop` (v1.2.0 → v1.2.1) — `docs-audit.md` joins
+  `CHANGELOG`/`RELEASE_NOTES` in the checker's historical set. Its rows
+  persist across runs by design, so a run that deletes a file and records the
+  deletion made the *next* run flag its own report as new breakage — with CI
+  wired in, that turns a completed fix into a red build. Hit for real when
+  `my_loops/README.md` was deleted.
 - `my_loops/docs-loop` (v1.1.0 → v1.2.0) — `check_references.py` gains
   `--baseline FILE` so it can gate CI: without it, wiring the checker in
   makes the build red on day one from the documented structural
@@ -90,6 +96,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   deliberately excluded — vendored from `notebooklm-py`, never
   hand-edited per this repo's own convention.
 ### Removed
+- `my_loops/README.md` — a one-line stub containing `# skill_pack`, the root
+  repo's own title, in a category folder. Never filled in, linked from
+  nowhere. `my_loops/` now matches `meta/` and `web_dev/`, which have no
+  category README either; `yt_research_for_cc/` keeps its real one.
 - `need_to_productize/datastar-pro.skill` — superseded by
   `web_dev/datastar-pro`, an updated, properly-authored version reviewed
   from the actual upstream source rather than this repo's own stale,

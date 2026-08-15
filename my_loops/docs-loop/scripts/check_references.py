@@ -285,7 +285,14 @@ def collect_docs(root: Path, args):
     return found
 
 
-HISTORICAL_DOCS = {"changelog", "release_notes", "releasenotes", "history"}
+HISTORICAL_DOCS = {
+    "changelog", "release_notes", "releasenotes", "history",
+    # docs-audit.md is this skill's own report, and its rows persist across
+    # runs by design (references/docs-audit-format.md). It therefore
+    # accumulates references to things a run deliberately deleted — a row
+    # recording "this stub was removed" is the report working, not drift.
+    "docs-audit",
+}
 
 
 def is_historical(doc: Path) -> bool:
