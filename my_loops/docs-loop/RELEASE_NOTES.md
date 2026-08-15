@@ -9,6 +9,55 @@ open.
 
 ---
 
+## v1.3.0 — Six findings from the first skill-retro
+**2026-08-15**
+
+Applied from a `meta/skill-retro` pass grounded in this skill's own first
+real run against `skill_pack` — the audit, the rows 1–3 pass, the row 5
+pass, and the `my_loops/README.md` deletion. All six findings had a concrete
+incident behind them; none were speculative.
+
+- **Added (the one that matters):** step 4 now stops and re-reports when an
+  approved row turns out bigger than the row. **Row 5 was approved as "declare
+  PyYAML — one line in that skill's Scripts section" and delivered as edits to
+  six skills.** The checkpoint is this loop's core safety mechanism and it
+  widened silently, because nothing said not to. An approval is for the row as
+  written, not for what the row turns out to imply — and this failure is
+  invisible from inside the fix, since the work feels like finishing the
+  approved row right up until it isn't. Applies in auto mode too, regardless
+  of classification.
+- **Changed:** doc-comments are no longer default scope. Step 0 claimed them
+  (`///`, docstrings, JSDoc) while the loop provides no extraction pass for
+  any language — so the run audited **zero** of them and still reported
+  whole-repo coverage. That's the same nearly-true claim this skill exists to
+  catch, made by the skill about itself. Now opt-in, with a requirement to
+  report which languages were covered; Limitations updated to match instead
+  of contradicting it.
+- **Added:** step 1 now requires declaring prior exposure. This run had read
+  `README.md` and `ARCHITECTURE.md` hours before building ground truth —
+  exactly the confirmation-reading failure the step order exists to prevent.
+  It got flagged, but by improvisation, not instruction. The auditor is the
+  last person able to notice it happening, so the disclosure has to be a rule.
+- **Changed:** the per-run tracking issue is now conditional on auditing and
+  fixing being split across people or sessions. None was filed this run and
+  nothing suffered — a committed `docs-audit.md` already *is* the
+  traceability when the same run does both.
+- **Fixed:** step 5 asked for a re-run of *both* step 2 scripts. Only
+  `check_references.py` was re-run, correctly: `inventory_docs.sh` ranks by
+  commit recency, which your own edits perturb without saying anything about
+  correctness.
+- **Fixed:** step 6 said to retro "regardless of how the run ended" without
+  defining *ended*. In an interactive run where the user keeps picking rows,
+  it never fired — the user had to ask, four turns later. Now: once, when the
+  last approved row is merged and none remain picked, or when the user stops
+  the loop. Never per-PR.
+- **Logged as a candidate, not acted on:** `inventory_docs.sh` contributed
+  nothing this run — 38 of 98 docs share one bulk-commit date, so the top of
+  its ranking was a flat tie. One run isn't enough to call a step dead.
+- **Validated, not changed:** step 4's "every claim you write must be
+  checkable against something in the tree" caught two false sentences before
+  they landed. That rule earned its place twice in one day.
+
 ## v1.2.1 — docs-audit.md counts as a historical log
 **2026-08-15**
 
