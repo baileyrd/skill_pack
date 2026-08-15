@@ -5,6 +5,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `docs/adr/0002-repo-checks-require-a-real-failure.md` — the ADR log's first
+  real decision: why CI exists here as a deliberate exception to
+  `repo-config`'s no-manifest rule, and the constraint that a check earns its
+  place by naming the commit it would have failed. Resolves
+  `ARCHITECTURE.md`'s claim that `docs/adr/` records decisions.
 - `.github/workflows/ci.yml` + `scripts/check_repo.py` — five repo checks
   (exec bits, line endings, doc references, skill manifests, packaging),
   each added because that failure actually happened here, and each verified
@@ -105,6 +110,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- `ARCHITECTURE.md` Non-goals said "`scripts/*.py` are one-shot tooling
+  invoked by hand" — no longer true of `check_repo.py` once CI ran it. Drift
+  introduced by this repo's own CI change hours earlier, caught while writing
+  ADR-0002.
 - Dependency declarations across six skills, found by `docs-loop` row 5:
   `meta/my-skill-creator` (v1.0.1) now declares PyYAML; `dedupe-loop`
   (v1.1.2), `issue-loop` (v1.1.1), `parity-loop` (v1.2.1), `rust-migration`

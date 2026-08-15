@@ -5,6 +5,43 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## ADR-0002 — a repo check needs a real failure behind it
+**2026-08-15**
+
+- **Added:** `docs/adr/0002-repo-checks-require-a-real-failure.md`, the ADR
+  log's first actual decision. Records why CI was added as a deliberate
+  exception to `repo-config`'s "no manifest, no workflow" rule, and the
+  constraint that makes the exception safe: **a check earns its place by
+  naming the commit it would have failed.**
+- **Three corollaries recorded because each is load-bearing:** a check must
+  be demonstrated failing before it ships (two of the five silently passed
+  their first fault injection); a check that can't be green on day one gets
+  a baseline with written reasons, not a waiver; and lint is not tests and
+  must not be described as tests.
+- **Four rejected alternatives written down with why they lost** — including
+  the genuinely reasonable one (keep no CI, delete the claim from
+  CONTRIBUTING) and the conventional one (adopt an off-the-shelf lint stack,
+  which would have caught none of the four defects that prompted this and
+  arrived with a backlog of unrelated style findings).
+- **What it forecloses, stated plainly:** a sixth check now needs an
+  incident, not an argument. That's the point — but it's a real constraint
+  and belongs in the record rather than in someone's memory.
+- **Resolved:** `ARCHITECTURE.md`'s "See `docs/adr/` for the record of
+  individual decisions and their tradeoffs", open as `aspirational` since
+  docs-loop's first run. The log now points at a decision instead of at an
+  unfilled `# ADR-0001: <Title>` template.
+- **Found while writing it:** adding CI yesterday-afternoon made
+  `ARCHITECTURE.md`'s Non-goals claim — "`scripts/*.py` are one-shot tooling
+  invoked by hand" — inaccurate, since `check_repo.py` is now invoked by the
+  workflow too. A small drift introduced by my own change a few hours
+  earlier, caught only because writing the ADR meant re-reading what the repo
+  claims about how its scripts run. Fixed by naming which three are
+  hand-invoked and which one CI also runs.
+- **Not written:** a second ADR for the `.gitattributes`-in-scope /
+  `.gitignore`-out-of-scope decision from `repo-config` v1.2.0. It's a real
+  decision with a real rationale and would make a reasonable ADR-0003 — left
+  for a separate call rather than bundled in.
+
 ## Delete my_loops/README.md — the stub that said `# skill_pack`
 **2026-08-15**
 
