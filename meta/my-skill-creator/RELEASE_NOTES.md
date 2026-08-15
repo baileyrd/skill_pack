@@ -9,6 +9,22 @@ still open.
 
 ---
 
+## v1.0.1 — Declare the PyYAML dependency
+**2026-08-15**
+
+- **Fixed:** `scripts/quick_validate.py:8` does an unguarded top-level
+  `import yaml` (PyYAML) to parse SKILL.md frontmatter, and nothing said so.
+  Without it that script dies with `ModuleNotFoundError`; the rest of the
+  skill is unaffected. New "Dependencies" section states it and the install
+  fix.
+- **Context, verified across all 17 tracked `.py` files:** `yaml` is the only
+  third-party module *imported* anywhere in this repo. External binaries are
+  a separate matter and several skills need one (`gh`, `git`, `jq`,
+  optionally `ripgrep`, and `yt-dlp` for `yt_research_for_cc`) — a
+  distinction an earlier draft of this entry blurred and the check caught.
+- **This was `docs-loop` row 5's original finding**, and fixing it properly
+  surfaced the same defect class in five `my_loops` skills.
+
 ## v1.0.0 — Initial release
 **2026-08-13**
 

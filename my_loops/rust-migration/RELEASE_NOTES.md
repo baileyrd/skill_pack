@@ -9,6 +9,15 @@ still open.
 
 ---
 
+## v1.1.1 — Declare jq and ripgrep
+**2026-08-15**
+
+- **Fixed:** the Scripts note said "shell out to `gh`/`git` (or plain text
+  parsing for the coverage check) only — no extra dependencies."
+  `next_capability.sh:26` requires **`jq`**; `scan_platform_repos.sh:56`
+  uses **`ripgrep`** when present, `grep` otherwise.
+- Found by `docs-loop` row 5.
+
 ## v1.1.0 — Wire skill-retro into step 4's wrap-up
 **2026-08-13**
 

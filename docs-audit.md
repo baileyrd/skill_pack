@@ -25,6 +25,31 @@
 `ARCHITECTURE.md` Structure). Struck through above only in this note rather
 than removed, so the next run sees them as settled.
 
+**The PyYAML row is fixed too, and it was six times bigger than logged.**
+Verifying it before writing turned one undeclared import into a
+dependency-declaration audit across every skill with scripts:
+
+| Skill | Was documented | Actually true |
+| --- | --- | --- |
+| `meta/my-skill-creator` | nothing | requires **PyYAML** (`quick_validate.py:8`, unguarded import) |
+| `my_loops/dedupe-loop` | "gh/git/**ripgrep** only" | requires **jq** (`next_issue.sh:33`); uses **no ripgrep at all** — that claim was inherited from a sibling |
+| `my_loops/issue-loop` | "gh/git only — no extra dependencies" | requires **jq**; **ripgrep** optional (`command -v rg`, falls back to `grep`) |
+| `my_loops/parity-loop` | "gh and git only — no extra dependencies" | same |
+| `my_loops/rust-migration` | "gh/git … only — no extra dependencies" | same |
+| `my_loops/sovereignty-loop` | "gh/git/ripgrep only — no extra dependencies" | **jq** missing from the list; ripgrep is optional, not required |
+
+Note the direction varies: five skills *understated* their dependencies, and
+one (`dedupe-loop`) *overstated* — documenting a `ripgrep` requirement that
+no script has. A one-line "declare PyYAML" fix would have left all of that
+in place.
+
+Two near-misses worth recording, both caught by checking before writing:
+`jq` appears in every `watch_and_merge.sh` as `gh --jq`, which is gh's own
+built-in flag and needs no `jq` binary — counting those would have invented
+a dependency for `docs-loop`, which has none. And a draft sentence calling
+PyYAML "the only third-party dependency anywhere" ignored `yt-dlp`, which
+`yt_research_for_cc` genuinely needs as an external binary.
+
 ## Auto-eligible vs. always-waits
 
 Under `LOOP_HARNESS_MODE=auto`, rows 1, 3 and 4 (the two stale facts and the

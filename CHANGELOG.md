@@ -81,6 +81,13 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- Dependency declarations across six skills, found by `docs-loop` row 5:
+  `meta/my-skill-creator` (v1.0.1) now declares PyYAML; `dedupe-loop`
+  (v1.1.2), `issue-loop` (v1.1.1), `parity-loop` (v1.2.1), `rust-migration`
+  (v1.1.1) and `sovereignty-loop` (v1.1.1) each claimed "no extra
+  dependencies" while requiring `jq`. `dedupe-loop` also documented a
+  `ripgrep` dependency no script of its own has. Required (`jq`) vs.
+  optional (`ripgrep`, guarded by `command -v`) is now stated per tool.
 - Three verifiable `docs-loop` findings: `README.md`'s "each category's own
   README" claim (only `yt_research_for_cc/` has one), its stale
   `zip/dedupe-loop-v1.0.0.zip` example (now version-free so it can't rot),

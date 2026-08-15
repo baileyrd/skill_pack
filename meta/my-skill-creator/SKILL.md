@@ -1,7 +1,7 @@
 ---
 name: my-skill-creator
 description: This repo's own copy of the skill-creator workflow (draft → test → eval → iterate → optimize description → package), adapted to skill_pack's own authoring conventions and with one behavioral change from the upstream version — every skill it drafts or improves gets a wrap-up-retro step wired to meta/skill-retro by default, not as a separate follow-up change. Use when users want to create a skill from scratch, edit or optimize an existing skill in this repo, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy — same triggers as upstream skill-creator, but prefer this copy over the generic one whenever the target skill lives in (or is meant to land in) skill_pack, since it applies this repo's own conventions and the retro-by-default rule automatically.
-version: 1.0.0
+version: 1.0.1
 ---
 
 # My Skill Creator
@@ -593,6 +593,21 @@ The agents/ directory contains instructions for specialized subagents. Read them
 
 The references/ directory has additional documentation:
 - `references/schemas.md` — JSON structures for evals.json, grading.json, etc.
+
+## Dependencies
+
+Everything under `scripts/` is Python-standard-library only, with one
+exception: `scripts/quick_validate.py` imports **PyYAML** (`import yaml`, an
+unguarded top-level import) to parse `SKILL.md` frontmatter. Without it that
+one script raises `ModuleNotFoundError`; the rest of the skill is unaffected.
+
+`pip install pyyaml` if validation fails on import.
+
+Across all 17 tracked `.py` files in this repo, `yaml` is the only
+third-party module that gets *imported*. External **binaries** are a separate
+question and several skills need one: `gh` and `git` throughout, `jq` for the
+`my_loops` issue-picking scripts, `ripgrep` optionally for their repo scans,
+and `yt-dlp` for `yt_research_for_cc`.
 
 ---
 

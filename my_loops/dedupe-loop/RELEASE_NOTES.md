@@ -10,6 +10,18 @@ still open.
 
 ---
 
+## v1.1.2 — Correct the dependency line
+**2026-08-15**
+
+- **Fixed:** the Scripts note claimed everything "shells out to
+  `gh`/`git`/`ripgrep` only." Two errors in one sentence: no script here
+  invokes `ripgrep` at all (that claim was inherited from a sibling), and
+  `next_issue.sh:33` pipes `gh` output through **`jq`**, a hard requirement
+  the "no extra dependencies" wording denied. The script's own header
+  declared `jq` correctly the whole time; only the SKILL.md was wrong.
+- Found by `docs-loop` row 5, which started as a single undeclared PyYAML
+  import in `meta/my-skill-creator` and turned out to span six skills.
+
 ## v1.1.1 — Stop documenting a clone script this skill doesn't have
 **2026-08-15**
 

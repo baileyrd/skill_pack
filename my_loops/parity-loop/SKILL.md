@@ -1,7 +1,7 @@
 ---
 name: parity-loop
 description: Runs an autonomous "close the capability gap" loop against a reference API surface — assess what a target codebase is missing relative to a reference (e.g. the `libc` crate, POSIX, another package/spec), check whether a sibling repo across the Rusty-Mill/baileyrd platform namespaces already implements the gap before writing anything from scratch, open one GitHub issue per gap, then work each issue end-to-end (implement or port, test, PR, wait for green CI, merge with a merge commit, sync) — looping until the gap list is empty or told to stop. Use whenever the user asks to assess a codebase for missing coverage against a reference library/spec and close the gaps, wants "parity" or "coverage" work automated as a repeatable issue-to-merged-PR loop, or references this by name (parity-loop, gap loop, coverage loop). Companion to the repo-config skill — assumes repo-config's PR/issue templates and RELEASE_NOTES.md convention if present, but works without them.
-version: 1.2.0
+version: 1.2.1
 ---
 
 # parity-loop
@@ -340,6 +340,8 @@ the local gate) and the rest of this skill applies unchanged.
 | `watch_and_merge.sh` | Waits for a PR's CI, merges (merge commit) + syncs on green, retries once on red before surfacing failure | `<pr-number> [--retries N] [--repo <owner/repo>]` |
 | `scan_rustymill_repos.sh` | Greps RustyMill sibling repos for an existing implementation of a gap | `<symbol> [keyword ...] --repos <repo1,repo2,...>` |
 
-All three shell out to `gh` and `git` only — no extra dependencies. They
+All three shell out to `gh` and `git`, plus **`jq`** (required —
+`next_issue.sh` pipes `gh` output through it) and **`ripgrep`** (optional —
+`scan_rustymill_repos.sh` uses it when present, `grep` otherwise). They
 resolve paths relative to their own location, so they work whether this skill
 is installed or just checked out locally.
