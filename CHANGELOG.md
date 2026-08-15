@@ -69,6 +69,13 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- `.gitattributes` added with `* text=auto eol=lf` — the synced copy of
+  `repo-config`'s `audit.sh` had CRLF endings and failed on Linux with
+  `$'\r': command not found`. Forces LF in the working tree on every
+  platform so a Windows checkout and anything copied out of it carry LF;
+  `.skill`/`.zip` marked `binary`. Same root cause as the exec-bit problem
+  `restore_exec_bits.py` handles. Doesn't retroactively fix existing
+  checkouts (`git add --renormalize .`) or already-synced skill copies.
 - `my_loops/dedupe-loop` (v1.1.0 → v1.1.1) — `references/platform-directory.md`
   documented a `scripts/scan_platform_repos.sh` the skill doesn't have,
   copied in from a sibling that does. Reading it revealed the real gap:

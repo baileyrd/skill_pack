@@ -1,0 +1,21 @@
+# Line endings
+#
+# This repo is worked on from Windows, but its scripts are executed by
+# Linux/macOS harnesses — a `.sh` file that reaches disk with CRLF fails on
+# the shebang line with `$'\r': command not found`, which is what happened to
+# the synced copy of repo-config's audit.sh.
+#
+# `eol=lf` forces LF in the WORKING TREE on every platform, not just in the
+# index, so a Windows checkout produces the same bytes a Linux one does and
+# anything copying files out of that checkout (skill sync, install_skills.py,
+# build_skill_zips.py) carries LF with it.
+* text=auto eol=lf
+
+# Belt and braces for the two file types that actually execute.
+*.sh text eol=lf
+*.py text eol=lf
+
+# Skill archives are zip files. Git already detects these as binary, but say
+# so explicitly so `text=auto` above can never guess wrong on one.
+*.skill binary
+*.zip binary

@@ -5,6 +5,42 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Add .gitattributes — force LF working-tree line endings
+**2026-08-15**
+
+- **Fixed:** the synced copy of `repo-config`'s `audit.sh` at
+  `~/.claude/skills/synced/repo-config/scripts/audit.sh` had CRLF line
+  endings and wouldn't run on Linux — `line 5: $'\r': command not found`,
+  then `set: pipefail: invalid option name`. Found by invoking `/repo-config`
+  against this repo, where step 0's very first command failed; ran the repo's
+  own LF copy instead to finish the audit.
+- **Fixed by:** `.gitattributes` with `* text=auto eol=lf`. `eol=lf` forces
+  LF in the **working tree** on every platform, not just in the index (which
+  was already clean — `git add --renormalize .` produced zero changes,
+  confirming the corruption happens after checkout, not in git's storage).
+  A Windows checkout now produces the same bytes a Linux one does, so
+  anything copying files out of it — skill sync, `install_skills.py`,
+  `build_skill_zips.py` — carries LF along. `.skill`/`.zip` archives are
+  marked `binary` explicitly so `text=auto` can never guess wrong on one;
+  verified they still report `attr/-text` afterward.
+- **Same root cause as the exec-bit problem** already documented for
+  `restore_exec_bits.py`: this repo is authored on Windows and consumed by
+  Linux/macOS harnesses, and git's platform-adaptive defaults are wrong for
+  that split in both directions. This closes the line-ending half; the
+  exec-bit half stays as it is.
+- **Known limits, stated rather than glossed:** adding the file doesn't
+  retroactively fix a checkout that already has CRLF files (needs one
+  `git add --renormalize .`), and it cannot reach an already-synced copy
+  under `~/.claude/skills/` — that one needs a re-sync or a re-run of
+  `install_skills.py` before it becomes runnable. Documented in README
+  alongside the exec-bit note rather than left as tribal knowledge.
+- **Out of repo-config's scope, deliberately:** the skill's own Limitations
+  say it doesn't touch `.gitignore` or repo-level git config, so this is a
+  fix to this repo rather than something `repo-config` generated. Whether
+  `.gitattributes` should join its template set is a separate question —
+  it would help every Windows-authored target repo, but it widens a scope
+  that was drawn narrow on purpose.
+
 ## docs-loop v1.1.0 — cut check_references.py's false positives 26 → 6
 **2026-08-15**
 
