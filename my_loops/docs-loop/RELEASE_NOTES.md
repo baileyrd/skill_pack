@@ -9,6 +9,22 @@ open.
 
 ---
 
+## v1.2.1 — docs-audit.md counts as a historical log
+**2026-08-15**
+
+- **Fixed:** a run that deletes a file, then records the deletion in its own
+  `docs-audit.md`, made the next run report that record as new broken
+  breakage — and with the checker wired into CI, that turns a completed,
+  correct fix into a red build. Hit for real the moment
+  `my_loops/README.md` was deleted from this repo.
+- `docs-audit` joins `CHANGELOG`/`RELEASE_NOTES` in the historical set. Its
+  rows persist across runs by design (`references/docs-audit-format.md`), so
+  it necessarily accumulates references to things a run deliberately removed.
+  A row saying "this stub was deleted" is the report working, not drift.
+- Scoped, not a blanket mute: only the `docs-audit` stem is affected, and
+  those rows are still reported — as `historical-*`, which the legend already
+  labels "never fix one."
+
 ## v1.2.0 — --baseline, so the checker can gate CI
 **2026-08-15**
 

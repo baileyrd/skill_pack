@@ -5,6 +5,40 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Delete my_loops/README.md — the stub that said `# skill_pack`
+**2026-08-15**
+
+- **Removed:** `my_loops/README.md`. It contained one line — `# skill_pack`,
+  the *root repo's* own title — in a category folder, with no trailing
+  newline and nothing else. A copy-paste stub that was never filled in.
+- **Why deleting rather than writing one:** the repo owner's call, after
+  docs-loop flagged it and stopped. Deleting a whole doc file is one of the
+  things the skill never does unattended in either harness mode, and this is
+  why — "write it" and "delete it" are both defensible, and the difference is
+  a judgment about whether category-level READMEs are wanted at all. The
+  answer turned out to be no: `meta/` and `web_dev/` have none either, so the
+  stub was the outlier, not the norm. `yt_research_for_cc/` keeps its real
+  one because it documents that pipeline's dependencies.
+- **Checked before deleting:** no doc links to it. The only mentions anywhere
+  are in this file's own earlier entries, which are historical record and are
+  left alone per the rule against rewriting past entries.
+- **CI caught the follow-on problem immediately, which is the first time
+  that's happened here.** Deleting the file made `docs-audit.md` — which
+  records the finding *and* its resolution — reference a path that no longer
+  exists, and `doc-refs` failed the run. The fix wasn't a baseline entry:
+  `docs-audit.md` persists rows across runs by design, so it necessarily
+  accumulates references to things a run deliberately removed. It now joins
+  `CHANGELOG`/`RELEASE_NOTES` in the checker's historical set
+  (`docs-loop` v1.2.1), where a row recording a deletion reads as the report
+  working rather than as drift. Verified the change is scoped: a doc with a
+  similar name still reports `broken` normally.
+- **It also fixes a sentence I got slightly wrong.** The row-1 fix earlier
+  today rewrote the root README to say "the other categories don't have one"
+  — which wasn't quite true while `my_loops/` still had its stub. That claim
+  is now exactly accurate. A small thing, but it's the same failure mode this
+  loop keeps catching: a sentence that reads true, isn't, and nobody notices
+  because it's *nearly* right.
+
 ## Add CI — five checks, each for a bug this repo actually had
 **2026-08-15**
 
