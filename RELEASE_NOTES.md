@@ -5,6 +5,42 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## skill-retro on docs-loop — six findings, all applied
+**2026-08-15**
+
+- **Ran** `meta/skill-retro` against `my_loops/docs-loop`, grounded in this
+  session's own run of it: the audit, the rows 1–3 pass, the row 5 pass, and
+  the `my_loops/README.md` deletion. Six findings, every one with a concrete
+  incident behind it; all approved and applied (`docs-loop` v1.2.1 → v1.3.0).
+- **The finding worth reading:** row 5 was approved as *"declare PyYAML — one
+  line in that skill's Scripts section"* and delivered as edits to **six
+  skills**. The step-3 checkpoint is the loop's core safety mechanism, and it
+  widened silently because nothing in step 4 said to stop when a row outgrows
+  its approval. Now it does, in auto mode too. Classified
+  `could-have-caused-real-damage` on skill-retro's own rule that severity is
+  judged by what the gap could cause on a *different* run — here, six files
+  edited on a one-file approval happened to be correct work, which is exactly
+  what makes it easy to miss.
+- **The skill was making the same class of claim it exists to catch.** Step 0
+  put doc-comments in *default* scope while providing no extraction pass for
+  any language — so the run audited zero of them and still reported whole-repo
+  coverage. Now opt-in, with Limitations updated to agree rather than
+  contradict.
+- **Also applied:** step 1 must declare prior exposure when the docs were
+  already read earlier in the session (this run had read README and
+  ARCHITECTURE hours before building ground truth, and caught it only by
+  improvisation); the per-run tracking issue became conditional on auditing
+  and fixing being split; step 5 stopped asking for a re-run that says
+  nothing; step 6 got a definition of when a run has *ended*, since it never
+  fired on its own and had to be requested four turns late.
+- **Logged, not acted on:** `inventory_docs.sh` contributed nothing this run —
+  38 of 98 docs share one bulk-commit date, so its ranking was a flat tie at
+  the top. One run is not enough to call a step dead, per skill-retro's own
+  single-run-evidence limitation.
+- **Validated:** step 4's "every claim you write must be checkable against
+  something in the tree" caught two false sentences before they landed, on two
+  separate passes. Left exactly as written.
+
 ## ADR-0003 — `.gitattributes` in scope, `.gitignore` out
 **2026-08-15**
 

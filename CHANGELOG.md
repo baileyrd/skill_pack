@@ -66,6 +66,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   (`datastar-pro-main/`) and upstream development-process scaffolding
   (`CLAUDE.md`, `.planning/`) deliberately excluded from the import.
 ### Changed
+- `my_loops/docs-loop` (v1.2.1 → v1.3.0) — six findings applied from the
+  first `meta/skill-retro` pass on it. Chief among them: step 4 now stops and
+  re-reports when an approved row outgrows its approval (row 5 was approved
+  as one line in one file and delivered as six skills), and doc-comments drop
+  out of default scope because the loop provides no way to audit them and was
+  claiming whole-repo coverage without them.
 - `my_loops/repo-config` (v1.2.0 → v1.2.1) — Limitations cites ADR-0003 for
   the scope boundary instead of only asserting it. Doc-only.
 - `my_loops/repo-config` (v1.1.0 → v1.2.0) — `.gitattributes` joins the

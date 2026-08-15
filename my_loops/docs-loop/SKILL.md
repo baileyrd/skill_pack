@@ -1,7 +1,7 @@
 ---
 name: docs-loop
 description: Reviews a repo's documentation against what the code actually does right now, then updates it — builds ground truth from the manifest, entry points, CLI help, scripts, CI workflows, and the real directory tree FIRST, then audits every checkable claim in README/ARCHITECTURE/CONTRIBUTING/docs/ADRs and public doc-comments, classifying each as accurate, stale, missing, orphaned, aspirational, or unverifiable in a `docs-audit.md` checkpoint before a single edit lands. Use whenever the user asks for a documentation review, wants docs updated to match the current state of the repo, wants drift/rot checked after a batch of merged work, wants README or ARCHITECTURE brought up to date, wants broken doc links and dead file paths found, asks "are the docs still right", or names it (docs-loop, doc review loop, docs drift loop). Companion to repo-config, which installs the governance file SET and only checks those files are PRESENT — this one checks whether their CONTENT is still true; same PR/CI/merge mechanics as its my_loops siblings. Checkpointed with per-finding sign-off by default, proceeding unattended on verifiable stale-fact and broken-reference rows when `LOOP_HARNESS_MODE=auto` (any finding where the CODE looks wrong rather than the doc always still waits).
-version: 1.2.1
+version: 1.3.0
 ---
 
 # docs-loop
@@ -41,10 +41,14 @@ two.
   this skill's job. Don't re-run it if a prior step this session already
   covered it.
 - **Doc surface** — default scope is every tracked `*.md`/`*.mdx` in the
-  repo, plus doc-comments on the public API surface (`///` / `//!`,
-  docstrings, JSDoc). Generated API reference output (rustdoc HTML, Sphinx
-  builds) is out of scope — review the source comments it's generated from,
-  not the artifact.
+  repo. **Doc-comments on the public API surface (`///` / `//!`, docstrings,
+  JSDoc) are in scope only when asked for**, because auditing them needs a
+  per-language extraction pass this loop doesn't provide — and a run that
+  claims whole-repo coverage while silently auditing none of them is making
+  the exact kind of nearly-true claim this skill exists to catch. If they're
+  requested, say in the report which languages were covered and how. Generated
+  API reference output (rustdoc HTML, Sphinx builds) is out of scope either
+  way — review the source comments it's generated from, not the artifact.
 - **Review depth** — default is the full current state, not a diff since
   some marker. If the user scopes it to "since the last release" or "the
   docs touched by these 6 merged PRs", honor that, and say in the report
@@ -62,6 +66,12 @@ layout, and the ADR log. Two rules that matter here:
 - The ADR log is ground truth for *decisions*, not for *current behavior* —
   an accepted ADR whose implementation never shipped makes the docs
   aspirational, which is its own audit classification, not "accurate."
+- **If the docs were already read earlier in this session, say so in the
+  report** and re-derive every claim from the tree rather than from recall.
+  Prior exposure doesn't invalidate the run, but an undeclared anchored
+  auditor is precisely the confirmation-reading failure this step order
+  exists to prevent — and the auditor is the last person able to notice it
+  happening.
 
 **2. Inventory the doc surface** — `scripts/inventory_docs.sh <TARGET_REPO>`
 lists every tracked doc with a drift signal: when it last changed, and how
@@ -107,14 +117,23 @@ constraints:
 - **Every claim you write must be checkable against something in the tree.**
   If you can't point at the manifest line, the script, or the code path that
   makes a sentence true, don't write the sentence.
+- **If a row turns out bigger than the row, stop and re-report.** An
+  approval is for the row *as written*, not for whatever the row turns out
+  to imply. When acting on it reaches files, skills, or decisions the row
+  didn't name, return to the step-3 checkpoint with the real scope before
+  continuing — in auto mode too, regardless of the row's classification.
+  This is the failure mode the checkpoint exists to prevent, and it's
+  invisible from inside the fix: the work feels like finishing the approved
+  row right up until it isn't.
 - File one tracking issue per audit run (`assets/templates/issue-body.md`,
-  labeled `docs-drift`) rather than one per row — a docs run produces
-  dozens of small rows, and an issue each is ceremony with no traceability
-  gain. The audit table goes in the issue body; each PR closes it with
-  `Closes #N` once the last approved row is done. If the target has
-  `RELEASE_NOTES.md`, add the dated entry before opening the PR.
+  labeled `docs-drift`) **when auditing and fixing are split** — different
+  people, or different sessions. One per run, never one per row: a docs run
+  produces dozens of small rows and an issue each is ceremony. When the same
+  run audits and fixes immediately, a committed `docs-audit.md` already *is*
+  the traceability and a duplicate issue adds none. If the target has
+  `RELEASE_NOTES.md`, add the dated entry before opening the PR either way.
 
-**5. Verify** — re-run both step 2 scripts against the updated docs, and
+**5. Verify** — re-run `check_references.py` against the updated docs, and
 actually execute the read-only commands the docs tell a reader to run
 (`--help`, `--dry-run`, a test invocation, a build) rather than eyeballing
 them. A documented command that errors is the most common single defect
@@ -124,9 +143,12 @@ documented command that writes, deploys, publishes, or spends money to
 Then re-audit: report before/after counts by classification, and what's
 still open.
 
-**6. Wrap-up retro** — regardless of how the run ended (all rows fixed, some
-deferred, stopped mid-way), run a `meta/skill-retro` pass on `docs-loop`
-itself, grounded in this run: did step 1's ground-truth order hold up, did
+**6. Wrap-up retro** — fires once, when the last approved row is merged and
+no rows remain picked, or when the user stops the loop. **Not after every
+individual PR**: an interactive run where the user keeps picking rows is one
+run, not one per row, and a retro per PR is noise. Whatever the ending (all
+rows fixed, some deferred, stopped mid-way), run a `meta/skill-retro` pass on
+`docs-loop` itself, grounded in that whole run: did step 1's ground-truth order hold up, did
 step 3's six classifications fit what this repo actually had, did step 5's
 verification catch anything the audit missed? Read-only, safe to run
 unattended in either harness mode — applying anything `skill-retro` finds is
@@ -228,9 +250,11 @@ regardless of harness setting:
 - The drift signal in `inventory_docs.sh` is commit recency, not semantics.
   A doc untouched for a year can be perfectly accurate, and a doc edited
   yesterday can be wrong — it ranks candidates for attention, nothing more.
-- Doc-comment review is limited to the public API surface by default.
-  Auditing every private-item comment in a large codebase is a different,
-  much larger job, and worth scoping explicitly rather than assuming.
+- Doc-comments aren't audited unless asked for (step 0). Even then it's the
+  public API surface only — auditing every private-item comment in a large
+  codebase is a different, much larger job. This loop provides no extraction
+  pass for either, so a doc-comment audit is hand-rolled per language and
+  should be reported as such.
 - Claims about anything outside the repo — deploy targets, infrastructure,
   external services, org policy — land in `unverifiable` and stay there.
   This loop can flag them for a human; it can't check them.
