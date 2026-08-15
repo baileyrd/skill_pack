@@ -5,6 +5,18 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `my_loops/docs-loop` skill — thorough documentation review/update loop
+  against a repo's current state: ground truth built from the code before
+  any prose doc is opened, a six-way classified `docs-audit.md` checkpoint,
+  then per-doc PRs through the sibling loops' CI-gated merge mechanics.
+  Complements `repo-config`, whose `audit.sh` deliberately checks doc
+  *presence* and says so — this is the skill that checks their *content*.
+  Ships two scripts (`inventory_docs.sh` drift ranking,
+  `check_references.py` link/anchor/path resolution); running the latter
+  against this repo turned up two real broken references (dedupe-loop's
+  `platform-directory.md`, datastar-pro's `core.md` TOC anchor) among 16
+  cross-repo false positives — logged as a follow-up rather than fixed in
+  the same change.
 - `my_loops/rust-migration` skill — migrates a repo/application to Rust
   with a capability manifest (every item defaults REQUIRED, only a
   written user sign-off moves one to OUT-OF-SCOPE) as the mechanism for

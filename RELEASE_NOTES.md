@@ -5,6 +5,48 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Add my_loops/docs-loop — documentation review/update loop
+**2026-08-15** · branch `claude/docs-review-loop-skill-ih5zhr`
+
+- **Added:** `my_loops/docs-loop` (v1.0.0) — reviews a target repo's
+  documentation against the current state of its code and updates it. Order
+  is the whole point: ground truth from manifests/entry points/`--help`/CI/
+  the real tree *first*, prose second, because reading the docs first turns
+  an audit into a proofread. Findings are classified six ways (`stale` /
+  `missing` / `orphaned` / `aspirational` / `unverifiable` / `accurate`) in a
+  `docs-audit.md` checkpoint before any edit; `accurate` and `unverifiable`
+  rows persist across runs so a re-audit doesn't re-litigate settled claims.
+- **Added:** `scripts/inventory_docs.sh` (per-doc drift ranking: last
+  changed, plus commits to non-doc files since) and
+  `scripts/check_references.py` (relative links, GitHub heading anchors,
+  backticked repo paths, shell-block paths — stdlib only). The checker
+  separates `broken` (path anchored in a directory that really exists, so
+  the claim is about this tree and is false) from `unresolved` (could be a
+  runtime file, an example, or prose with a slash in it) — conflating them
+  buried 11 real findings under ~300 rows of noise in the first pass here.
+- **Found while testing, not fixed here:** the checker reports 18 `broken`
+  rows against `skill_pack`. Reading each one — which is exactly the step
+  the skill insists on, since the script surfaces candidates and never
+  renders a verdict — **two** are real drift:
+  `my_loops/dedupe-loop/references/platform-directory.md:60` names
+  `scripts/scan_platform_repos.sh`, which its three sibling copies do have
+  and dedupe-loop does not (its scripts are `index_capabilities.sh` /
+  `find_clusters.py`); and
+  `web_dev/datastar-pro/references/core.md:11`'s TOC links
+  `#operators-in-expressions` against a heading that slugs to `operators`.
+  Both left for a real docs-loop run to take through its own checkpoint
+  rather than hand-patched inside the change that added the tool.
+- **The other 16 are the documented false-positive class**, and the ratio is
+  the point: most docs here describe *other* repos or use skill-relative
+  shorthand (`scripts/audit.sh` meaning repo-config's), and `CHANGELOG.md`'s
+  pointer to the removed `need_to_productize/datastar-pro.skill` is correct
+  history, which this skill's own rules say never to "fix." Documented in
+  the skill's Limitations and the script's docstring rather than filtered
+  out by a heuristic that would have hidden the two real findings with them.
+  One row is also build-state-dependent (`README.md`'s
+  `zip/dedupe-loop-v1.0.0.zip` resolves or not depending on whether
+  gitignored `zip/` output is present) — run against a clean tree.
+
 ## PR #4 — Fix silent exec-bit loss in build_skill_zips.py
 **2026-08-12** · [#4](https://github.com/baileyrd/skill_pack/pull/4)
 
