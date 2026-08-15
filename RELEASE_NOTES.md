@@ -5,6 +5,39 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## ADR-0003 — `.gitattributes` in scope, `.gitignore` out
+**2026-08-15**
+
+- **Added:** `docs/adr/0003-gitattributes-in-scope-gitignore-out.md`,
+  recording the scope decision made when `repo-config` v1.2.0 took
+  `.gitattributes` into its template set. Until now the reasoning lived only
+  in a Limitations paragraph and a release note.
+- **The decision it records is a test, not a verdict.** `repo-config`'s
+  boundary used to be drawn by category — repo-level git config was excluded
+  wholesale, so `.gitignore` and `.gitattributes` sat on the same side of the
+  line without the line being argued. It's now drawn by two questions: does
+  this file have the same correct content everywhere, and does getting it
+  wrong fail loudly or silently? `.gitattributes` is same-everywhere and
+  fails loudly (a script that won't run). `.gitignore` is per-project and
+  fails silently, in the worst direction — a file that should have been
+  committed simply isn't.
+- **Four alternatives recorded with why they lost**, including the cheap one
+  (fix only this repo, leave the template alone) and the consistent-looking
+  one (bring `.gitignore` in too, which fails on the asymmetry above).
+- **Consequences stated, including the unwelcome one:** `audit.sh`'s
+  denominator moved 10 → 11, so every repo the skill has already been run
+  against now scores 10/11 until the file is applied. Intended signal, not a
+  regression — but it will surface.
+- **Changed:** `repo-config` (v1.2.0 → v1.2.1) — its Limitations now cite
+  ADR-0003 for the reasoning instead of only asserting the conclusion, so a
+  future proposal to add repo-level config has a test to meet rather than a
+  precedent to point at.
+- **Cross-referenced with ADR-0002:** `.gitattributes` cannot fix the
+  executable bit — git has no attribute for permissions — so the two halves
+  of the same Windows-authored/Linux-consumed problem are handled by
+  different mechanisms, and the ADR says so rather than leaving a reader to
+  assume one covers both.
+
 ## Build a test harness — 44 tests, each naming the bug it would have caught
 **2026-08-15**
 

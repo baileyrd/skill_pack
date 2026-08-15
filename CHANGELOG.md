@@ -5,6 +5,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `docs/adr/0003-gitattributes-in-scope-gitignore-out.md` — records why
+  `repo-config` admits `.gitattributes` but not `.gitignore`, as a reusable
+  test (same-everywhere? loud or silent when wrong?) rather than a one-off
+  verdict.
 - `tests/` — 44 stdlib `unittest` tests over `check_references.py`'s parsing
   and classification logic and `check_repo.py`'s frontmatter parser, run by
   CI as a step separate from the lint checks. Each regression test names the
@@ -62,6 +66,8 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   (`datastar-pro-main/`) and upstream development-process scaffolding
   (`CLAUDE.md`, `.planning/`) deliberately excluded from the import.
 ### Changed
+- `my_loops/repo-config` (v1.2.0 → v1.2.1) — Limitations cites ADR-0003 for
+  the scope boundary instead of only asserting it. Doc-only.
 - `my_loops/repo-config` (v1.1.0 → v1.2.0) — `.gitattributes` joins the
   standard governance set as `audit.sh`'s 11th item, prompted by this
   skill's own synced `audit.sh` arriving with CRLF and failing on Linux.
