@@ -1,0 +1,38 @@
+name: CI
+
+# This repo has no language manifest, so repo-config's stack-selected CI
+# templates don't apply — its rule is "no manifest, no workflow," because an
+# always-red workflow is worse than none. This is a deliberate exception: the
+# checks below are lint over the repo's own structure, and each one exists
+# because the thing it checks for actually broke here. See scripts/check_repo.py
+# for the commit each check would have failed.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: repo checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # check_repo.py reads the git index and blob contents (exec bits,
+          # CRLF), so it needs the real repository, not just a file tree.
+          # Depth 1 is enough — no check looks at history.
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # No install step: every check is Python standard library plus git,
+      # both already on the runner. If this ever needs a dependency, that's a
+      # decision to make explicitly, not to discover here.
+      - name: Run repo checks
+        run: python3 scripts/check_repo.py

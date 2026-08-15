@@ -1,0 +1,28 @@
+# Accepted broken doc references — read by scripts/check_repo.py via
+# check_references.py --baseline, so CI fails on NEW breakage only.
+#
+# Format: kind<TAB>doc<TAB>detail   (no line number — an accepted row must not
+# come back as new when someone adds a paragraph above it)
+#
+# Every entry needs a reason. A row here is a judgment that the checker is
+# wrong about this specific reference, not a to-do list — if a row is real
+# drift, fix it instead of listing it. Entries that stop matching anything are
+# reported as stale on every run and should be deleted.
+#
+# This repo's structural false-positive class: most docs here describe a
+# DIFFERENT repo (a skill documenting its target) or use skill-relative
+# shorthand. Neither is drift. See my_loops/docs-loop/SKILL.md, Limitations.
+
+# A worked example in a format spec, naming another skill's reference file to
+# show what a finding row looks like. Not a claim about skill-retro's own tree.
+inline-path	meta/skill-retro/references/retro-findings-format.md	references/platform-directory.md
+
+# Cross-skill shorthand: this is repo-config's scripts/audit.sh, which
+# dedupe-loop's step 0 tells the reader to run against the target repo. It
+# resolves from repo-config's directory, not from dedupe-loop's.
+inline-path	my_loops/dedupe-loop/SKILL.md	scripts/audit.sh
+
+# Component-relative shorthand for yt-pipeline/scripts/select_videos.py, from
+# a category README that isn't itself inside a component, so the checker has
+# no component root to resolve against.
+inline-path	yt_research_for_cc/README.md	scripts/select_videos.py

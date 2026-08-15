@@ -5,6 +5,64 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Add CI — five checks, each for a bug this repo actually had
+**2026-08-15**
+
+- **Added:** `.github/workflows/ci.yml` and `scripts/check_repo.py`. The
+  design rule was that a check earns its place by naming the commit it would
+  have failed, not by being good practice in the abstract:
+  | Check | The failure behind it |
+  | --- | --- |
+  | `exec-bits` | 18 tracked scripts committed `100644` despite a shebang, shipped non-executable for months (PR #22) |
+  | `line-ends` | The synced `audit.sh` arriving with CRLF and dying on its shebang (PR #20) — regression guard, since the index was clean that time |
+  | `doc-refs` | docs-loop's first run: a dead script path in dedupe-loop, a TOC anchor pointing at nothing in datastar-pro (#16, #17) |
+  | `manifests` | `name`/directory match, semver `version`, `RELEASE_NOTES.md` present — the "real fix shipped with no entry" failure repo-config's own log records |
+  | `packaging` | `build_skill_zips.py` still runs — smoke test before anyone relies on its output |
+- **Each check was verified by reproducing its historical bug**, not by
+  assuming: a shebang file forced to `100644`, a CRLF blob written straight
+  into the index with `git hash-object` (normal `git add` can't produce one
+  any more — `.gitattributes` normalizes it, which is the earlier fix
+  working), a new broken reference, a skill with a wrong name and bad
+  version, and a deliberately broken packager. All five failed as intended,
+  then passed again once reverted.
+- **Two of those tests initially failed to fail**, which is the reason for
+  testing this way. `line-ends` didn't fire on `git add` of a CRLF file —
+  `.gitattributes` had silently fixed it — so the check needed a blob written
+  past the filters to prove its detection works at all. And `packaging`
+  didn't fire when a `raise` was appended to the end of
+  `build_skill_zips.py`: the script's own `raise SystemExit(main())` runs
+  first, so the injected fault was unreachable code. A check that can't be
+  shown to fail is not a check.
+- **Added:** `docs-refs-baseline.tsv`, 3 accepted rows each with a written
+  reason. Wired in without it, `doc-refs` would have been red on day one from
+  the documented structural false-positive class (most docs here describe
+  *other* repos) — and repo-config's own rule is that an always-red workflow
+  is worse than none. `--baseline` support went into
+  `my_loops/docs-loop`'s `check_references.py` (v1.1.0 → v1.2.0), keyed on
+  `kind + doc + detail` *without* the line number so an accepted row doesn't
+  return as new when a paragraph is added above it. Stale entries are
+  reported, never fatal.
+- **Fixed a flaky-CI bug in the new code before it shipped:** the `packaging`
+  check builds into `zip/`, and a `zip/` that exists changes what `doc-refs`
+  sees — a doc quoting `zip/x-v1.0.0.zip` only resolves as "broken" when the
+  directory is there. Caught by running the two checks in isolation and
+  getting a different answer than the full suite gave. `packaging` now
+  restores the tree, while keeping zips a developer built on purpose.
+- **Side effect worth noting:** creating `.github/workflows/` resolved 3 of
+  the 6 outstanding broken doc references on its own — three docs referenced
+  that directory, which until now didn't exist.
+- **Resolved:** `CONTRIBUTING.md`'s "CI must be green before merge", open as
+  `aspirational` since docs-loop's first run. It now points at something
+  real, with the honest caveat that a workflow only *reports* until it's set
+  as a required status check in branch protection — which needs a repo admin,
+  not a commit.
+- **Deliberately NOT resolved:** "Add tests for non-trivial logic." These
+  five checks are lint over repo structure, not behavior, and calling them
+  tests would be exactly the kind of green-badge dishonesty this whole
+  exercise has been about. CONTRIBUTING now states plainly that no harness
+  exists and asks PRs to say so rather than tick a box that isn't real. The
+  underlying question — build one, or drop the requirement — is still open.
+
 ## docs-loop row 5: dependency declarations, six skills wide
 **2026-08-15**
 

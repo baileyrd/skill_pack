@@ -60,7 +60,7 @@ Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver
 
 ## Repo tooling
 
-Three standalone scripts under `scripts/`, each usable on its own or chained — `install_skills.py` and `build_skill_zips.py` both call `restore_exec_bits.py` automatically, so a plain `git add -A && python scripts/install_skills.py` (or `build_skill_zips.py`) is enough day to day.
+Four standalone scripts under `scripts/`, each usable on its own or chained — `install_skills.py` and `build_skill_zips.py` both call `restore_exec_bits.py` automatically, so a plain `git add -A && python scripts/install_skills.py` (or `build_skill_zips.py`) is enough day to day.
 
 ### `scripts/install_skills.py`
 
@@ -83,6 +83,12 @@ python scripts/build_skill_zips.py
 ```
 
 `zip/` is generated output and is gitignored, not committed.
+
+### `scripts/check_repo.py`
+
+The five checks CI runs, runnable locally with `python3 scripts/check_repo.py` (or `--only <name>` for one). Each exists because the thing it checks for actually broke here and cost a PR to fix — exec bits (18 scripts shipped non-executable), line endings, doc references, skill manifests, packaging. The script's own docstring names the failure behind each one.
+
+`doc-refs` runs `my_loops/docs-loop`'s `check_references.py` against `docs-refs-baseline.tsv`, so it fails on *new* broken references only. The baseline exists because this repo has a permanent structural false-positive class — most docs here describe *other* repos — and a check that's red on day one gets ignored. Every baseline entry carries a written reason; entries that stop matching are reported as stale.
 
 ### `scripts/restore_exec_bits.py`
 

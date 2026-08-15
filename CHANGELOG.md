@@ -5,6 +5,14 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `.github/workflows/ci.yml` + `scripts/check_repo.py` — five repo checks
+  (exec bits, line endings, doc references, skill manifests, packaging),
+  each added because that failure actually happened here, and each verified
+  by reproducing its historical bug. Runnable locally with
+  `python3 scripts/check_repo.py`.
+- `docs-refs-baseline.tsv` — 3 accepted broken doc references with written
+  reasons, so `doc-refs` fails on new breakage only rather than being red
+  from day one.
 - `docs-audit.md` — checkpoint from `my_loops/docs-loop`'s first end-to-end
   run against this repo: 7 findings (3 stale/missing, 1 orphaned, 3
   aspirational), no edits applied. Committed per the skill's own persistence
@@ -51,6 +59,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   problem in place. Limitations rewritten: `.gitignore` stays out of scope
   (per-project, silent failure mode), `.gitattributes` comes in (one correct
   answer everywhere, breaks scripts at a distance when wrong).
+- `my_loops/docs-loop` (v1.1.0 → v1.2.0) — `check_references.py` gains
+  `--baseline FILE` so it can gate CI: without it, wiring the checker in
+  makes the build red on day one from the documented structural
+  false-positive class. Keyed on `kind + doc + detail` without the line
+  number, so an accepted row doesn't return as new when a paragraph is added
+  above it; stale entries are reported, never fatal.
 - `my_loops/docs-loop` (v1.0.0 → v1.1.0) — `check_references.py` false
   positives cut 26 → 6 whole-repo (3 broken anchors → 0) via three fixes:
   component-relative path resolution (doc dir → nearest `SKILL.md`/manifest
