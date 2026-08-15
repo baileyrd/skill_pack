@@ -5,6 +5,48 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Build a test harness — 44 tests, each naming the bug it would have caught
+**2026-08-15**
+
+- **Added:** `tests/`, run by `python3 -m unittest discover -s tests` and by
+  CI as a step separate from the lint checks. Stdlib `unittest`, **no
+  third-party runner**: PyYAML is already the only third-party import in this
+  repo and is documented as an exception, not a precedent, and a suite you
+  can only run after `pip install` is a suite that stops being run.
+- **Resolves** `CONTRIBUTING.md`'s "add tests for non-trivial logic", open as
+  `aspirational` since docs-loop's first run and the last unresolved row in
+  `docs-audit.md`. Every finding from that run is now resolved, deferred with
+  a written reason, or logged as an accepted non-finding.
+- **The admission rule is ADR-0002's, applied to tests:** a test earns its
+  place by naming the bug it would have caught. Not coverage — the specific
+  mistakes this code has already proven it makes. `check_references.py` alone
+  was wrong four separate ways on the day it was written, each in a way that
+  read as obviously correct, so most of the suite is those four plus the
+  classification logic they exposed.
+- **Every regression test was verified by reverting its fix and watching it
+  fail** — slugify collapsing whitespace (the 12-false-anchor bug), the
+  `:line` suffix, single-backtick-only code spans, `docs-audit.md` not
+  counted as historical (today's red-build), and component-root resolution.
+  All five went red on mutation and green on restore.
+- **The mutation harness was itself broken on the first attempt**, which is
+  the honest headline. It reported `FAILED (errors=1)` for all five and I
+  nearly wrote that up as "all five caught" — but they were `ImportError`s
+  from running `unittest` with a module path that isn't importable from the
+  repo root. The tests never executed. Re-run with
+  `discover -s tests -k <name>`, all five produce real `failures=1`. A
+  verification step that can't itself be verified is worth exactly nothing,
+  and this one nearly shipped as evidence.
+- **Tests run as a separate CI step, not a sixth check in
+  `check_repo.py`** — ADR-0002 governs repo *checks* (lint over structure,
+  admitted only for a failure that actually happened) and states that lint is
+  not tests. Folding the suite in would blur the line that ADR exists to
+  draw.
+- **What isn't unit-tested, and why:** the git-dependent checks (`exec-bits`,
+  `line-ends`) and the packaging smoke test. Their behavior *is* the
+  integration with git and the filesystem; a mock of `git cat-file` would
+  test the mock. They stay verified by fault injection, which is what caught
+  the two cases where a check silently passed when it shouldn't have.
+
 ## ADR-0002 — a repo check needs a real failure behind it
 **2026-08-15**
 
