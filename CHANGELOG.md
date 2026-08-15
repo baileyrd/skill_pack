@@ -39,6 +39,13 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   (`datastar-pro-main/`) and upstream development-process scaffolding
   (`CLAUDE.md`, `.planning/`) deliberately excluded from the import.
 ### Changed
+- `my_loops/docs-loop` (v1.0.0 → v1.1.0) — `check_references.py` false
+  positives cut 26 → 6 whole-repo (3 broken anchors → 0) via three fixes:
+  component-relative path resolution (doc dir → nearest `SKILL.md`/manifest
+  dir → repo root), masking inline code spans before link extraction so
+  quoted markdown syntax isn't parsed as a real link, and `historical-*`
+  verdicts for non-resolving paths in `CHANGELOG`/`RELEASE_NOTES`, which are
+  usually correct history the skill's own Rules forbid rewriting.
 - `my_loops/rust-migration` (v1.0.0 → v1.1.0) — step 4's wrap-up now runs a
   `meta/skill-retro` pass on the skill itself before ending the run.
 - `meta/skill-retro` (v1.0.0 → v1.1.0) — new step 6 self-retros

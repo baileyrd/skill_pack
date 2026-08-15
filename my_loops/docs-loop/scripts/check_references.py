@@ -12,13 +12,19 @@ a clean run here is not evidence the docs are correct, only that their
 pointers resolve. docs-loop step 3 does the real audit; this narrows what it
 has to think about.
 
-One false-positive class is structural and worth knowing before you read the
-output: a doc that describes a DIFFERENT repo's layout (a skill documenting
-its target, a README quoting a downstream consumer's tree) names paths that
-correctly don't exist here. Those surface as broken/unresolved and are not
-drift. Resolution is against the working tree as it stands, so gitignored
-build output being present or absent moves some rows between verdicts — run
-on a clean tree if you want the result to be reproducible.
+Paths resolve against three bases, nearest first: the doc's own directory,
+its nearest enclosing component (a directory with a SKILL.md or a language
+manifest), and the repo root. The component base is what makes shorthand
+like `scripts/run.sh` inside that component's `references/` resolve the way
+a reader reads it.
+
+One false-positive class survives all of that, and it's structural: a doc
+describing a DIFFERENT component's or repo's layout (a skill documenting its
+target, a README quoting a downstream consumer's tree) names paths that
+correctly don't exist here. Those are not drift. Resolution is also against
+the working tree as it stands, so gitignored build output being present or
+absent moves some rows between verdicts — run on a clean tree if you want
+the result to be reproducible.
 
 With no doc paths given, every tracked *.md/*.mdx under the repo root is
 checked (falling back to a filesystem walk outside a git repo), skipping
@@ -44,7 +50,10 @@ DOC_SUFFIXES = (".md", ".mdx")
 SHELL_LANGS = {"bash", "sh", "shell", "console", "zsh", "shell-session"}
 
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(\s*<?([^)>\s]+)>?(?:\s+[\"'][^\"']*[\"'])?\s*\)")
-INLINE_CODE_RE = re.compile(r"`([^`\n]+)`")
+# Code spans use a run of N backticks closed by the same run, so a span can
+# itself contain backticks: ``a `b` c``. Matching only single-backtick spans
+# leaves the inner content exposed to the link/path scanners below.
+INLINE_CODE_RE = re.compile(r"(`+)(.+?)\1")
 FENCE_RE = re.compile(r"^\s*(?:```+|~~~+)\s*([A-Za-z0-9_+.-]*)\s*$")
 HEADING_RE = re.compile(r"^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$")
 PATHISH_EXT_RE = re.compile(
@@ -73,6 +82,18 @@ def slugify(heading: str) -> str:
     s = re.sub(r"[^\w\s-]", "", s)
     s = re.sub(r"\s", "-", s.strip())
     return s
+
+
+def mask_code_spans(line: str) -> str:
+    """Blank out inline code spans, preserving length so column positions
+    still line up.
+
+    A doc that *quotes* markdown link syntax inside backticks —
+    "the TOC linked `[Operators](#operators)`" — is describing a link, not
+    making one. Without this, every release note that documents a broken
+    link re-reports that same broken link forever, which is exactly the
+    trap a docs checker should not walk into."""
+    return INLINE_CODE_RE.sub(lambda m: " " * len(m.group(0)), line)
 
 
 def strip_fences(lines):
@@ -129,18 +150,50 @@ def normalize(token: str) -> str:
     return token.rstrip("/")
 
 
-def resolve(root: Path, doc: Path, candidate: str):
-    """Resolve a doc-relative or root-relative path. Returns the resolved
-    Path if something exists there, else None."""
+def component_root(root: Path, doc: Path):
+    """Nearest ancestor of `doc` that looks like a self-contained component
+    — a directory holding a SKILL.md, a manifest, or its own README.
+
+    Docs inside such a component name paths relative to the COMPONENT, not
+    to the file or the repo: a skill's `references/foo.md` says
+    `scripts/run.sh` meaning its own sibling `scripts/`, and a package's
+    `docs/guide.md` says `src/main.rs` meaning the package's. Resolving
+    only against the doc's directory and the repo root reports every one of
+    those as broken, which drowns real findings in a monorepo or a repo of
+    independently-packaged parts."""
+    markers = ("SKILL.md", "Cargo.toml", "pyproject.toml", "package.json", "go.mod")
+    current = doc.parent
+    while True:
+        if any((current / m).exists() for m in markers):
+            return current
+        if current == root or current.parent == current:
+            return None
+        current = current.parent
+
+
+def resolution_bases(root: Path, doc: Path):
+    """Where a path in this doc could legitimately be rooted, nearest first.
+    Deduplicated, order preserved — the first hit wins in resolve()."""
+    bases, seen = [], set()
+    for base in (doc.parent, component_root(root, doc), root):
+        if base is not None and base not in seen:
+            seen.add(base)
+            bases.append(base)
+    return bases
+
+
+def resolve(bases, candidate: str):
+    """Resolve a candidate against each base in turn. Returns the resolved
+    Path if something exists, else None."""
     cand = candidate.lstrip("/") if candidate.startswith("/") else candidate
-    for base in (doc.parent, root):
-        target = (base / cand)
+    for base in bases:
+        target = base / cand
         if target.exists():
             return target
     return None
 
 
-def classify_path(root: Path, doc: Path, candidate: str, basenames: set):
+def classify_path(bases, candidate: str, basenames: set):
     """Split "doesn't resolve" into two very different findings.
 
     `broken` is reserved for paths anchored in a directory that really
@@ -151,11 +204,11 @@ def classify_path(root: Path, doc: Path, candidate: str, basenames: set):
     (`storage_state.json`), an example (`./local-file.pdf`), or prose that
     happened to contain a slash (`status/wait/cancel`) as it is stale. Both
     get reported; conflating them buries the real ones."""
-    if resolve(root, doc, candidate):
+    if resolve(bases, candidate):
         return "ok"
     if "/" in candidate:
         first = candidate.split("/", 1)[0]
-        if (root / first).exists() or (doc.parent / first).exists():
+        if any((base / first).exists() for base in bases):
             return "broken"
         return "unresolved"
     # A bare filename that exists somewhere in the tree is normal prose
@@ -224,6 +277,28 @@ def collect_docs(root: Path, args):
     return found
 
 
+HISTORICAL_DOCS = {"changelog", "release_notes", "releasenotes", "history"}
+
+
+def is_historical(doc: Path) -> bool:
+    """CHANGELOG.md / RELEASE_NOTES.md and friends are logs, not descriptions
+    of the current tree. A path in a past entry that no longer resolves is
+    usually *correct history* — the entry recording that a file was removed
+    is doing its job. docs-loop's own rules say never to rewrite a past
+    entry, so reporting those as `broken` sends an auditor to rows they are
+    forbidden to act on."""
+    return doc.stem.lower() in HISTORICAL_DOCS
+
+
+def path_row(verdict: str, kind: str, historical: bool):
+    """Downgrade a non-resolving path in a historical log to `unresolved`
+    with a self-labelling kind, so it reads as "logged, do not touch"
+    rather than "drift, go fix it"."""
+    if historical and verdict != "ok":
+        return ("unresolved", f"historical-{kind}")
+    return (verdict, kind)
+
+
 def check_doc(root: Path, doc: Path, rows: list, basenames: set):
     rel = doc.relative_to(root) if doc.is_relative_to(root) else doc
     try:
@@ -233,12 +308,16 @@ def check_doc(root: Path, doc: Path, rows: list, basenames: set):
         return
 
     own_slugs = headings_of(doc)
+    bases = resolution_bases(root, doc)
+    historical = is_historical(doc)
 
     for lineno, line, lang in strip_fences(lines):
         where = f"{rel}:{lineno}"
 
         if lang is None:
-            for raw in LINK_RE.findall(line):
+            # Links come from prose (code spans masked out); path candidates
+            # come from the code spans themselves. Same line, two readings.
+            for raw in LINK_RE.findall(mask_code_spans(line)):
                 target = raw.strip()
                 if target.startswith(("http://", "https://", "mailto:", "tel:")):
                     rows.append(("unchecked", "external-link", where, target))
@@ -249,7 +328,7 @@ def check_doc(root: Path, doc: Path, rows: list, basenames: set):
                     verdict = "ok" if not anchor or anchor.lower() in own_slugs else "broken"
                     rows.append((verdict, "anchor", where, f"#{anchor}"))
                     continue
-                resolved = resolve(root, doc, path_part)
+                resolved = resolve(bases, path_part)
                 if resolved is None:
                     rows.append(("broken", "link", where, target))
                     continue
@@ -259,14 +338,16 @@ def check_doc(root: Path, doc: Path, rows: list, basenames: set):
                 else:
                     rows.append(("ok", "link", where, target))
 
-            for token in INLINE_CODE_RE.findall(line):
+            for match in INLINE_CODE_RE.finditer(line):
+                token = match.group(2)
                 if not looks_like_path(token):
                     continue
                 cand = normalize(token)
                 if not cand:
                     continue
                 rows.append(
-                    (classify_path(root, doc, cand, basenames), "inline-path", where, token)
+                    path_row(classify_path(bases, cand, basenames), "inline-path", historical)
+                    + (where, token)
                 )
             continue
 
@@ -290,7 +371,8 @@ def check_doc(root: Path, doc: Path, rows: list, basenames: set):
             if not cand:
                 continue
             rows.append(
-                (classify_path(root, doc, cand, basenames), "shell-path", where, token)
+                path_row(classify_path(bases, cand, basenames), "shell-path", historical)
+                + (where, token)
             )
 
 
@@ -340,6 +422,8 @@ def main(argv):
         "            THIS tree and it is false — fix these.\n"
         "unresolved= nothing in the tree matches; could equally be a runtime file,\n"
         "            an example, or prose with a slash in it — read before acting.\n"
+        "historical-* = same, but in a CHANGELOG/RELEASE_NOTES, where a path that\n"
+        "            no longer resolves is usually correct history. Never \"fix\" one.\n"
         "unchecked = commands and external links; running/fetching them is\n"
         "            docs-loop step 5's job, not this script's.\n"
         "Resolvable references only — prose accuracy is step 3's job either way.",

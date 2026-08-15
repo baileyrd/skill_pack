@@ -5,6 +5,40 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## docs-loop v1.1.0 — cut check_references.py's false positives 26 → 6
+**2026-08-15**
+
+- **Added:** component-relative path resolution. Candidates resolve against
+  the doc's directory, its nearest enclosing component (a directory with a
+  `SKILL.md` or a language manifest), then the repo root. This repo is a
+  tree of independently-packaged skills, so shorthand like `scripts/run.sh`
+  inside a skill's `references/` was being reported broken on every single
+  skill. It now resolves the way a reader reads it. 23 → 18 inline-path
+  rows.
+- **Fixed:** the checker was parsing markdown link syntax quoted inside
+  backticks as a real link, so a release note *documenting* a broken link
+  re-reported that link forever. Found because this repo's own release notes
+  did exactly that — the entry describing the `#operators-in-expressions`
+  fix was itself reported as a broken anchor, twice. Code spans are now
+  masked before link extraction; path candidates still come from the code
+  spans. 3 broken anchors → 0.
+- **Added:** `historical-*` verdicts for non-resolving paths in
+  `CHANGELOG`/`RELEASE_NOTES` files. A path in a past entry that no longer
+  exists is usually the log doing its job, and docs-loop's own Rules already
+  say never to rewrite a past entry — so reporting those as `broken` was
+  sending an auditor at rows they're forbidden to act on. 55 rows moved off
+  the action list without disappearing from the report.
+- **Verified no real finding was lost:** the two genuine findings from the
+  v1.0.0 run were already fixed in the previous change, and the remaining 6
+  `broken` rows were each read individually. All 6 are the structural class
+  the skill's Limitations already names — a doc describing a *different*
+  component or repo — or build-state-dependent (`README.md`'s `zip/`
+  example, which resolves or not depending on whether zips were built).
+- **Not chased:** the ~150 `unresolved` rows. That verdict exists precisely
+  to hold "might be a runtime file, an example, or prose with a slash in
+  it," and driving it to zero would mean tightening heuristics until real
+  findings vanish with the noise.
+
 ## Work docs-loop's first two findings (#16, #17)
 **2026-08-15** · [#16](https://github.com/baileyrd/skill_pack/issues/16) · [#17](https://github.com/baileyrd/skill_pack/issues/17)
 

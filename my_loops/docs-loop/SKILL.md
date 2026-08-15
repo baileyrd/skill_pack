@@ -1,7 +1,7 @@
 ---
 name: docs-loop
 description: Reviews a repo's documentation against what the code actually does right now, then updates it — builds ground truth from the manifest, entry points, CLI help, scripts, CI workflows, and the real directory tree FIRST, then audits every checkable claim in README/ARCHITECTURE/CONTRIBUTING/docs/ADRs and public doc-comments, classifying each as accurate, stale, missing, orphaned, aspirational, or unverifiable in a `docs-audit.md` checkpoint before a single edit lands. Use whenever the user asks for a documentation review, wants docs updated to match the current state of the repo, wants drift/rot checked after a batch of merged work, wants README or ARCHITECTURE brought up to date, wants broken doc links and dead file paths found, asks "are the docs still right", or names it (docs-loop, doc review loop, docs drift loop). Companion to repo-config, which installs the governance file SET and only checks those files are PRESENT — this one checks whether their CONTENT is still true; same PR/CI/merge mechanics as its my_loops siblings. Checkpointed with per-finding sign-off by default, proceeding unattended on verifiable stale-fact and broken-reference rows when `LOOP_HARNESS_MODE=auto` (any finding where the CODE looks wrong rather than the doc always still waits).
-version: 1.0.0
+version: 1.1.0
 ---
 
 # docs-loop
@@ -215,11 +215,16 @@ regardless of harness setting:
 - The mechanical half (`check_references.py`) covers links, anchors, and
   paths — the claims a machine can settle. Prose accuracy is judgment, and
   a clean script run is not evidence the docs are true. Most real drift is
-  invisible to it. It also has one structural false-positive class: a doc
-  describing a *different* repo's layout (which is most of this repo's own
-  skills) names paths that correctly don't exist here. And it resolves
-  against the working tree as it stands, so gitignored build output being
-  present or absent changes some rows — run it on a clean tree.
+  invisible to it. One structural false-positive class survives its
+  resolution rules: a doc describing a *different* component's or repo's
+  layout (which is most of this repo's own skills) names paths that
+  correctly don't exist here. And it resolves against the working tree as it
+  stands, so gitignored build output being present or absent changes some
+  rows — run it on a clean tree.
+- `historical-*` rows are reported but must never be acted on as drift. A
+  path in a past `CHANGELOG`/`RELEASE_NOTES` entry that no longer resolves
+  is usually the log doing its job — the entry recording a file's removal.
+  The script labels them; the Rules above are what actually forbid the edit.
 - The drift signal in `inventory_docs.sh` is commit recency, not semantics.
   A doc untouched for a year can be perfectly accurate, and a doc edited
   yesterday can be wrong — it ranks candidates for attention, nothing more.
