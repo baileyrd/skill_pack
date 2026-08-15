@@ -16,7 +16,10 @@ Columns:
 - **Category** — one of `SKILL.md`'s step 3 categories:
   `ambiguous-instruction` / `missing-guardrail` / `stale-reference` /
   `redundant-step` / `tooling-bug` / `description-triggering` /
-  `scope-drift`.
+  `scope-drift`. Note `redundant-step` covers two shapes — a step that added
+  nothing, and a step stated unconditionally that's only correct sometimes.
+  The second takes a condition as its proposed edit, not a deletion; see
+  `SKILL.md` step 3 for why the distinction matters.
 - **Severity** — `cosmetic` / `costly-guess` / `could-have-caused-real-damage`,
   judged by what the gap could cause on a *different* run, not just how
   this run happened to turn out.

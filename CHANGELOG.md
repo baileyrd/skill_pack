@@ -128,6 +128,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- `meta/skill-retro` (v1.1.0 → v1.1.1) — `redundant-step` now covers both a
+  step that added nothing *and* a step stated unconditionally that's only
+  sometimes correct, since the second takes a condition rather than a
+  deletion as its fix. From this skill's own self-retro, where a `docs-loop`
+  finding had to be filed under a category that implied the wrong edit.
 - `ARCHITECTURE.md` Non-goals said "`scripts/*.py` are one-shot tooling
   invoked by hand" — no longer true of `check_repo.py` once CI ran it. Drift
   introduced by this repo's own CI change hours earlier, caught while writing

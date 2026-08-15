@@ -1,7 +1,7 @@
 ---
 name: skill-retro
 description: Runs a post-execution retrospective on a skill (call it B) immediately after B finishes real work, treating what just happened as evidence about B's own instructions rather than about the task B was doing. Re-reads B's current SKILL.md/references/scripts on disk, reconstructs what actually happened in this session against them — every ambiguity resolved by guessing, every question asked that B's instructions should have pre-answered, every step skipped/reordered/improvised, every stale reference or script that errored — and reports each as a finding: what happened, which file/section it traces to, and a concrete proposed edit. Never edits B's files unprompted; applies findings only on explicit approval, then bumps B's version and RELEASE_NOTES.md per this repo's own versioning convention, through the normal PR workflow. Use immediately after finishing a task that leaned on another skill in this repo, when the user asks to retro/review/critique/post-mortem a skill that was just used, wants to close the loop on whether that skill's own instructions were good enough, or references this by name (skill-retro, meta-review).
-version: 1.1.0
+version: 1.1.1
 ---
 
 # skill-retro
@@ -69,11 +69,14 @@ numbered/step structure (if it has one) and note, per step:
 **3. Classify each real finding** (skip step 2 items that resolved cleanly
 — this report is about friction, not a step-by-step recap):
 - **Category**: `ambiguous-instruction` / `missing-guardrail` (a stop-and-ask
-  B should have had but didn't) / `stale-reference` / `redundant-step` /
-  `tooling-bug` (a script/template that's actually broken) /
-  `description-triggering` (B's frontmatter `description` didn't actually
-  match how/when it got invoked) / `scope-drift` (B's instructions and what
-  it was actually asked to do have quietly diverged).
+  B should have had but didn't) / `stale-reference` / `redundant-step` (a
+  step that added nothing, **or one stated unconditionally that's only
+  correct in some contexts** — the fix for the second kind is a condition,
+  not a deletion, so don't let the category's name push you toward cutting a
+  step that's right half the time) / `tooling-bug` (a script/template that's
+  actually broken) / `description-triggering` (B's frontmatter `description`
+  didn't actually match how/when it got invoked) / `scope-drift` (B's
+  instructions and what it was actually asked to do have quietly diverged).
 - **Severity**: `cosmetic` (wording, would've worked out either way) /
   `costly-guess` (produced a workable but not-obviously-right result) /
   `could-have-caused-real-damage` (a guardrail gap that, on a different run,
