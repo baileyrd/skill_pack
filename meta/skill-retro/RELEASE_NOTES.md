@@ -9,6 +9,28 @@ still open.
 
 ---
 
+## v1.1.1 — `redundant-step` covers two shapes, not one
+**2026-08-15**
+
+- **Fixed:** step 3's category list gave `redundant-step` no definition, and
+  the name pushes toward deletion. Applied from this skill's own step-6
+  self-retro, run after a `docs-loop` retro where a finding didn't fit: the
+  tracking-issue step there wasn't redundant at all — it was **correct when
+  auditing and fixing are split, and stated unconditionally**. The fix was a
+  condition, not a cut. `redundant-step` was used anyway because nothing
+  better existed, which is how a taxonomy gap turns into a wrong proposed
+  edit.
+- `redundant-step` now explicitly covers both shapes, with a warning not to
+  let the category's name push toward cutting a step that's right half the
+  time. `references/retro-findings-format.md` cross-references it.
+- **Two sibling findings from the same self-retro were logged and not
+  applied** — step 0's assumption that B's run is a discrete "just finished"
+  block (it spanned eight turns with unrelated work interleaved), and the
+  findings format having nowhere to record a rule that *fired and prevented*
+  a defect. Both `cosmetic`, both single-run evidence; per this skill's own
+  Limitations, one occurrence of a minor finding is worth logging rather than
+  necessarily acting on. They'll be worth doing if a second run hits them.
+
 ## v1.1.0 — Wire skill-retro into its own wrap-up (step 6, self-retro)
 **2026-08-13**
 

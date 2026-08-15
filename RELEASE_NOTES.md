@@ -5,6 +5,32 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## skill-retro v1.1.1 — its own self-retro, one finding applied
+**2026-08-15**
+
+- **Fixed:** `skill-retro`'s step 3 gave `redundant-step` no definition, and
+  the name alone pushes toward deletion. Found by its own step-6 self-retro,
+  run automatically after the `docs-loop` retro: one of that retro's six
+  findings didn't fit any category cleanly. `docs-loop`'s per-run tracking
+  issue wasn't redundant — it was correct when auditing and fixing are split,
+  and stated unconditionally. The right edit was a condition, not a cut, and
+  the category name argued for the opposite.
+- The category now names both shapes explicitly, with the warning attached.
+  A taxonomy gap that quietly recommends the wrong fix is worth closing on
+  first occurrence, unlike the two below.
+- **Logged, deliberately not applied:** step 0 assumes B's run is a discrete
+  "just finished" block, where this one spanned eight turns with unrelated
+  work interleaved and four PRs landing on top before the retro was asked
+  for; and the findings format has nowhere to record a rule that *fired and
+  prevented* a defect, so the evidence that `docs-loop` step 4's
+  checkable-claims rule caught two false sentences had to go outside the
+  table as prose. Both `cosmetic`, both single-run — and this skill's own
+  Limitations argue that one occurrence of a minor finding is worth logging
+  rather than acting on. Applying its own advice to itself seemed like the
+  point.
+- **The recursion guard worked:** B was `docs-loop`, so step 6 fired once and
+  did not cascade into retro-ing the self-retro.
+
 ## skill-retro on docs-loop — six findings, all applied
 **2026-08-15**
 
