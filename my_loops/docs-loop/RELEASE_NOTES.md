@@ -9,6 +9,50 @@ open.
 
 ---
 
+## v1.1.0 — Cut check_references.py's false positives 26 → 6
+**2026-08-15**
+
+Three fixes to what the checker treats as a claim about the tree. Measured
+against `skill_pack` itself, whole-repo: **26 `broken` rows → 6**, including
+**3 broken anchors → 0**. No real finding was lost — the two genuine ones
+from v1.0.0's run were already fixed in #18, and re-running against that
+state reproduces them when reverted.
+
+- **Added:** component-relative resolution. Paths now resolve against three
+  bases, nearest first — the doc's own directory, its nearest enclosing
+  component (a directory holding a `SKILL.md` or a language manifest), and
+  the repo root. A skill's `references/foo.md` saying `scripts/run.sh` means
+  its own sibling `scripts/`, which is how a reader reads it and how the
+  checker now reads it too. This alone cleared the four
+  `platform-directory.md` rows and 23 → 18 inline-path rows.
+- **Fixed:** markdown link syntax quoted inside backticks was parsed as a
+  real link. A release note saying "the TOC linked
+  `` `[Operators](#operators)` ``" is *describing* a link, not making one —
+  so every note documenting a broken link re-reported that broken link
+  forever. Exactly the trap a docs checker shouldn't walk into, and it was
+  this skill's own release notes that walked into it. Code spans are now
+  masked before link extraction (length-preserving, so columns still line
+  up); path candidates still come from the code spans themselves. Same line,
+  two readings. 3 broken anchors → 0.
+- **Fixed:** code spans delimited by a run of backticks (``` ``a `b` c`` ```)
+  were only matched at length one, leaving the inner content exposed to the
+  link and path scanners. Caught by writing the entry above: quoting the
+  quoted-link example needed double backticks, which promptly produced a
+  seventh false positive in this very file.
+- **Added:** `historical-*` verdicts. A non-resolving path in a
+  `CHANGELOG`/`RELEASE_NOTES` is usually *correct history* — the entry
+  recording that a file was removed is doing its job — and this skill's own
+  Rules already forbid rewriting past entries. Reporting those as `broken`
+  sent an auditor to rows they're not allowed to touch. They're now
+  `unresolved` with a self-labelling kind, still visible, no longer an
+  action item. 55 rows moved.
+- **Unchanged, deliberately:** the remaining 6. Each is a doc describing a
+  *different* component or repo (`docs-loop`'s own SKILL.md citing a target
+  repo's `.github/workflows/`, `skill-retro`'s format example, dedupe-loop
+  citing repo-config's `scripts/audit.sh`), or build-state-dependent
+  (`README.md`'s `zip/` example). That class is structural — no resolution
+  rule fixes it without also hiding real findings.
+
 ## v1.0.0 — Initial release
 **2026-08-15**
 
