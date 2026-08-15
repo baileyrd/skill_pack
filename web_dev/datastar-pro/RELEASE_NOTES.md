@@ -9,6 +9,28 @@ still open.
 
 ---
 
+## v1.0.1 — Fix dead TOC anchor in core.md
+**2026-08-15**
+
+- **Fixed:** `references/core.md`'s table of contents linked
+  `[Operators in Expressions](#operators-in-expressions)`. The heading it
+  means is `### Operators`, which GitHub slugs to `#operators`, so the link
+  went nowhere. The entry was also listed after `Action Calls` when the
+  section it points at sits *before* it, under `## Expression Syntax`.
+- **Fixed by:** pointing the entry at the real anchor (`[Operators](#operators)`)
+  and moving it into document order. Fixed the TOC rather than renaming the
+  heading — the heading is the content, the TOC is a pointer at it, and
+  pointers yield to what they point at. Every other anchor in the file
+  already resolved; this was the single wrong entry, not a systemic problem.
+- **Found by:** `my_loops/docs-loop`'s first run against this repo
+  ([#17](https://github.com/baileyrd/skill_pack/issues/17)). Worth noting
+  for anyone re-running that checker against this skill: the finding only
+  became visible after fixing the checker's own slug generation, which had
+  been collapsing runs of whitespace and so reported 12 *correct* anchors in
+  `references/styling.md` as broken. GitHub hyphenates each whitespace
+  character, so `data-style — Reactive Inline Styles` is
+  `#data-style--reactive-inline-styles`, with two hyphens.
+
 ## v1.0.0 — Imported from baileyrd/datastar-pro-skill
 **2026-08-13**
 

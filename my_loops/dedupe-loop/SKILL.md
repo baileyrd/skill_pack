@@ -1,7 +1,7 @@
 ---
 name: dedupe-loop
 description: Scans a set of platform repos for duplicate or near-duplicate implementations (e.g. every repo growing its own HTTP client wrapper) and proposes hoisting the genuine duplicates into a single common module on the platform layer, per the mechanism/policy split already established by ADR-011. Trigger on requests to find duplicated code across repos, consolidate common functionality, "do we have three versions of this," or hoist something into rustils/the platform layer. Companion to parity-loop and sovereignty-loop (same PR/CI/merge mechanics, same platform-repo scoping question) — checkpointed with per-cluster sign-off by default (this one spans repos, so a wrong call is costlier to unwind), but exact/near-duplicate clusters proceed unattended when `LOOP_HARNESS_MODE=auto`; a convergent-but-diverged cluster's behavioral question always still needs a human answer regardless of harness mode.
-version: 1.1.0
+version: 1.1.1
 ---
 
 # dedupe-loop
@@ -63,6 +63,11 @@ doc comments plus public item signatures (`pub fn` / `pub struct` /
 `pub trait` / `pub enum`) with their first doc line, one row per item. Run it
 once per repo in `PLATFORM_REPOS`; this is mechanical extraction, not
 judgment yet.
+
+The argument is a **local path**, not a repo name — this skill has no clone
+step, so any repo in `PLATFORM_REPOS` that isn't already checked out has to
+be cloned first (`references/platform-directory.md` has the one-liner and
+the namespace caveat).
 
 **2. Cluster candidates across repos** — `scripts/find_clusters.py` takes
 the combined indices and groups items by normalized name/keyword overlap
@@ -207,6 +212,12 @@ finds is a separate, explicitly-approved follow-up, not part of this run.
 - Cross-repo sequencing means a cluster can't fully complete in one sitting
   the way a `parity-loop` issue can — the hoist PR has to merge before
   adoption PRs even start. Plan for a cluster to span more than one session.
+- No clone path, deliberately: `index_capabilities.sh` reads a local
+  directory and nothing here fetches a repo, so a `PLATFORM_REPOS` entry
+  that isn't checked out is a manual `gh repo clone` before step 1. The
+  sibling skills' `scan_platform_repos.sh` does this for them; porting it
+  here would add a `gh` dependency this skill otherwise doesn't need, so
+  it's a separate decision rather than an assumed gap.
 - Assumes each consuming repo already has (or the user sets up) a pinning
   mechanism for depending on `HOIST_TARGET` — the ADR-011 precedent for
   rust-shell is the model to follow; this skill doesn't establish that

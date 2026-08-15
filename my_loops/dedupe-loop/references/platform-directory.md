@@ -57,9 +57,20 @@ same as coverage.
 
 ## Resolving a bare repo name
 
-`scripts/scan_platform_repos.sh` needs an owner/repo slug to clone a repo
-it doesn't have checked out locally. Use this table's **Namespace** column
-to build the slug — don't assume everything is still under the personal
-namespace or that migration to `Rusty-Mill` is finished for a given repo;
-check this table first, then fall back to trying both namespaces if a repo
-isn't listed here yet.
+`scripts/index_capabilities.sh` takes a **local repo path**, not a repo
+name — dedupe-loop has no clone step of its own, unlike the sibling skills
+whose `scan_platform_repos.sh` will fetch a repo it doesn't have. So a repo
+in `PLATFORM_REPOS` that isn't checked out locally has to be cloned before
+step 1 can index it:
+
+```bash
+gh repo clone <namespace>/<repo> /path/to/scratch/<repo> -- --depth 1
+```
+
+Use this table's **Namespace** column to build that slug — don't assume
+everything is still under the personal namespace or that migration to
+`Rusty-Mill` is finished for a given repo; check this table first, then fall
+back to trying both namespaces if a repo isn't listed here yet.
+
+A shallow clone is enough: `index_capabilities.sh` reads the working tree
+only and never looks at history.

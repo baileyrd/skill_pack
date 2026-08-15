@@ -10,7 +10,7 @@ description: >
   page", "create a Datastar app", "SSE-powered UI", "hypermedia application", "Stellar CSS",
   or any mention of data-bind, data-signals, data-on, data-text, data-show, @get, @post,
   or similar Datastar attribute/action syntax.
-version: 1.0.0
+version: 1.0.1
 ---
 
 # Datastar Pro Skill

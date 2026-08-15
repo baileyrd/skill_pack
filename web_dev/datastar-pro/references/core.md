@@ -7,8 +7,8 @@ For SSE/server patterns, see `references/backend.md`. For styling/animation, see
 
 - [Signal Declaration](#signal-declaration)
 - [Expression Syntax](#expression-syntax)
+- [Operators](#operators)
 - [Action Calls](#action-calls)
-- [Operators in Expressions](#operators-in-expressions)
 - [Modifier Syntax](#modifier-syntax)
 - [Computed Signals & Effects](#computed-signals--effects)
 - [Data Binding Deep-Dive](#data-binding-deep-dive)

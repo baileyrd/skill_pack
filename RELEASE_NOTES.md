@@ -5,6 +5,42 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Work docs-loop's first two findings (#16, #17)
+**2026-08-15** · [#16](https://github.com/baileyrd/skill_pack/issues/16) · [#17](https://github.com/baileyrd/skill_pack/issues/17)
+
+- **Fixed:** `my_loops/dedupe-loop` (v1.1.1) —
+  `references/platform-directory.md` told the reader
+  `scripts/scan_platform_repos.sh` would clone a repo that wasn't checked
+  out. That script exists in four sibling skills and not in this one. What
+  the reading turned up is bigger than the wrong filename: dedupe-loop has
+  no clone path at all, and `index_capabilities.sh` takes a local directory,
+  so an un-checked-out `PLATFORM_REPOS` entry silently can't be indexed. The
+  section now documents the actual workflow (`gh repo clone ... --depth 1`,
+  namespace caveat intact), step 1 states the local-path requirement instead
+  of leaving it to a usage error, and Limitations records the absent clone
+  path as a deliberate choice — porting the sibling's script would add a
+  `gh` dependency this skill otherwise doesn't need.
+- **Fixed:** `web_dev/datastar-pro` (v1.0.1) — `references/core.md`'s TOC
+  entry `[Operators in Expressions](#operators-in-expressions)` pointed at
+  nothing; the heading is `### Operators` (slug `#operators`), and the entry
+  was listed after `Action Calls` when its section precedes it. Fixed the
+  TOC rather than the heading: the heading is the content, the TOC is a
+  pointer at it.
+- **Not fixed, deliberately:** the other 16 `broken` rows from the same
+  checker run. They're the documented cross-repo false-positive class —
+  docs here describing *other* repos, skill-relative shorthand, and
+  `CHANGELOG.md`'s pointer to a file it correctly records as removed. Two
+  real findings out of 18 candidates is the ratio the skill's own
+  Limitations predicts, and acting on the other 16 would have meant
+  vandalising accurate docs.
+- **Follow-up worth doing, not done here:** `check_references.py` resolves
+  a candidate path against the doc's own directory and the repo root only.
+  Most of this repo's shorthand (`scripts/audit.sh` inside a
+  `references/` subdirectory) would resolve if it also tried the nearest
+  ancestor containing a `SKILL.md`. That would cut the false-positive class
+  substantially — a change to the tool, kept out of a change that was
+  supposed to be about the two findings.
+
 ## Add my_loops/docs-loop — documentation review/update loop
 **2026-08-15** · branch `claude/docs-review-loop-skill-ih5zhr`
 

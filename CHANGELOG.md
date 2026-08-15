@@ -62,6 +62,20 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- `my_loops/dedupe-loop` (v1.1.0 → v1.1.1) — `references/platform-directory.md`
+  documented a `scripts/scan_platform_repos.sh` the skill doesn't have,
+  copied in from a sibling that does. Reading it revealed the real gap:
+  dedupe-loop has no clone path at all, so `PLATFORM_REPOS` entries must be
+  checked out before step 1. Section rewritten, prerequisite stated in step
+  1, and the missing clone path recorded in Limitations as a deliberate
+  choice rather than an oversight ([#16](https://github.com/baileyrd/skill_pack/issues/16)).
+- `web_dev/datastar-pro` (v1.0.0 → v1.0.1) — `references/core.md`'s TOC
+  linked `#operators-in-expressions` against a heading that slugs to
+  `#operators`, and listed it out of document order. Fixed the pointer, not
+  the heading ([#17](https://github.com/baileyrd/skill_pack/issues/17)).
+- Both were the two genuine findings from `docs-loop`'s first run; the other
+  16 `broken` rows it reported were the documented cross-repo
+  false-positive class and were correctly left alone.
 ### Security
 
 <!-- ## [0.1.0] - YYYY-MM-DD
