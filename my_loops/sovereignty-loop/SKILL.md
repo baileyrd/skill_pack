@@ -1,7 +1,7 @@
 ---
 name: sovereignty-loop
 description: Audits a repo's external dependencies, checks whether an existing repo, library, or component across the Rusty-Mill org or baileyrd's personal rusty_* repos already covers the same capability, and proposes a swap-to-internal or a scoped hand-rolled replacement for each — turning "we depend on too many external crates" into a bounded loop. Trigger on requests to reduce external dependencies, consolidate around the platform layer, check for supply-chain/sovereignty exposure, or "do we already have something for this" against the user's own repo ecosystem. Companion to parity-loop (same PR/CI/merge mechanics) and repo-config (same governance conventions) — checkpointed with per-row sign-off by default since replacing a dependency is a toolchain change, but proceeds unattended on pre-classified-safe rows when `LOOP_HARNESS_MODE=auto` (hand-roll L/XL and ambiguous rows always still wait).
-version: 1.1.1
+version: 1.2.0
 ---
 
 # sovereignty-loop
@@ -83,16 +83,60 @@ existing coverage:
   eliminating it at the floor. Note this distinction in the report (see
   step 3) rather than collapsing it into a flat yes/no.
 
+**2.5. Reachability check — required before any row is called eliminable**
+
+Removing a dependency from the target's own manifest only removes it from the
+build if **nothing else in the graph pulls it**. This step is not optional and
+not a judgment call: run it for every dependency that steps 1–2 leave looking
+like a `covered`, `partial`, or `hand-roll candidate` row.
+
+```
+cargo tree --workspace -e normal,build -i <crate>     # Rust
+pipdeptree --reverse --packages <pkg>                 # Python
+npm ls <pkg>                                          # Node
+```
+
+Read the *whole* reverse tree, not just the first line. Three outcomes:
+
+- **Only the target reaches it** → the row is genuinely eliminable. Classify
+  normally.
+- **Something else also reaches it** → the row is **not** eliminable, and
+  must not be classified `covered`/`hand-roll candidate` as though it were.
+  Reclassify as `keep external` and record the other path. The most this row
+  can achieve is "stop naming it directly," which is worth doing only as a
+  *precondition* for a change somewhere else — say so explicitly rather than
+  presenting it as a removal.
+- **The other path is itself an internal repo** → the real target is that
+  repo, not this one. Say where, and propose the audit there as the
+  follow-up. That is usually the higher-value finding.
+
+Why this is a hard requirement rather than a nicety: step 1's direct-dependency
+scope makes a transitively-reachable crate look identical to an eliminable one.
+In the audit this rule comes from, `syn`/`quote`/`proc-macro2` were classified
+as the target's only removable dependency, a complete hand-rolled replacement
+was built and verified, and only then did `cargo tree -i syn` reveal all three
+still arriving via `platform` → `thiserror` → `thiserror-impl`. The lockfile
+was unchanged either way. One command before classifying would have caught it,
+and would have pointed straight at the single `thiserror` derive that was the
+actual lever.
+
 **3. Classify & report** — one row per dependency in `dependency-audit.md`
 (format: `references/dependency-audit-format.md`):
 - **covered** — an internal repo already does this; recommend swap-to-internal.
 - **partial** — internal repo covers part of it; recommend extend-and-swap,
   keep external for the remainder.
-- **hand-roll candidate** — no internal coverage, and the surface is small
-  and bounded enough to build; note a rough size (S/M/L/XL).
+- **hand-roll candidate** — no internal coverage, the surface is small and
+  bounded enough to build, **and step 2.5 confirmed nothing else in the graph
+  reaches it**; note a rough size (S/M/L/XL).
 - **keep external** — a deliberate decision (too foundational, too large a
-  surface, low sovereignty relevance for this dependency specifically), not
-  a silent skip. Log the reason.
+  surface, low sovereignty relevance for this dependency specifically, or
+  transitively reachable regardless per step 2.5), not a silent skip. Log the
+  reason.
+
+Record the step 2.5 result in every row's Notes, including the ones that came
+back clean — "only the target reaches it" is evidence the check ran, and its
+absence on a later re-read is indistinguishable from the check being skipped.
+
 
 Report this before doing anything else — it's the checkpoint. In
 **interactive** harness mode (default), **nothing in step 4 starts without
@@ -190,6 +234,12 @@ follow-up, not part of this run.
   still wait — see "Harness mode."
 - Never relitigate an already-decided floor dependency — check
   RFC/ARCHITECTURE in step 0 before the audit runs, not after.
+- **Never classify a row as eliminable without the step 2.5 reachability
+  check.** `cargo tree -i <crate>` (or the ecosystem equivalent) before
+  `covered`/`partial`/`hand-roll candidate`, and record the result in the
+  row's Notes either way. A crate something else in the graph reaches is
+  `keep external`, however small and self-contained its use in the target
+  looks.
 - Hand-roll size L/XL is never attempted inline — hand back a dedicated-repo
   proposal instead, per the tailscale-rs precedent.
 - Same standing workflow as `parity-loop`/`repo-config`: PR against default
@@ -216,9 +266,18 @@ follow-up, not part of this run.
 - crates.io lookups need network reachability; air-gapped/SIPR runs fall
   back to local manifest/source data only, so "purpose" may be thinner than
   a connected run would produce.
-- Direct dependencies only by default. Transitive supply-chain exposure
-  (what your dependencies depend on) needs a separate pass — `cargo tree` is
-  a starting point — not scoped into this skill.
+- Direct dependencies only by default — the *audit* enumerates what the target
+  itself names, not the full graph. Step 2.5 narrows this to the one question
+  that changes a verdict ("does anything else reach this crate?"), but it
+  doesn't make the audit a supply-chain review: it won't surface a risky
+  transitive dependency nobody in the graph names directly, and it won't tell
+  you what your dependencies' dependencies do. A real transitive-exposure pass
+  is still a separate exercise.
+- Step 2.5 answers *whether* a crate is reachable another way, not *how hard*
+  that other path is to change. A row can be correctly reclassified `keep
+  external` while the follow-up it points at turns out to be a fifteen-line
+  fix in a sibling repo — that's a good outcome, but this skill won't size it
+  for you. Chase the pointer.
 - The S/M/L/XL hand-roll size is a routing gut-call (inline loop vs.
   dedicated-repo proposal), not a committed estimate — treat it as a
   starting point for scoping, not a promise.

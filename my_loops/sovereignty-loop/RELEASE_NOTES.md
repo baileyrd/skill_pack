@@ -10,6 +10,37 @@ still open.
 
 ---
 
+## v1.2.0 — Require a reachability check before calling a dependency removable
+**2026-08-15**
+
+- **Added: step 2.5, a required reachability check.** Before any dependency is
+  classified `covered`/`partial`/`hand-roll candidate`, the loop now runs
+  `cargo tree -i <crate>` (with `pipdeptree --reverse` / `npm ls` equivalents
+  given) and reads the full reverse tree. A crate anything else in the graph
+  reaches is `keep external` however small its use in the target looks; when
+  the other path is an internal repo, that repo becomes the follow-up — usually
+  the higher-value finding.
+- **Added:** a required **Reachable via** column in
+  `references/dependency-audit-format.md`, populated on every row including
+  clean ones (`target only`). A blank cell is indistinguishable from a skipped
+  check, which is the failure mode this guards against.
+- **Why:** auditing `rusty_tokio`, `syn`/`quote`/`proc-macro2` were classified
+  as its only removable dependency. A complete hand-rolled replacement for the
+  proc-macro crate was built and verified — then `cargo tree -i syn` showed all
+  three still arriving via `platform` → `thiserror` → `thiserror-impl`, with
+  the lockfile unchanged at 38 packages either way. The work was discarded
+  (baileyrd/rusty_tokio#268, PR #270). One command before classifying would
+  have caught it, and would have pointed straight at the single `thiserror`
+  derive in `rustils` that was the actual lever (baileyrd/rustils#128).
+- **Changed:** the "direct dependencies only" limitation now separates what
+  step 2.5 fixes (a wrong verdict on a named dependency) from what it doesn't
+  (surfacing risky transitive dependencies nobody names — still a separate
+  exercise), plus a note that the check says whether another path exists, not
+  how hard it is to change.
+- **Fixed:** `references/platform-directory.md` refreshed against the live
+  namespaces — see the parity-loop/issue-loop/dedupe-loop notes for the same
+  fix; the file is shared verbatim across all four.
+
 ## v1.1.1 — Declare jq, and split required from optional
 **2026-08-15**
 

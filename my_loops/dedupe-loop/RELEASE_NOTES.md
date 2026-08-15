@@ -10,6 +10,27 @@ still open.
 
 ---
 
+## v1.2.0 — Refresh the stale platform repo directory
+**2026-08-15**
+
+- **Fixed:** `references/platform-directory.md` was wrong in a way that broke
+  the scan step, not just incomplete. It listed ~25 repos under `Rusty-Mill/*`
+  — rustils, rusty_json, rusty_http, rusty_libc, rusty_tokio, rusty_wire and
+  others — when all of them live under `baileyrd`. Only four repos are actually
+  in the Rusty-Mill org. Since the file's own "Resolving a bare repo name"
+  section tells the scan script to build clone URLs from that column, every one
+  of those lookups would 404.
+- **Fixed:** it listed 30 repos against an actual 80+, missing `rusty_sync`,
+  `rusty_wire`, `rusty_codec`, `rusty_stream` and others. Two of those turned
+  out to be the relevant candidates in a real audit.
+- **Fixed:** three entries don't exist under the names given — `rush`,
+  `rusty_compactor` (it's `rusty_token_compactor`), `rusty_tail` (it's
+  `rusty_tailscale`). `rusty_async` exists but is an empty repository.
+- **Changed:** regrouped by function; purposes not confirmed by reading source
+  are now marked `†` rather than asserted; added a note that `platform`'s
+  `thiserror` dependency pulls syn/quote/proc-macro2/unicode-ident into every
+  consumer of the platform layer.
+
 ## v1.1.2 — Correct the dependency line
 **2026-08-15**
 
