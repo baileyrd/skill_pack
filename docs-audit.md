@@ -1,7 +1,8 @@
 # docs-audit.md
 
 **Run:** 2026-08-15 against `462d704` · **Scope:** whole repo (95 tracked docs)
-**Counts:** 3 stale · 1 missing · 1 orphaned · 3 aspirational · 0 unverifiable · 4 accurate
+**Counts at audit:** 3 stale · 1 missing · 1 orphaned · 3 aspirational · 0 unverifiable · 4 accurate
+**After the first fix pass:** rows 1, 3 and 4 fixed; one new `missing` row found *by* fixing row 1 (see below). 4 rows still awaiting a decision.
 
 ## Findings
 
@@ -18,6 +19,11 @@
 | README.md | Repo tooling, L63 | "Three standalone scripts under `scripts/`" | accurate | Exactly 3: `build_skill_zips.py`, `install_skills.py`, `restore_exec_bits.py` | none | — |
 | README.md | Versioning, L58 | notebooklm is the one unversioned exception | accurate | It's the only skill with no `version:` and no `RELEASE_NOTES.md` | none | — |
 | 5 × `check_references` broken rows | — | — | accurate (non-findings) | Each names a *different* component's or repo's path — the structural false-positive class docs-loop's Limitations already documents | none | — |
+| meta/my-skill-creator/SKILL.md | whole file | — | missing *(new — found while fixing row 1)* | `meta/my-skill-creator/scripts/quick_validate.py:8` does `import yaml` (PyYAML, third-party). The SKILL.md declares no dependency, and unlike its siblings makes no "stdlib only" claim either — so nothing is contradicted, but a real runtime requirement is undocumented. `jq` and `rg` are likewise invoked by `my_loops` shell scripts | Declare it — one line in that skill's Scripts section | S |
+
+**Rows 1, 3 and 4 are fixed** (`README.md` intro, `README.md` zip example,
+`ARCHITECTURE.md` Structure). Struck through above only in this note rather
+than removed, so the next run sees them as settled.
 
 ## Auto-eligible vs. always-waits
 
@@ -52,3 +58,17 @@ edits code:
   true rather than claims that rotted. For a repo of this age that's the
   interesting result: the docs describe an intended engineering practice (CI,
   tests, recorded decisions) that hasn't been built.
+- **The fix pass caught its own bad sentence.** The first replacement written
+  for row 1 asserted that the categories without a README needed "nothing
+  beyond `git`, `gh`, and the Python standard library." Checking it before
+  committing — per the rule that every written claim must point at something
+  in the tree — showed it was false: `quick_validate.py` imports PyYAML and
+  the loop scripts shell out to `jq`/`rg`. The claim was replaced with one
+  that doesn't assert what it can't show, and the false premise became the
+  new `missing` row above. A confident, plausible, wrong sentence is exactly
+  what this loop is supposed to keep out of a README, and it nearly wrote one.
+- `trying/` is described in `ARCHITECTURE.md` only by what's checkable — that
+  it holds `.skill` archives and is skipped by the tooling. Its *purpose*,
+  as distinct from `need_to_productize/`, is recorded nowhere in the repo;
+  the folder name is the only evidence, and a name is not ground truth. Worth
+  a sentence from whoever knows, rather than an inferred one.

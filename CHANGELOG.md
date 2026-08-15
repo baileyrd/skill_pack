@@ -81,6 +81,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- Three verifiable `docs-loop` findings: `README.md`'s "each category's own
+  README" claim (only `yt_research_for_cc/` has one), its stale
+  `zip/dedupe-loop-v1.0.0.zip` example (now version-free so it can't rot),
+  and `ARCHITECTURE.md`'s Structure section, which never mentioned
+  `need_to_productize/` or `trying/` — both now described by what's
+  checkable: `.skill` archives, no `SKILL.md`, skipped by the tooling.
 - 18 tracked scripts were committed as `100644` despite starting with `#!` —
   every script in `dedupe-loop`/`issue-loop`/`parity-loop`/`sovereignty-loop`,
   both `yt_research_for_cc` scripts, and all three under `scripts/`. All now

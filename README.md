@@ -2,7 +2,7 @@
 
 Personal collection of [Claude Agent Skills](https://support.claude.com/en/articles/12512176-what-are-skills) — folders of instructions, scripts, and resources that Claude Code / OMP / Claude.ai load dynamically for specialized tasks. Most skills here are authored in this repo; `notebooklm` is vendored from a third-party package and should never be hand-edited (see [`yt_research_for_cc/README.md`](yt_research_for_cc/README.md)).
 
-Skills are grouped by category folder; see each category's own README for dependencies specific to it.
+Skills are grouped by category folder. [`yt_research_for_cc/`](yt_research_for_cc/README.md) has its own README covering that pipeline's dependencies; the other categories don't have one — check the individual skill's `SKILL.md` for what it needs.
 
 ## Categories
 
@@ -75,7 +75,7 @@ python scripts/install_skills.py [--dry-run] [--target DIR]
 
 ### `scripts/build_skill_zips.py`
 
-Packages every skill (any directory containing a `SKILL.md`) into an installable, version-tagged zip under `zip/` at the repo root (e.g. `zip/dedupe-loop-v1.0.0.zip`; `notebooklm.zip` has no version suffix since it isn't versioned here). Each archive's single top-level entry is the skill directory itself, matching the [Skills API upload format](https://platform.claude.com/docs/en/build-with-claude/skills-guide) so an archive can be uploaded as-is to claude.ai / Claude Desktop / the Skills API.
+Packages every skill (any directory containing a `SKILL.md`) into an installable, version-tagged zip under `zip/` at the repo root (e.g. `zip/dedupe-loop-v<version>.zip`, taking the version from that skill's own `SKILL.md` frontmatter; `notebooklm.zip` has no version suffix since it isn't versioned here). Each archive's single top-level entry is the skill directory itself, matching the [Skills API upload format](https://platform.claude.com/docs/en/build-with-claude/skills-guide) so an archive can be uploaded as-is to claude.ai / Claude Desktop / the Skills API.
 
 ```bash
 git add -A

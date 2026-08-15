@@ -5,6 +5,53 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## docs-loop rows 1–3: fix the verifiable findings
+**2026-08-15**
+
+- **Fixed:** `README.md` intro claimed "see each category's own README for
+  dependencies specific to it." Only `yt_research_for_cc/` has one;
+  `meta/` and `web_dev/` have none and `my_loops/README.md` is a stub. Now
+  points at the one that exists and sends the reader to the individual
+  `SKILL.md` otherwise.
+- **Fixed:** `README.md`'s zip example cited `zip/dedupe-loop-v1.0.0.zip`;
+  that skill is v1.1.1. Replaced with `zip/dedupe-loop-v<version>.zip` and a
+  note that the version comes from the skill's own frontmatter — a
+  version-free example can't rot again, which is a better fix than bumping
+  the number and waiting for it to go stale.
+- **Fixed:** `ARCHITECTURE.md`'s Structure section named four category
+  folders and `scripts/`, but `need_to_productize/` (4 files) and `trying/`
+  (3) appeared in no doc anywhere. Both now described by what's checkable:
+  they hold exported `.skill` zip archives rather than unpacked skills,
+  contain no `SKILL.md`, and are therefore skipped entirely by
+  `build_skill_zips.py`/`install_skills.py`, which enumerate via
+  `rglob("SKILL.md")`.
+- **Deliberately not asserted:** what `trying/` is *for*, as distinct from
+  `need_to_productize/`. The repo records it nowhere — the folder name is
+  the only evidence, and a name isn't ground truth.
+  `need_to_productize/` did get a purpose sentence, because `CHANGELOG.md`'s
+  `Removed` entry for `datastar-pro.skill` documents it.
+- **New finding, found by fixing the first one:** the initial replacement
+  for the README line asserted the other categories needed "nothing beyond
+  `git`, `gh`, and the Python standard library." Checking it before
+  committing — per docs-loop's rule that every written claim must point at
+  something in the tree — showed it was false:
+  `meta/my-skill-creator/scripts/quick_validate.py` imports PyYAML, and the
+  loop shell scripts invoke `jq`/`rg`. The sentence was rewritten to claim
+  only what it can show, and the undeclared PyYAML dependency was logged as
+  a new `missing` row in `docs-audit.md` rather than fixed in this pass.
+  A confident, plausible, wrong sentence is precisely what this loop exists
+  to keep out of a README, and it nearly wrote one.
+- **Verified**, not eyeballed: every claim written was re-derived
+  (`ls` on the two absent READMEs, `git ls-files` counts for both archive
+  folders, zero `SKILL.md` inside either, `rglob("SKILL.md")` present in the
+  enumerator, the CHANGELOG entry cited), and the documented zip command was
+  actually run — it emits `zip/dedupe-loop-v1.1.1.zip`, matching the new
+  version-free wording.
+- **Still open:** the four rows needing a decision (delete-or-write
+  `my_loops/README.md`; CI and tests claimed by `CONTRIBUTING.md` but never
+  built; `docs/adr/` holding only an unfilled template), plus the new
+  PyYAML row.
+
 ## docs-loop's first real run — docs-audit.md checkpoint
 **2026-08-15**
 
