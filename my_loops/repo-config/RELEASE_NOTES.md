@@ -10,6 +10,18 @@ what's still open.
 
 ---
 
+## v1.2.1 — Cite ADR-0003 for the scope boundary
+**2026-08-15**
+
+- **Changed:** Limitations now points at
+  [ADR-0003](https://github.com/baileyrd/skill_pack/blob/main/docs/adr/0003-gitattributes-in-scope-gitignore-out.md)
+  for *why* `.gitattributes` is in scope and `.gitignore` isn't, instead of
+  only asserting it. The decision rule is the pair of questions the ADR
+  records — does this file have the same correct content everywhere, and does
+  getting it wrong fail loudly or silently — so a future proposal to add
+  repo-level config has a test to meet rather than a precedent to point at.
+- Doc-only; no behavior change to `apply.sh` or `audit.sh`.
+
 ## v1.2.0 — Add .gitattributes to the standard set (11th item)
 **2026-08-15**
 

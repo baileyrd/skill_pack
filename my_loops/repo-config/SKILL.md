@@ -1,7 +1,7 @@
 ---
 name: repo-config
 description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, an ADR seed, and a `.gitattributes` that forces LF line endings so a Windows-authored repo stops handing Linux/macOS shell scripts that die on their own shebang. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license) for a brand-new repo, deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` wherever they specify something more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis, separate from initial setup — whenever a meaningful change is made to a repo that already has a RELEASE_NOTES.md, whether repo-config put it there or not, add a dated entry before ending the turn, without being asked.
-version: 1.2.0
+version: 1.2.1
 ---
 
 # repo-config
@@ -149,7 +149,12 @@ separate, explicitly-approved follow-up, not part of this run.
   stops a real file from being committed. `.gitattributes` is the one piece of
   repo-level git config that *is* in scope, and only because it's the opposite
   case — the correct content is the same for every repo here, and getting it
-  wrong breaks scripts at a distance, in a copy nobody is looking at.
+  wrong breaks scripts at a distance, in a copy nobody is looking at. The test
+  for admitting any future repo-level config is that pair of questions —
+  same-everywhere, and loud-or-silent when wrong — recorded as
+  [ADR-0003](https://github.com/baileyrd/skill_pack/blob/main/docs/adr/0003-gitattributes-in-scope-gitignore-out.md)
+  in this skill's own repo, so it's a rule to apply rather than an argument to
+  have again.
   CI *is* in scope, but only a basic per-stack test/lint/type gate so the "on green
   CI, merge" rule has a real check to gate on — not multi-version matrices or
   publish pipelines.
