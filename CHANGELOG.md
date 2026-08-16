@@ -5,6 +5,20 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `check_repo.py`'s `manifests` check now enforces claude.ai's 1024-character
+  `description` limit, so an over-length description fails locally and in CI
+  instead of at upload. Backed by `read_description()`, which handles YAML
+  block scalars: the first version reused `read_frontmatter()`, which skips
+  continuation lines by design and so measured `datastar-pro`'s `>` block as
+  1 character — the guard would have shipped with the blind spot it was added
+  to close.
+- `tests/test_install_skills.py` — 9 tests over the file set shared by
+  `build_skill_zips.py` and `install_skills.py`: artifact exclusion, nested
+  walking, the stale-removal self-heal, that the installer uses the shared
+  helper rather than its own walk, and the invariant that a zip and an
+  install contain the same files for every skill. Plus 9 in
+  `test_check_repo.py` over inline vs. block-scalar descriptions. 72 tests
+  total.
 - `scripts/retro_reminder.py` + `.claude/settings.json` — a `PostToolUse` hook
   on the `Skill` tool that reminds when an invoked skill carries a wrap-up
   `skill-retro` step. Twelve skills carry one; it fired zero times out of two
@@ -140,6 +154,21 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   from the actual upstream source rather than this repo's own stale,
   never-reviewed export.
 ### Fixed
+- Five skill `description` fields were over claude.ai's 1024-character upload
+  limit and were rejected one at a time at upload: `rust-migration` (1354),
+  `docs-loop` (1274), `learn-it` (1209), `repo-config` (1146), `skill-retro`
+  (1135). Trimmed to 979–1009 with every trigger phrase kept; no behavior
+  changed. Nothing local could have caught it — `install_skills.py` and
+  `build_skill_zips.py` both copy frontmatter without reading it, and Claude
+  Code loads an over-length description fine, so the limit was enforced only
+  by the one install path that can't be scripted.
+- `scripts/install_skills.py` mirrored build artifacts into
+  `~/.claude/skills/<name>/scripts/`. The "what counts as part of a skill"
+  filter lived only in `build_skill_zips.py`, so the zips stayed clean while
+  the installed tree collected `__pycache__` on every install that followed a
+  `check_repo.py` run — the order the README recommends. Now both call a
+  shared `iter_skill_files()`; the existing stale-file pass removes anything
+  an earlier install left behind.
 - `meta/skill-retro` (v1.1.0 → v1.1.1) — `redundant-step` now covers both a
   step that added nothing *and* a step stated unconditionally that's only
   sometimes correct, since the second takes a condition rather than a

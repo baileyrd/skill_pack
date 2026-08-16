@@ -6,7 +6,7 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 ---
 
 ## Two ship blockers the local tooling couldn't see
-**2026-08-16**
+**2026-08-16** — [#35](https://github.com/baileyrd/skill_pack/pull/35)
 
 Both found by installing this repo's skills and then uploading them — not by
 any check here, which is the point of the entry.
