@@ -16,6 +16,12 @@ ones, and removes files no longer present in the source -- a real
 install-or-update-or-replace, not an additive copy. File modes come from the
 git index, same rationale as build_skill_zips.py / restore_exec_bits.py.
 
+Source files are enumerated by build_skill_zips.iter_skill_files, so an
+install and a zip contain exactly the same thing. Because build artifacts
+are now absent from the source set, the stale-file pass removes any
+``__pycache__`` an earlier version of this script already installed -- no
+manual cleanup needed.
+
 Usage:
     python scripts/install_skills.py [--dry-run] [--target DIR]
 """
@@ -29,7 +35,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_skill_zips import REPO_ROOT, find_skill_dirs, git_file_mode  # noqa: E402
+from build_skill_zips import (  # noqa: E402
+    REPO_ROOT,
+    find_skill_dirs,
+    git_file_mode,
+    iter_skill_files,
+)
 from restore_exec_bits import restore as restore_exec_bits  # noqa: E402
 
 DEFAULT_TARGET = Path.home() / ".claude" / "skills"
@@ -37,7 +48,7 @@ DEFAULT_TARGET = Path.home() / ".claude" / "skills"
 
 def sync_skill(skill_dir: Path, dest_dir: Path, dry_run: bool) -> tuple[int, int, int]:
     """Mirror `skill_dir` into `dest_dir`. Returns (added, updated, removed)."""
-    src_files = {p.relative_to(skill_dir) for p in skill_dir.rglob("*") if p.is_file()}
+    src_files = {p.relative_to(skill_dir) for p in iter_skill_files(skill_dir)}
     dest_files = (
         {p.relative_to(dest_dir) for p in dest_dir.rglob("*") if p.is_file()}
         if dest_dir.exists()

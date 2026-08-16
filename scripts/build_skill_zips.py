@@ -48,6 +48,26 @@ def find_skill_dirs(root: Path) -> list[Path]:
     return skills
 
 
+def iter_skill_files(skill_dir: Path) -> list[Path]:
+    """Every file genuinely part of a skill, build artifacts excluded.
+
+    Shared with install_skills.py on purpose. This filter used to live only
+    here, so the two tools disagreed about what a skill contains: the zips
+    stayed clean while `install_skills.py` mirrored `__pycache__` into
+    `~/.claude/skills/<name>/scripts/` on every install that followed a
+    `check_repo.py` run -- which is to say, the workflow the README
+    recommends.
+    """
+    return [
+        p
+        for p in sorted(skill_dir.rglob("*"))
+        if p.is_file()
+        and p.name not in SKIP_FILE_NAMES
+        and p.suffix not in SKIP_FILE_SUFFIXES
+        and not SKIP_DIR_NAMES & set(p.relative_to(skill_dir).parts[:-1])
+    ]
+
+
 def has_shebang(path: Path) -> bool:
     """True if `path` starts with `#!` -- a script meant to be run directly."""
     try:
@@ -104,14 +124,7 @@ def build_zip(skill_dir: Path, repo_root: Path, zip_dir: Path) -> Path:
     version = skill_version(skill_dir)
     filename = f"{skill_name}-v{version}.zip" if version else f"{skill_name}.zip"
     zip_path = zip_dir / filename
-    files = [
-        p
-        for p in sorted(skill_dir.rglob("*"))
-        if p.is_file()
-        and p.name not in SKIP_FILE_NAMES
-        and p.suffix not in SKIP_FILE_SUFFIXES
-        and not SKIP_DIR_NAMES & set(p.relative_to(skill_dir).parts[:-1])
-    ]
+    files = iter_skill_files(skill_dir)
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for f in files:

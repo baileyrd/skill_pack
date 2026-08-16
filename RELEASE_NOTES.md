@@ -5,6 +5,45 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Two ship blockers the local tooling couldn't see
+**2026-08-16**
+
+Both found by installing this repo's skills and then uploading them — not by
+any check here, which is the point of the entry.
+
+- **Five descriptions were over claude.ai's 1024-character limit** and were
+  rejected at upload, one file at a time: `rust-migration` (1354),
+  `docs-loop` (1274), `learn-it` (1209), `repo-config` (1146), `skill-retro`
+  (1135). Trimmed to 979–1009, every trigger phrase and by-name reference
+  kept; the cuts are positioning prose and detail each skill already states
+  in its body. No behavior changed. Patch bumps and per-skill notes.
+- **Nothing local could have caught it.** `install_skills.py` copies
+  frontmatter without reading it, `build_skill_zips.py` zips it the same way,
+  and Claude Code loads an over-length description fine. The limit is enforced
+  only by the one install path that can't be scripted. `check_repo.py`'s
+  `manifests` check now enforces it.
+- **The first version of that check had the blind spot it was added to
+  close.** `read_frontmatter` deliberately skips continuation lines, so it
+  measured `datastar-pro`'s `>` block scalar as **1 character** — any wrapped
+  description would have passed. Added `read_description`, which handles both
+  forms.
+- **`install_skills.py` was installing build artifacts.** The "what counts as
+  part of a skill" filter lived only in `build_skill_zips.py`; the installer
+  mirrored `rglob("*")` wholesale, so `__pycache__` landed in
+  `~/.claude/skills/<name>/scripts/` on every install following a
+  `check_repo.py` run — the order the README recommends. Zips were clean the
+  whole time, which is how two tools disagreed about the contents of a skill
+  without anyone noticing.
+- **Fixed as a shared helper, not a copied filter** (`iter_skill_files`),
+  since duplicated logic is what let them drift. The stale-file pass now
+  removes any `__pycache__` an earlier install wrote, so it self-heals.
+- **18 new tests** across `test_check_repo.py` and a new
+  `test_install_skills.py`: inline vs. block-scalar descriptions, block
+  termination at the next top-level key, artifact exclusion, and the
+  invariant that a zip and an install contain the same file set.
+
+---
+
 ## skill-retro on repo-config — and the wrap-up retro finally wired
 **2026-08-15**
 
