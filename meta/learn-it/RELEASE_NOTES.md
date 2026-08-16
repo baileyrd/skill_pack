@@ -9,6 +9,47 @@ still open.
 
 ---
 
+## v1.2.0 — Four findings from the run that produced PR #44
+**2026-08-16**
+
+- **Fixed ([#45](https://github.com/baileyrd/skill_pack/issues/45)):**
+  `references/skill-authoring-conventions.md` listed three category folders;
+  there are five, plus two staging areas that are *not* categories and hold no
+  skill directories at all. A placement decision made against a stale list is
+  wrong in a way that's expensive to undo once the directory exists, so the
+  section now leads with an instruction to confirm the list against the repo
+  rather than trusting it, and is dated.
+- **Added ([#46](https://github.com/baileyrd/skill_pack/issues/46)):** step 2
+  now anticipates two candidate shapes that make "update in place" the wrong
+  answer — a `.skill` **zip archive** (everything in the staging areas is one;
+  `cat` gives you binary), and **vendored third-party code** carrying
+  `LICENSE`/`homepage`/`repository`/`author` frontmatter. Editing the second
+  forks someone else's work and forfeits upstream updates however good the
+  match. A third outcome, **adjacent**, is now named alongside new/update: a
+  skill that explicitly scopes itself against the existing one and says so in
+  its own description. That is what `video-teardown` did against
+  `trying/watch`, arrived at by noticing the vendored markers by chance while
+  the skill's own text pointed toward merging.
+- **Added ([#47](https://github.com/baileyrd/skill_pack/issues/47)):** a
+  "locate the repo" note. `${CLAUDE_SKILL_DIR}` and `~/.claude/skills/` are
+  the *installed* flat copy — no category folders, no `scripts/`, no git
+  history — and they look enough like the repo to return plausible search hits
+  while missing the layout every instruction depends on. Confirm the source
+  checkout by `scripts/build_skill_zips.py` sitting alongside the category
+  folders; ask if unsure, since guessing cost a full turn last time.
+- **Fixed ([#48](https://github.com/baileyrd/skill_pack/issues/48)):** step 5
+  named `build_skill_zips.py` as the pre-commit sanity check. **CI runs
+  `check_repo.py`**, which enforces five checks; the zip build covers only
+  packaging and reports success regardless. It packaged a skill whose
+  description was over the 1024-character limit and said nothing about an
+  unresolvable inline path. Step 5 now gates on `check_repo.py`, run *after*
+  `git add` since `exec-bits` reads the index, with the zip build demoted to a
+  secondary check. Also records that `restore_exec_bits.py` cannot fix a
+  genuinely new script — it only repairs content matching an already-`100755`
+  blob at `HEAD` — so `git update-index --chmod=+x` is the actual remedy.
+
+---
+
 ## v1.1.2 — YAML-safe description
 **2026-08-16**
 
