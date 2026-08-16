@@ -1,7 +1,7 @@
 ---
 name: repo-config
-description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, an ADR seed, and a `.gitattributes` that forces LF line endings so a Windows-authored repo stops shipping shell scripts that die on their own shebang. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters, internal-only license), deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` where they're more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md, add a dated entry before ending the turn.
-version: 1.3.1
+description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, an ADR seed, and a `.gitattributes` that forces LF line endings so a Windows-authored repo stops shipping scripts that die on their own shebang. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters), deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` where more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md or CHANGELOG.md, add an entry to each before ending the turn.
+version: 1.3.2
 ---
 
 # repo-config
@@ -99,12 +99,27 @@ Everything else in the set is close to drop-in once the tokens are substituted.
 and what's still manual (README's Getting Started section, ARCHITECTURE's boundary
 table, the first real ADR replacing the seed).
 
-`audit.sh` checks file *presence*, not *currency* — a stale `RELEASE_NOTES.md`
-still scores as present. So step 4 also includes a judgment the script can't make:
-did any real change happen this session (setup counts, and so does any later fix or
-feature) that isn't yet logged in `RELEASE_NOTES.md`? If so, add the entry now
-before reporting done — see "Ongoing maintenance" below. Report RELEASE_NOTES as
-current only after that check, not on the strength of the presence score alone.
+`audit.sh` checks file *presence*, not *currency* — a stale log still scores as
+present. So step 4 also includes a judgment the script can't make, and it applies
+to **every log-shaped file in the set, not just `RELEASE_NOTES.md`**: today that
+means `RELEASE_NOTES.md` and `CHANGELOG.md`, and it means any log added later
+without this section needing another edit. For each of them:
+
+- **Coverage** — did any real change happen this session (setup counts, and so does
+  any later fix or feature) that isn't yet logged? If so, add the entry now before
+  reporting done — see "Ongoing maintenance" below.
+- **Links** — does every entry whose PR has since merged actually carry its link?
+  The "log it without a link" rule below is deliberate, but it defers an obligation
+  to *here*: step 4 runs after the work is pushed, which is the first moment the
+  link can be added honestly. An entry can cover its change perfectly and still
+  violate the file's own stated convention.
+
+Report a log as current only after both checks, not on the strength of the presence
+score alone. Two separate files with separate conventions means updating one during
+the work does not imply the other — the changelog being untouched while
+`RELEASE_NOTES.md` was updated is the exact shape this catches
+([#37](https://github.com/baileyrd/skill_pack/issues/37),
+[#38](https://github.com/baileyrd/skill_pack/issues/38)).
 
 **5. Wrap-up retro** — after step 4's re-audit report, run a
 `meta/skill-retro` pass on `repo-config` itself, grounded in this run: did
@@ -116,24 +131,36 @@ separate, explicitly-approved follow-up, not part of this run.
 
 ## Ongoing maintenance — not just initial setup
 
-`RELEASE_NOTES.md` isn't a one-time drop. Once a repo has one, keep it current:
+The logs in the set aren't one-time drops. Once a repo has them, keep them
+current — `RELEASE_NOTES.md` and `CHANGELOG.md` alike, each in its own format:
 
 - After any meaningful change to that repo — a fix, a feature, a behavior change,
   not a typo or formatting-only edit — add a new entry at the top before ending
   the turn. Don't wait to be asked. This applies whether or not repo-config was
-  what put the file there in the first place; any repo with a `RELEASE_NOTES.md`
+  what put the file there in the first place; any repo with one of these files
   qualifies.
-- Match the format already in the file: dated, bolded inline category tag
-  (`**Added:**` / `**Changed:**` / `**Fixed:**`), reasoning included, known
-  limitations stated plainly rather than glossed over — see `references/examples.md`.
+- **Update every log the repo has, not whichever one you touched first.** They
+  have separate conventions and separate audiences, so an entry in one is not an
+  entry in the other. A repo with both and a change logged in only one is the
+  common failure, not a rare one.
+- Match the format already in each file: `RELEASE_NOTES.md` uses dated entries with
+  bolded inline category tags (`**Added:**` / `**Changed:**` / `**Fixed:**`);
+  `CHANGELOG.md` uses Keep-a-Changelog sections (`### Added` / `### Changed` /
+  `### Fixed`) under a release heading. Reasoning included, known limitations
+  stated plainly rather than glossed over — see `references/examples.md`.
 - Link the real commit/PR once the change is actually pushed; if it isn't pushed
-  yet, log it without a link rather than inventing one.
+  yet, log it without a link rather than inventing one — **and add the link on the
+  next pass**, which step 4 now checks for. Logging without a link is correct at
+  write time; leaving it unlinked once the PR has merged is not.
 - This was missed once already on repo-config's own `RELEASE_NOTES.md` — a real fix
-  shipped with no entry, caught only because the repo owner pointed it out. That's
-  the failure mode this rule exists to prevent.
+  shipped with no entry, caught only because the repo owner pointed it out. It was
+  then missed a second time in a different shape: `RELEASE_NOTES.md` was updated
+  and `CHANGELOG.md` was left with no record of the same PR at all. That's the
+  failure mode these rules exist to prevent.
 
 ## Rules
-- Keep `RELEASE_NOTES.md` current, not just seeded — see "Ongoing maintenance"
+- Keep every log in the set current, not just seeded — `RELEASE_NOTES.md` and
+  `CHANGELOG.md` both, and linked once their PRs merge. See "Ongoing maintenance"
   above.
 - Every change to a target repo lands through a PR against the default branch, never
   a direct push. On green CI, merge with a **merge commit** (GitHub's "Create a merge

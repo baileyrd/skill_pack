@@ -5,6 +5,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `my_loops/repo-config` (v1.3.1 → v1.3.2) — step 4's currency check now covers
+  **every log-shaped file in the set**, not just `RELEASE_NOTES.md`, and also
+  verifies that entries whose PRs have merged carry their links. Written as a
+  general rule rather than a two-filename enumeration so a log added later
+  doesn't reintroduce the gap. `audit.sh` emits its presence-only caveat per
+  log accordingly.
 - `check_repo.py`'s `manifests` check now enforces claude.ai's 1024-character
   `description` limit, so an over-length description fails locally and in CI
   instead of at upload. Backed by `read_description()`, which handles YAML

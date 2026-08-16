@@ -5,6 +5,45 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## repo-config's currency check stops having a blind spot
+**2026-08-16** — [#39](https://github.com/baileyrd/skill_pack/pull/39)
+
+Applied from the step-5 wrap-up retro on the `/repo-config` run that produced
+[#36](https://github.com/baileyrd/skill_pack/pull/36). Both findings were filed
+as issues first ([#37](https://github.com/baileyrd/skill_pack/issues/37),
+[#38](https://github.com/baileyrd/skill_pack/issues/38)) and applied only after
+sign-off — the separation `skill-retro` requires between finding and fixing.
+
+- **Fixed (repo-config v1.3.2) — the currency check named one file and meant
+  two.** Step 4 exists precisely to catch what `audit.sh` structurally can't: a
+  file that is present but stale. It scoped that judgment to `RELEASE_NOTES.md`
+  in all five places the rule appeared. `CHANGELOG.md` sits in the same
+  checklist and counts toward the same 11/11, so it collected full presence
+  credit with nothing ever asking whether it was current. **On the run that
+  found this, the changelog had no record of the latest PR at all.** It surfaced
+  only because the file set got inspected by hand — not a step the instructions
+  contained. A run that followed them exactly would have reported a fully
+  current repo.
+- **Fixed (repo-config v1.3.2) — a correct rule that guaranteed a later
+  violation.** "Log it without a link if the PR doesn't exist yet" is right;
+  inventing a PR number is worse. But nothing ever came back to add the link,
+  so following the rule correctly at write time reliably left an entry
+  violating the convention `RELEASE_NOTES.md`'s own header states. Step 4 now
+  closes it, which is the right place: step 4 runs after the work is pushed,
+  the first moment a link can be added honestly. That only 2 of this file's
+  entries carried links suggests it had been recurring quietly for a while.
+- **The generalization is the actual fix.** Both issues proposed naming
+  `CHANGELOG.md` alongside `RELEASE_NOTES.md`. That would have worked and
+  would have been wrong — it's the same enumeration one item longer, waiting
+  for a third log. The rule now reads "every log-shaped file in the set."
+- **Left undone, deliberately:** step 0 still infers language from a stack
+  manifest only, so this repo — no manifest, unmistakably Python — scans as
+  having no language. It did not fire on the run that found the other two, so
+  under `skill-retro`'s evidence-grounded rule it stayed an observation. Not
+  filed, not fixed, recorded here so it isn't rediscovered as new.
+
+---
+
 ## Two ship blockers the local tooling couldn't see
 **2026-08-16** — [#35](https://github.com/baileyrd/skill_pack/pull/35)
 

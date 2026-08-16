@@ -10,6 +10,51 @@ what's still open.
 
 ---
 
+## v1.3.2 — The currency check covers every log, and links get closed out
+**2026-08-16**
+
+Applied from the step-5 wrap-up retro on the run that produced
+[#36](https://github.com/baileyrd/skill_pack/pull/36) — this skill run against
+`skill_pack` itself. Both findings had a real miss behind them; neither was
+speculative.
+
+- **Fixed ([#37](https://github.com/baileyrd/skill_pack/issues/37)):** step 4's
+  currency check named `RELEASE_NOTES.md` and silently omitted `CHANGELOG.md`,
+  in all five places the rule was stated — SKILL.md steps 4, "Ongoing
+  maintenance", Rules, the `description`, and `audit.sh`'s own note.
+  `CHANGELOG.md` is item 23 in the same checklist, so it earned full presence
+  credit while nothing ever asked whether it was current. **On the run that
+  found this, the changelog had no record of the latest PR at all** — two
+  shipped bug fixes missing — and it was caught only because the operator
+  inspected the file set by hand, which is not a step the instructions
+  contained. A run following the instructions exactly would have reported a
+  current repo. Now written as a general rule (*every log-shaped file in the
+  set*) rather than an enumeration, so a third log added later doesn't
+  reintroduce it.
+- **Fixed ([#38](https://github.com/baileyrd/skill_pack/issues/38)):** "log it
+  without a link if the PR doesn't exist yet" is the right rule — inventing a
+  number is worse — but it deferred an obligation nothing discharged. Following
+  it correctly at write time *guaranteed* a convention violation later, in a
+  file whose own header requires every entry to link its PR. Step 4 now checks
+  that entries whose PRs have merged carry their links; it's the natural home,
+  since step 4 runs after the work is pushed, which is the first moment the
+  link can be added honestly. Evidence it was recurring rather than one-off:
+  only 2 entries in this repo's `RELEASE_NOTES.md` carried links.
+- **Changed:** `audit.sh` now emits its presence-only caveat for each log the
+  target actually has, and mentions the link check. Naming one file implied it
+  was the only one with the problem.
+- **Changed:** the `description` lost the internal-only-license clause and two
+  wordy phrases to make room for `CHANGELOG.md` — 984 chars, 40 under the
+  limit v1.3.1 introduced. Trimmed rather than left at +3, since a limit this
+  close is one edit from breaking again.
+- **Not addressed:** step 0 still infers language from a stack manifest only, so
+  a repo like this one — no manifest, plainly Python — reports no language. It
+  didn't fire on the run that found the above (the full-marks early exit skipped
+  the step that would have used it), so it stayed an observation rather than a
+  finding. Unfixed and unfiled.
+
+---
+
 ## v1.3.1 — Description under claude.ai's upload limit
 **2026-08-16**
 
