@@ -11,7 +11,7 @@ import importlib.util
 import sys
 import tempfile
 import unittest
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MODULE_PATH = REPO_ROOT / "my_loops/docs-loop/scripts/check_references.py"
@@ -261,3 +261,65 @@ class TestHeadingsOf(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestWherePathsArePosix(unittest.TestCase):
+    """`where` fields must use forward slashes on every platform.
+
+    REGRESSION (issue #49): `check_doc` built `where` as f"{rel}:{lineno}"
+    from a `Path`. On Windows that stringifies with backslashes, while
+    `docs-refs-baseline.tsv` stores forward slashes. `baseline_key` is
+    kind+where+detail, so no baselined row ever matched on a Windows
+    checkout: three long-accepted findings resurfaced as NEW and buried the
+    one genuinely new finding, which only CI (Linux) surfaced.
+
+    The damage is the masking, not the noise — a check whose output differs
+    by platform trains you to distrust it, and then you miss the real one.
+
+    These tests drive `rel_where` with `PureWindowsPath` rather than relying
+    on the host platform. That is the whole point: an earlier version of this
+    class asserted "no backslash in `where`" against real `Path`s, passed on
+    Linux with the fix *reverted*, and would have shipped as a test that
+    could never fail. On POSIX, `str(PosixPath)` and `.as_posix()` are the
+    same string — only a Windows-flavoured path can tell them apart.
+    """
+
+    def test_rel_where_posix_paths(self):
+        root = PurePosixPath("/home/user/skill_pack")
+        doc = PurePosixPath("/home/user/skill_pack/meta/skill-retro/references/fmt.md")
+        self.assertEqual(cr.rel_where(root, doc), "meta/skill-retro/references/fmt.md")
+
+    def test_rel_where_windows_paths_still_emit_forward_slashes(self):
+        """The actual regression. Fails if `.as_posix()` is dropped."""
+        root = PureWindowsPath(r"C:\dev\skill_pack")
+        doc = PureWindowsPath(r"C:\dev\skill_pack\meta\skill-retro\references\fmt.md")
+        where = cr.rel_where(root, doc)
+        self.assertEqual(where, "meta/skill-retro/references/fmt.md")
+        self.assertNotIn("\\", where)
+
+    def test_rel_where_outside_root_windows(self):
+        """The `else` branch is a `where` field too, and had the same bug."""
+        root = PureWindowsPath(r"C:\dev\skill_pack")
+        doc = PureWindowsPath(r"D:\elsewhere\notes\x.md")
+        self.assertEqual(cr.rel_where(root, doc), "D:/elsewhere/notes/x.md")
+
+    def test_where_is_posix_end_to_end(self):
+        """Integration cover: the row `check_doc` actually emits."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            nested = root / "meta" / "skill-retro" / "references"
+            nested.mkdir(parents=True)
+            doc = nested / "fmt.md"
+            doc.write_text("See `nope/missing.md` for details.\n", encoding="utf-8")
+            rows = []
+            cr.check_doc(root, doc, rows, cr.index_basenames(root))
+            self.assertTrue(rows, "expected at least one row")
+            for _v, _k, where, _d in rows:
+                self.assertTrue(where.startswith("meta/skill-retro/references/"), where)
+
+    def test_baseline_key_is_separator_sensitive(self):
+        """Why normalization must happen where `where` is built, not at compare."""
+        self.assertNotEqual(
+            cr.baseline_key("inline-path", "meta/skill-retro/x.md:11", "a/b.md"),
+            cr.baseline_key("inline-path", "meta\\skill-retro\\x.md:11", "a/b.md"),
+        )

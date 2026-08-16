@@ -314,8 +314,25 @@ def path_row(verdict: str, kind: str, historical: bool):
     return (verdict, kind)
 
 
-def check_doc(root: Path, doc: Path, rows: list, basenames: set):
+def rel_where(root, doc) -> str:
+    """`doc` relative to `root` as a forward-slashed string.
+
+    Always `.as_posix()`, never the platform separator. This string becomes the
+    `where` field of every row, and `where` is part of `baseline_key`. A Windows
+    checkout emitting `meta\\skill-retro\\...` never matches a baseline written
+    as `meta/skill-retro/...`, so every accepted row resurfaces as NEW and
+    buries the findings that are real (issue #49).
+
+    Split out as its own function so the Windows behaviour is testable from any
+    platform by passing `PureWindowsPath`s — asserting on `str(Path(...))` from
+    a POSIX test process cannot tell the fixed code from the broken code.
+    """
     rel = doc.relative_to(root) if doc.is_relative_to(root) else doc
+    return rel.as_posix()
+
+
+def check_doc(root: Path, doc: Path, rows: list, basenames: set):
+    rel = rel_where(root, doc)
     try:
         lines = doc.read_text(encoding="utf-8", errors="replace").splitlines()
     except OSError as exc:
@@ -446,7 +463,11 @@ def main(argv):
     rows = []
     for doc in docs:
         if not doc.is_file():
-            rows.append(("broken", "missing-doc", str(doc), "named on the command line, not on disk"))
+            # `.as_posix()` for the same reason as `check_doc`'s `rel`: this is a
+            # `where` field, and `where` is part of the baseline identity key.
+            rows.append(
+                ("broken", "missing-doc", doc.as_posix(), "named on the command line, not on disk")
+            )
             continue
         check_doc(root, doc, rows, basenames)
 
