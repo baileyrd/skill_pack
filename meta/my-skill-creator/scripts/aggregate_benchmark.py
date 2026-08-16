@@ -253,7 +253,9 @@ def aggregate_results(results: dict) -> dict:
     return run_summary
 
 
-def generate_benchmark(benchmark_dir: Path, skill_name: str = "", skill_path: str = "") -> dict:
+def generate_benchmark(
+    benchmark_dir: Path, skill_name: str = "", skill_path: str = "", model: str = ""
+) -> dict:
     """
     Generate complete benchmark.json from run results.
     """
@@ -289,16 +291,43 @@ def generate_benchmark(benchmark_dir: Path, skill_name: str = "", skill_path: st
         for r in config
     ))
 
+    # Runs per configuration, counted from the data rather than assumed. This
+    # was hardcoded to 3 and rendered verbatim into benchmark.md, which is a
+    # claim about statistical strength — exactly the number a reader uses to
+    # decide how much weight a pass-rate delta deserves. A run with 1 per
+    # configuration advertised "3 runs each" (issue #52). Configurations can
+    # legitimately differ (a baseline reused across iterations), so report the
+    # range when they do rather than picking one.
+    # Count per (config, eval), NOT len(results[config]): that list is flat
+    # across every eval, so a 6-eval run with one run apiece would report "6
+    # runs each per configuration" — a different false claim, not a fix.
+    counts_by_pair: dict[tuple, int] = {}
+    for config, runs_for in results.items():
+        for r in runs_for:
+            counts_by_pair[(config, r["eval_id"])] = counts_by_pair.get((config, r["eval_id"]), 0) + 1
+    per_config = sorted(set(counts_by_pair.values()))
+    if not per_config:
+        runs_per_configuration = 0
+    elif len(per_config) == 1:
+        runs_per_configuration = per_config[0]
+    else:
+        runs_per_configuration = f"{per_config[0]}-{per_config[-1]}"
+
+    metadata = {
+        "skill_name": skill_name or "<skill-name>",
+        "skill_path": skill_path or "<path/to/skill>",
+        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "evals_run": eval_ids,
+        "runs_per_configuration": runs_per_configuration,
+    }
+    # Omitted entirely rather than emitted as a placeholder: "<model-name>" in a
+    # shared artifact undercuts trust in the real numbers next to it.
+    if model:
+        metadata["executor_model"] = model
+        metadata["analyzer_model"] = model
+
     benchmark = {
-        "metadata": {
-            "skill_name": skill_name or "<skill-name>",
-            "skill_path": skill_path or "<path/to/skill>",
-            "executor_model": "<model-name>",
-            "analyzer_model": "<model-name>",
-            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "evals_run": eval_ids,
-            "runs_per_configuration": 3
-        },
+        "metadata": metadata,
         "runs": runs,
         "run_summary": run_summary,
         "notes": []  # To be filled by analyzer
@@ -322,9 +351,16 @@ def generate_markdown(benchmark: dict) -> str:
     lines = [
         f"# Skill Benchmark: {metadata['skill_name']}",
         "",
-        f"**Model**: {metadata['executor_model']}",
+    ]
+    # No `**Model**:` line at all when none was supplied — see generate_benchmark.
+    if metadata.get("executor_model"):
+        lines.append(f"**Model**: {metadata['executor_model']}")
+    per_config = metadata["runs_per_configuration"]
+    plural = "" if per_config == 1 else "s"
+    lines += [
         f"**Date**: {metadata['timestamp']}",
-        f"**Evals**: {', '.join(map(str, metadata['evals_run']))} ({metadata['runs_per_configuration']} runs each per configuration)",
+        f"**Evals**: {', '.join(map(str, metadata['evals_run']))} "
+        f"({per_config} run{plural} each per configuration)",
         "",
         "## Summary",
         "",
@@ -384,6 +420,12 @@ def main():
         help="Path to the skill being benchmarked"
     )
     parser.add_argument(
+        "--model",
+        default="",
+        help="Model id that produced the runs. Omitted from the report when unset, "
+             "rather than printed as a placeholder.",
+    )
+    parser.add_argument(
         "--output", "-o",
         type=Path,
         help="Output path for benchmark.json (default: <benchmark_dir>/benchmark.json)"
@@ -396,7 +438,9 @@ def main():
         sys.exit(1)
 
     # Generate benchmark
-    benchmark = generate_benchmark(args.benchmark_dir, args.skill_name, args.skill_path)
+    benchmark = generate_benchmark(
+        args.benchmark_dir, args.skill_name, args.skill_path, args.model
+    )
 
     # Determine output paths
     output_json = args.output or (args.benchmark_dir / "benchmark.json")

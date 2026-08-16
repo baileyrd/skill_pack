@@ -5,6 +5,21 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Fixed
+- `meta/my-skill-creator` (v1.1.1 → v1.2.0) — the four remaining findings from
+  its own `skill-retro`, applied together. `aggregate_benchmark.py` no longer
+  hardcodes `runs_per_configuration: 3` or an `executor_model` placeholder,
+  both of which it printed verbatim into `benchmark.md` (#52); "Retro by
+  default" gains a fourth shape for **multi-mode skills** plus an instruction
+  to weigh the retro against a *typical* invocation, not the heaviest (#53);
+  the 1024-character description ceiling is stated as the budget it is, along
+  with a requirement to use a `>-` block scalar (#54); and the headless-viewer
+  note is now capability-based rather than a list of product names, with
+  "Test Cases" permitting backgroundable runs to launch in the same turn as
+  the prompts are presented (#55).
+  On #52 specifically: the obvious fix, `len(results[config])`, is *also*
+  wrong — that list is flat across every eval, so a 6-eval run with one run
+  apiece reports "6 runs each", trading one false claim for another. The count
+  is now per (configuration, eval) pair and prints a range when they differ.
 - `my_loops/docs-loop` (v1.3.1 → v1.3.2) — `check_references.py` stringified a
   `Path` into every row's `where` field, so a Windows checkout emitted
   backslash paths that could never match the forward-slash

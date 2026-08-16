@@ -9,6 +9,47 @@ still open.
 
 ---
 
+## v1.2.0 — Four findings from its own skill-retro
+**2026-08-16**
+
+All four were filed as issues from a `skill-retro` on the run that drafted
+`dev_practices/unix-philosophy`, and are applied here together.
+
+- **Fixed ([#52](https://github.com/baileyrd/skill_pack/issues/52)):**
+  `aggregate_benchmark.py` hardcoded `runs_per_configuration: 3` and
+  `executor_model: "<model-name>"`, rendering both verbatim into
+  `benchmark.md`. A run with one run per configuration advertised "3 runs each
+  per configuration" — a claim about statistical strength, and exactly the
+  number a reader uses to weigh a pass-rate delta. The count is now derived
+  from the data, and `--model` is optional with the `**Model**:` line omitted
+  entirely when unset rather than printed as a placeholder.
+  Worth recording: the obvious fix — `len(results[config])` — is also wrong.
+  That list is flat across every eval, so a 6-eval run with one run apiece
+  reports "6 runs each", swapping one false claim for another. The count is per
+  (configuration, eval) pair, and reports a range like `1-2` when they differ.
+- **Added ([#53](https://github.com/baileyrd/skill_pack/issues/53)):** a fourth
+  shape in "Retro by default" for **multi-mode skills**, plus a preamble
+  instruction to check the retro's cost against a *typical* invocation rather
+  than the heaviest one. `unix-philosophy` fit none of the three existing
+  shapes; shape 2 was applied unconditionally and two design-mode eval runs
+  reported *skipping* the retro. A step a run reports skipping is worse than no
+  step.
+- **Added ([#54](https://github.com/baileyrd/skill_pack/issues/54)):** the
+  1024-character `description` ceiling, framed as the budget it is — the
+  "write it long and dense" guidance and this limit genuinely conflict, and the
+  limit wins. Also says which half to cut first (trigger phrases before the
+  statement of what the skill does). A second bullet now requires a `>-` block
+  scalar unless the description certainly contains no `": "`, after four skills
+  shipped descriptions that no real YAML parser would accept.
+- **Fixed ([#55](https://github.com/baileyrd/skill_pack/issues/55)):** the
+  headless-environment note is now capability-based ("any environment without a
+  display") rather than a list of product names that will always lag reality,
+  and "Test Cases" permits launching backgroundable runs in the same turn as
+  presenting the prompts instead of blocking on a confirm while nothing
+  executes.
+
+---
+
 ## v1.1.1 — Allow `version` in the frontmatter allowlist
 **2026-08-16**
 
