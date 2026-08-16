@@ -1,0 +1,126 @@
+{
+  "skill_name": "unix-philosophy",
+  "evals": [
+    {
+      "id": 1,
+      "name": "design-mode-feature-creep-no-keyword",
+      "prompt": "quick design question before i start writing this. we have an internal cli called `ingest` that reads vendor csv drops off an s3 prefix, normalizes them and writes parquet to our warehouse bucket. it's about 900 lines, one repo, we run it from airflow. product now wants a slack ping to #data-alerts whenever a vendor file arrives malformed, with the row numbers that failed. my instinct is to just add a --slack-webhook flag and a notify() call in the validation path since all the row info is already right there. my teammate thinks it belongs somewhere else but couldn't really say why. which way should i go, and if it's the second one how would the two pieces actually talk to each other?",
+      "expected_output": "Should run the `and` test and identify the seam (normalize/write vs. notify), recommend keeping ingest emitting structured validation failures on a defined channel with notification as a separate consumer, name the concrete present cost of bundling (release/test coupling, Slack outage blocking ingest, second consumer needs a second flag), and specify the actual interface between them (e.g. NDJSON validation records on stderr/a rejects file, non-zero exit class). Should state the tradeoff of the split (an extra moving part, ordering, ops overhead) rather than presenting it as free. Should not lecture about Unix as authority.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A1",
+          "text": "Recommends against putting the Slack notification inside ingest's validation path \u2014 sides with the teammate and identifies the seam between normalizing/writing data and notifying humans"
+        },
+        {
+          "id": "A2",
+          "text": "Specifies a concrete interface between the two pieces: names both a format (e.g. NDJSON/JSON lines/structured records/an event payload) and a channel (e.g. stderr, a rejects file/object, an exit code class, a queue)"
+        },
+        {
+          "id": "A3",
+          "text": "Names at least one concrete present cost of bundling \u2014 e.g. a Slack outage or webhook failure affecting the ingest run, coupled release/test cadence, a second consumer requiring a second code change, or tests needing Slack mocked"
+        },
+        {
+          "id": "A4",
+          "text": "States at least one cost or downside of the recommended split rather than presenting it as free (extra moving part, ops/deploy overhead, ordering or latency, another thing to monitor)"
+        },
+        {
+          "id": "A5",
+          "text": "Any design principle invoked is paired with a concrete consequence for this specific system \u2014 no recommendation rests on 'Unix philosophy says so' as its stated justification"
+        },
+        {
+          "id": "A6",
+          "text": "Answers the user's actual second question \u2014 how the two pieces talk \u2014 rather than stopping at the which-way verdict"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "audit-mode-existing-cli",
+      "prompt": "can you take a look at reportgen.py and tell me whether it's well designed? honestly the thing works fine but every time someone asks me for the deploy numbers in a different format i end up copy pasting bits of it into a new script, and last month it silently produced an empty report for two weeks and nobody noticed until the retro. i'd like to know what's actually wrong with it structurally and what to fix first, not a full rewrite.",
+      "expected_output": "An audit report with per-dimension Pass/Warn/Fail verdicts and file:line citations. Must catch the highest-cost defect \u2014 the bare `except: pass` in fetch_deploys() masking the empty-report incident the user described \u2014 and rank it High. Should also catch: multiple jobs (fetch/summarize/render/write/notify/--serve dashboard), no machine-readable output path (render() is terminal-only, CSV is a side effect to a hardcoded dir), diagnostics printed to stdout interleaved with the report, hardcoded SLACK_WEBHOOK/DB_PATH/OUTPUT_DIR as policy in mechanism, always exit(0), and a hardcoded secret. Should name what's already right, order findings by severity, and stop at reporting rather than rewriting the file.",
+      "files": [
+        "fixtures/reportgen.py"
+      ],
+      "assertions": [
+        {
+          "id": "A1",
+          "text": "Produces per-dimension verdicts using an explicit Pass/Warn/Fail (or N/A) scale rather than only prose observations"
+        },
+        {
+          "id": "A2",
+          "text": "Findings cite specific locations in reportgen.py \u2014 line numbers or named functions/constants \u2014 rather than resting on general impressions"
+        },
+        {
+          "id": "A3",
+          "text": "Identifies the bare `except: pass` in fetch_deploys() as a finding AND ranks it the top/highest-severity item"
+        },
+        {
+          "id": "A4",
+          "text": "Explicitly connects that swallowed exception to the two-week silent empty report the user described"
+        },
+        {
+          "id": "A5",
+          "text": "Identifies that there is no machine-readable output path (render() produces terminal-only text; CSV is a side effect to a hardcoded directory) and connects it to the user's copy-paste-into-a-new-script complaint"
+        },
+        {
+          "id": "A6",
+          "text": "Flags the hardcoded SLACK_WEBHOOK credential in source"
+        },
+        {
+          "id": "A7",
+          "text": "Flags at least two of: --serve dashboard as an unrelated second job, sys.exit(0) regardless of outcome, progress prints on stdout interleaved with the report, hardcoded DB_PATH/OUTPUT_DIR as policy baked into the tool"
+        },
+        {
+          "id": "A8",
+          "text": "Includes a section naming specific things that are already right and worth preserving"
+        },
+        {
+          "id": "A9",
+          "text": "Findings are ordered/prioritized by severity or a stated fix-first order, matching the user's 'what to fix first' request"
+        },
+        {
+          "id": "A10",
+          "text": "Reports without rewriting: reportgen.py is byte-identical to its committed state and no refactored version was written over it"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "counterweight-resist-over-decomposition",
+      "prompt": "we're building the billing engine for our b2b saas (rust, ~6 person team, maybe 400 customers). i've been reading about doing one thing well and small composable pieces and i want to get this right from the start. my plan is to split it into six services: invoice generation, tax calculation, payment gateway adapter, dunning/retry, ledger writes, and a pdf renderer. each gets its own repo and deploys independently, they talk over an internal http api. does that decomposition look right? anything i should split further?",
+      "expected_output": "Should push back on the decomposition rather than validating it \u2014 the modular-monolith reading is the faithful one at this scale, and `parsimony` cuts against splitting. Should name the concrete costs the user is buying (distributed transactions across ledger+invoice, partial failure, latency, 6 repos for 6 people) and note that invoice/tax/ledger are transactionally coupled so a service boundary there is the expensive place to put one. Should recommend module boundaries inside one deployable with the same interface discipline, and identify which piece (pdf renderer) is the genuine candidate for separation and why. Should explicitly decline to answer 'split further' as posed.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "A1",
+          "text": "Pushes back on the six-service decomposition rather than validating it \u2014 recommends a single deployable with internal module boundaries (modular monolith) as the default at this scale"
+        },
+        {
+          "id": "A2",
+          "text": "Names at least two concrete costs the user would be buying: e.g. distributed transactions/consistency across service boundaries, partial failure handling, added latency, or six repos of operational overhead for a six-person team"
+        },
+        {
+          "id": "A3",
+          "text": "Identifies that invoice generation, tax calculation, and ledger writes are transactionally coupled, making a network boundary between them specifically expensive \u2014 money correctness, not just overhead"
+        },
+        {
+          "id": "A4",
+          "text": "Identifies at least one piece (typically the PDF renderer, and/or the payment gateway adapter) as a more legitimate separation candidate, with a stated reason such as differing resource profile or third-party blast radius"
+        },
+        {
+          "id": "A5",
+          "text": "Preserves rather than dismisses the user's underlying instinct \u2014 keeps narrow interfaces and clean module seams as the recommendation, distinguishing module boundaries from deployment boundaries"
+        },
+        {
+          "id": "A6",
+          "text": "Declines to answer 'anything I should split further' as posed, instead of supplying additional split suggestions on the premise"
+        },
+        {
+          "id": "A7",
+          "text": "Explicitly addresses the reasoning the user cites ('do one thing well', 'small composable pieces') and explains why it does not translate to service-per-capability here, rather than ignoring the premise"
+        }
+      ]
+    }
+  ]
+}

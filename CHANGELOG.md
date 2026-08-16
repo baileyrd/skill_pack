@@ -5,6 +5,21 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `dev_practices/unix-philosophy` (v1.0.0) — new skill applying Unix software
+  design philosophy in two modes: design mode (a checklist for a live design
+  decision) and audit mode (eight dimensions scored Pass/Warn/Fail against
+  cited evidence, findings ranked by present cost, report-and-stop). Three
+  references carry the depth: the source philosophy plus the *cost* of each
+  principle, the audit rubric and report template, and translations to
+  non-CLI surfaces (libraries, HTTP/RPC services, background pipelines, agent
+  tools) including where the analogy breaks for distributed systems.
+- `dev_practices/` — fifth authored category folder, for design- and
+  coding-discipline skills. The four existing categories are each scoped to a
+  target (external repos, this repo's own skills, a research pipeline, a web
+  framework); guidance on how software is shaped fits none of them, so per
+  `meta/learn-it`'s category-placement rule this is a deliberate new category
+  rather than a forced fit. `ARCHITECTURE.md`'s Structure section and the root
+  `README.md` updated to match.
 - `my_loops/repo-config` (v1.3.1 → v1.3.2) — step 4's currency check now covers
   **every log-shaped file in the set**, not just `RELEASE_NOTES.md`, and also
   verifies that entries whose PRs have merged carry their links. Written as a
