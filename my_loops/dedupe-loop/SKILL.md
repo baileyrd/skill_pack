@@ -1,7 +1,7 @@
 ---
 name: dedupe-loop
 description: Scans a set of platform repos for duplicate or near-duplicate implementations (e.g. every repo growing its own HTTP client wrapper) and proposes hoisting the genuine duplicates into a single common module on the platform layer, per the mechanism/policy split already established by ADR-011. Trigger on requests to find duplicated code across repos, consolidate common functionality, "do we have three versions of this," or hoist something into rustils/the platform layer. Companion to parity-loop and sovereignty-loop (same PR/CI/merge mechanics, same platform-repo scoping question) — checkpointed with per-cluster sign-off by default (this one spans repos, so a wrong call is costlier to unwind), but exact/near-duplicate clusters proceed unattended when `LOOP_HARNESS_MODE=auto`; a convergent-but-diverged cluster's behavioral question always still needs a human answer regardless of harness mode.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # dedupe-loop
@@ -29,6 +29,28 @@ issues don't span repos natively.
 ## Run (when invoked)
 
 **0. Scope**
+- **Tooling preflight — do this before reporting that the loop has started.**
+  The bullets below validate the *target*; this one validates the loop's own
+  execution environment, which is what actually fails first when it fails.
+  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+     without it installed — the two scripts that shell out to it **cannot
+     run**. The GitHub MCP tools are the substitute: use them for the issue list
+     and the CI-wait-and-merge. Say so in the wrap-up report, so the run's
+     mechanics are legible rather than looking like the scripts ran, and do
+     **not** silently skip a step just because its script is unavailable.
+     (`find_clusters.py` and `index_capabilities.sh` don't touch `gh`
+     and still work.)
+  2. One cheap read against the API (list issues, page size 1). A rate limit or
+     an auth failure discovered here costs nothing; discovered mid-loop it
+     strands work in flight. See "Stop conditions" for what to do when it fails
+     later.
+  3. Note which CI-status mechanism the target uses. A repo whose CI reports via
+     **Actions checks** returns `total_count: 0` from the commit-status
+     endpoint — that is *not* evidence CI is missing, and reading it that way
+     will make you think a green run never happened. Match a run to the PR by
+     `head_sha`, never by branch: runs are associated to PRs by branch name, so
+     a stale run from an earlier PR on a reused branch can appear attached to
+     the current one and read as a pass for code it never ran against.
 - **repo-config prerequisite**: before acting on any approved cluster (step
   4), run `repo-config`'s `scripts/audit.sh` against `HOIST_TARGET` and
   every consuming repo that will get an adopt PR. Any repo scoring
@@ -177,6 +199,14 @@ finds is a separate, explicitly-approved follow-up, not part of this run.
 - A convergent-but-diverged cluster's behavioral question is still
   unanswered → that cluster stays at step 4.1, no code gets written for it,
   in either harness mode.
+- **The GitHub API is unreachable or rate-limited** → halt cleanly and report
+  three lists: clusters completed, work *in flight* (naming the branch and any
+  open PR, so nothing is stranded unnamed), and clusters never started — plus
+  the retry path. Every other stop condition here is about work state; this one
+  is about the tooling, and it's the case where partial state exists and
+  matters. Never lower the bar on step 3's cluster review to keep going —
+  waiting is cheap, and a cluster misclassified from a title alone and then
+  worked unattended is not.
 
 ## Rules
 
@@ -216,14 +246,23 @@ finds is a separate, explicitly-approved follow-up, not part of this run.
   directory and nothing here fetches a repo, so a `PLATFORM_REPOS` entry
   that isn't checked out is a manual `gh repo clone` before step 1. The
   sibling skills' `scan_platform_repos.sh` does this for them; porting it
-  here would add a `gh` dependency this skill otherwise doesn't need, so
-  it's a separate decision rather than an assumed gap.
+  here would add a `gh` dependency to step 1, which otherwise runs entirely
+  off local checkouts, so it's a separate decision rather than an assumed gap.
+- `next_issue.sh` and `watch_and_merge.sh` require `gh` on `PATH` and
+  authenticated (`find_clusters.py` and `index_capabilities.sh` don't). Step
+  0's preflight checks for it and routes to the GitHub MCP tools when it's
+  missing, but that fallback is a documented substitution the run has to make
+  deliberately — the scripts themselves have no MCP path.
 - Assumes each consuming repo already has (or the user sets up) a pinning
   mechanism for depending on `HOIST_TARGET` — the ADR-011 precedent for
   rust-shell is the model to follow; this skill doesn't establish that
   contract from scratch for a repo that doesn't have one yet.
 
 ## Scripts
+
+Two of these scripts shell out to `gh` — `next_issue.sh` and
+`watch_and_merge.sh`. If step 0's preflight found `gh` absent they cannot run,
+and the GitHub MCP tools are the substitute; see step 0.
 
 | Script | Purpose | Args |
 | --- | --- | --- |

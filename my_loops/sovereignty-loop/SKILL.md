@@ -1,7 +1,7 @@
 ---
 name: sovereignty-loop
 description: Audits a repo's external dependencies, checks whether an existing repo, library, or component across the Rusty-Mill org or baileyrd's personal rusty_* repos already covers the same capability, and proposes a swap-to-internal or a scoped hand-rolled replacement for each — turning "we depend on too many external crates" into a bounded loop. Trigger on requests to reduce external dependencies, consolidate around the platform layer, check for supply-chain/sovereignty exposure, or "do we already have something for this" against the user's own repo ecosystem. Companion to parity-loop (same PR/CI/merge mechanics) and repo-config (same governance conventions) — checkpointed with per-row sign-off by default since replacing a dependency is a toolchain change, but proceeds unattended on pre-classified-safe rows when `LOOP_HARNESS_MODE=auto` (hand-roll L/XL and ambiguous rows always still wait).
-version: 1.2.0
+version: 1.3.0
 ---
 
 # sovereignty-loop
@@ -24,6 +24,27 @@ the two.
 ## Run (when invoked)
 
 **0. Scope**
+- **Tooling preflight — do this before reporting that the loop has started.**
+  The bullets below validate the *target*; this one validates the loop's own
+  execution environment, which is what actually fails first when it fails.
+  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+     without it installed — the three scripts that shell out to it **cannot
+     run**. The GitHub MCP tools are the substitute: use them for the issue
+     list, the sibling-repo search, and the CI-wait-and-merge. Say so in the
+     wrap-up report, so the run's mechanics are legible rather than looking like
+     the scripts ran, and do **not** silently skip a step just because its
+     script is unavailable.
+  2. One cheap read against the API (list issues, page size 1). A rate limit or
+     an auth failure discovered here costs nothing; discovered mid-loop it
+     strands work in flight. See "Stop conditions" for what to do when it fails
+     later.
+  3. Note which CI-status mechanism the target uses. A repo whose CI reports via
+     **Actions checks** returns `total_count: 0` from the commit-status
+     endpoint — that is *not* evidence CI is missing, and reading it that way
+     will make you think a green run never happened. Match a run to the PR by
+     `head_sha`, never by branch: runs are associated to PRs by branch name, so
+     a stale run from an earlier PR on a reused branch can appear attached to
+     the current one and read as a pass for code it never ran against.
 - **repo-config prerequisite**: run `repo-config`'s `scripts/audit.sh
   <TARGET_REPO>` first. If the standard governance-file score is
   low/missing, run repo-config on the target before proceeding — the
@@ -224,6 +245,13 @@ follow-up, not part of this run.
   report, not the loop — there's no default path from "classified" to
   "worked." **Auto mode**: this only applies to hand-roll L/XL and
   ambiguous rows — see "Harness mode."
+- **The GitHub API is unreachable or rate-limited** → halt cleanly and report
+  three lists: rows completed, work *in flight* (naming the branch and any open
+  PR, so nothing is stranded unnamed), and rows never started — plus the retry
+  path. Every other stop condition here is about work state; this one is about
+  the tooling, and it's the case where partial state exists and matters. Never
+  lower the bar on step 2's classification to keep going — waiting is cheap, and
+  a row misclassified from a title alone and then worked unattended is not.
 
 ## Rules
 
@@ -281,11 +309,20 @@ follow-up, not part of this run.
 - The S/M/L/XL hand-roll size is a routing gut-call (inline loop vs.
   dedicated-repo proposal), not a committed estimate — treat it as a
   starting point for scoping, not a promise.
+- All three scripts require `gh` on `PATH` and authenticated. Step 0's
+  preflight checks for it and routes to the GitHub MCP tools when it's
+  missing, but that fallback is a documented substitution the run has to
+  make deliberately — the scripts themselves have no MCP path.
 - Doesn't decide *whether* sovereignty is worth the engineering cost for a
   given dependency — that's the judgment step 3 surfaces for the user, not
   something this skill resolves on its own.
 
 ## Scripts
+
+Three of these scripts shell out to `gh` — `next_issue.sh`,
+`watch_and_merge.sh`, and `scan_platform_repos.sh`. If step 0's preflight found
+`gh` absent they cannot run, and the GitHub MCP tools are the substitute; see
+step 0.
 
 | Script | Purpose | Args |
 | --- | --- | --- |

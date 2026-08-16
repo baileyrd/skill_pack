@@ -1,7 +1,7 @@
 ---
 name: parity-loop
 description: Runs an autonomous "close the capability gap" loop against a reference API surface — assess what a target codebase is missing relative to a reference (e.g. the `libc` crate, POSIX, another package/spec), check whether a sibling repo across the Rusty-Mill/baileyrd platform namespaces already implements the gap before writing anything from scratch, open one GitHub issue per gap, then work each issue end-to-end (implement or port, test, PR, wait for green CI, merge with a merge commit, sync) — looping until the gap list is empty or told to stop. Use whenever the user asks to assess a codebase for missing coverage against a reference library/spec and close the gaps, wants "parity" or "coverage" work automated as a repeatable issue-to-merged-PR loop, or references this by name (parity-loop, gap loop, coverage loop). Companion to the repo-config skill — assumes repo-config's PR/issue templates and RELEASE_NOTES.md convention if present, but works without them.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # parity-loop
@@ -21,6 +21,27 @@ template). This skill's own files describe the loop itself — don't confuse the
 
 **0. Settle what "parity" means for this run — before anything else, including
 before step 1 runs**
+- **Tooling preflight — do this before reporting that the loop has started.**
+  The bullets below validate the *target*; this one validates the loop's own
+  execution environment, which is what actually fails first when it fails.
+  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+     without it installed — the three scripts that shell out to it **cannot
+     run**. The GitHub MCP tools are the substitute: use them for step 2's issue
+     filing, step 3's issue picking, and step 3's CI-wait-and-merge. Say so in
+     the wrap-up report, so the run's mechanics are legible rather than looking
+     like the scripts ran, and do **not** silently skip a step just because its
+     script is unavailable.
+  2. One cheap read against the API (list issues, page size 1). A rate limit or
+     an auth failure discovered here costs nothing; discovered mid-loop it
+     strands work in flight. See "Stop conditions" for what to do when it fails
+     later.
+  3. Note which CI-status mechanism the target uses. A repo whose CI reports via
+     **Actions checks** returns `total_count: 0` from the commit-status
+     endpoint — that is *not* evidence CI is missing, and reading it that way
+     will make you think a green run never happened. Match a run to the PR by
+     `head_sha`, never by branch: runs are associated to PRs by branch name, so
+     a stale run from an earlier PR on a reused branch can appear attached to
+     the current one and read as a pass for code it never ran against.
 - **repo-config prerequisite**: run `repo-config`'s `scripts/audit.sh <target>`
   first. If the standard governance-file score is low/missing (repo-config
   hasn't been applied here), run repo-config on the target before doing any
@@ -233,7 +254,7 @@ step 3.4 are never affected by harness mode — both pause and ask in both
 modes; `LOOP_HARNESS_MODE=auto` unblocks unattended *work*, not unattended
 *scope decisions*.
 
-
+## Stop conditions
 
 Check these every iteration, not just at start:
 - No open `parity-gap` issues left (skipping `blocked`/`needs-human`) → done.
@@ -246,6 +267,14 @@ Check these every iteration, not just at start:
   auto-implement or auto-skip.
 - An issue is `new-subsystem`-labeled → pause and ask (step 3.4), don't
   auto-implement or auto-skip.
+- **The GitHub API is unreachable or rate-limited** → halt cleanly and report
+  three lists: gaps completed, work *in flight* (naming the branch and any open
+  PR, so nothing is stranded unnamed), and gaps never started — plus the retry
+  path. Every other stop condition here is about work state; this one is about
+  the tooling, and it is the case where partial state exists and matters. Never
+  lower the bar on step 1's analysis or step 3's triage to keep going — waiting
+  is cheap, and a gap misclassified from a title alone and then implemented
+  unattended is not.
 
 ## Rules
 
@@ -314,9 +343,13 @@ Check these every iteration, not just at start:
   repos worth scanning for a given gap (step 1), not the full org every
   time. `references/platform-directory.md` can also drift from the live
   org; confirm rather than assume it's complete.
-- Assumes `gh` is authenticated and CI is configured as a required status
-  check on the default branch; the "on green CI" gate only actually gates
-  merges if branch protection requires it (same caveat as repo-config).
+- Assumes CI is configured as a required status check on the default branch;
+  the "on green CI" gate only actually gates merges if branch protection
+  requires it (same caveat as repo-config).
+- All three scripts require `gh` on `PATH` and authenticated. Step 0's
+  preflight checks for it and routes to the GitHub MCP tools when it's
+  missing, but that fallback is a documented substitution the run has to
+  make deliberately — the scripts themselves have no MCP path.
 - Built for a single target/reference pair per run. Comparing against several
   references at once (e.g. libc *and* a BSD extension set) means running the
   assessment phase once per reference and merging the gap lists by hand.
@@ -333,6 +366,11 @@ target ecosystem's equivalents (e.g. a Python package: `griffe` or a
 the local gate) and the rest of this skill applies unchanged.
 
 ## Scripts
+
+Three of these scripts shell out to `gh` — `next_issue.sh`,
+`watch_and_merge.sh`, and `scan_rustymill_repos.sh`. If step 0's preflight found
+`gh` absent they cannot run, and the GitHub MCP tools are the substitute; see
+step 0.
 
 | Script | Purpose | Args |
 | --- | --- | --- |

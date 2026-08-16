@@ -10,6 +10,44 @@ still open.
 
 ---
 
+## v1.3.0 — Tooling preflight and an infrastructure stop condition
+**2026-08-16**
+
+- **Added:** a **tooling preflight** as the first bullet of step 0 — `command
+  -v gh`, one cheap API read, and a note on which CI-status mechanism the
+  target uses. The bullets it sits above all validate the *target*; this one
+  validates the loop's own execution environment, which is what actually fails
+  first when it fails.
+- **Added:** an **infrastructure stop condition** — an unreachable or
+  rate-limited GitHub API halts cleanly and reports three lists (completed, in
+  flight with branch and PR named, never started) plus the retry path. Every
+  other stop condition in this skill is about work state; this is the one where
+  partial state exists and something can be stranded unnamed.
+- **Added:** the preflight names the two CI-status traps by their symptom:
+  a repo reporting via Actions checks returns `total_count: 0` from the
+  commit-status endpoint (not evidence CI is missing), and runs associate to
+  PRs by *branch*, so a stale run from an earlier PR on a reused branch can
+  read as a pass for code it never ran against. Match by `head_sha`.
+- **Documented:** which scripts require `gh`, in both the Scripts section and
+  Limitations. `next_issue.sh` and `watch_and_merge.sh` do; `find_clusters.py`
+  and `index_capabilities.sh` don't and keep working without it. Limitations
+  previously said nothing about `gh` at all.
+- **Fixed:** the no-clone-path limitation claimed porting
+  `scan_platform_repos.sh` here "would add a `gh` dependency this skill
+  otherwise doesn't need" — but `next_issue.sh` and `watch_and_merge.sh`
+  already need it. Narrowed to the claim that's true: it would add one to
+  *step 1*, which otherwise runs entirely off local checkouts.
+
+**Evidence, stated honestly:** only `issue-loop` actually failed this way in a
+live run — `gh` absent in a web session, so its scripts couldn't run and the
+loop had to be re-derived mid-flight. The gap here was confirmed structurally
+by reading this skill, not by a failing run of it. The change is documentation
+only — no behavior changes and no scripts touched — so the cost of being wrong
+is low, but it isn't the same grade of evidence
+([#61](https://github.com/baileyrd/skill_pack/issues/61)).
+
+---
+
 ## v1.2.0 — Refresh the stale platform repo directory
 **2026-08-15**
 
