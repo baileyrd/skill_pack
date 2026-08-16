@@ -1,65 +1,165 @@
-# Platform repo directory (baileyrd/rusty_* + Rusty-Mill/*)
+# Platform repo directory (baileyrd/* + Rusty-Mill/*)
 
-A snapshot of repos worth checking for an existing implementation before
-hand-rolling a gap fix, spanning **both** namespaces — the personal
-`baileyrd/rusty_*` repos and the `Rusty-Mill/*` org. Org migration from the
-personal namespace to `Rusty-Mill` isn't complete, so a given repo may live
-in either place; treat this as one merged list, not two to check
-separately. Confirm against `gh repo list Rusty-Mill` and a check of the
-`baileyrd` namespace since both grow and repos move between them over
-time — this file is a cache, not gospel.
+Repos worth checking for an existing implementation before hand-rolling.
+Refreshed 2026-08-15 against the live namespaces.
 
-| Repo | Namespace | Purpose |
-| --- | --- | --- |
-| rush | Rusty-Mill | Native shell |
-| rustils | Rusty-Mill | OS abstraction / platform-core layer (`rust-platform-core`) |
-| rusty_ansder | Rusty-Mill | ANS DER |
-| rusty_compactor | Rusty-Mill | Token compactor |
-| rusty_croc | Rusty-Mill | Peer-to-peer file transfer (croc-like) |
-| rusty_db | Rusty-Mill | Database abstraction layer, SQLAlchemy-like |
-| rusty_h2 | Rusty-Mill | HTTP/2 protocol implementation |
-| rusty_http | Rusty-Mill | HTTP client/server library |
-| rusty_json | Rusty-Mill | JSON parsing/serialization |
-| rusty_libc | Rusty-Mill | libc reimplementation, tracked for parity against the `libc` crate |
-| rusty_lines | Rusty-Mill | Line-oriented text processing utility |
-| rusty_llama | Rusty-Mill | Llama.cpp-style local LLM inference |
-| rusty_lsp | Rusty-Mill | Language Server Protocol implementation |
-| rusty_naner | Rusty-Mill | Cmder-adjacent terminal implementation |
-| rusty_provider | Rusty-Mill | LLM provider/service abstraction layer |
-| rusty_rdp | Rusty-Mill | RDP (Remote Desktop Protocol) client/implementation |
-| rusty_regx | Rusty-Mill | Regular expression engine |
-| rusty_request | Rusty-Mill | HTTP request client (Python Requests-adjacent) |
-| rusty_search | Rusty-Mill | Search engine abstraction layer |
-| rusty_tail | Rusty-Mill | Rust-based Tailscale implementation |
-| rusty_term | Rusty-Mill | Terminal emulation/handling library |
-| rusty_tls | Rusty-Mill | TLS implementation |
-| rusty_tokio | Rusty-Mill | Async runtime tooling (tokio-adjacent) |
-| rusty_url | Rusty-Mill | URL parsing library |
-| rusty_whisper | Rusty-Mill | Speech-to-text (Whisper-based) |
-| rusty_win32 | Rusty-Mill | Windows API (Win32) bindings |
-| rusty_wire | Rusty-Mill | Wire protocol / binary serialization |
-| SHH | Rusty-Mill | SSH-related tool |
-| rusty_foundation_akb | Rusty-Mill | Architecture knowledge base — docs only, not a code source for reuse |
-| Atlas_Engineering_Standards_Library | baileyrd | Standards library — docs only, not a code source for reuse |
-| rusty_prime_agent | baileyrd | Rust rewrite of Prime Agent's daemon/worker/session core |
+## Read this before using the table
 
-The two standards/AKB repos are listed for completeness but are never reuse
-candidates — see `references/development-standards.md` for how they're
-actually used.
+**Almost everything lives under `baileyrd`, not `Rusty-Mill`.** The previous
+version of this file listed ~25 repos as `Rusty-Mill` (rustils, rusty_json,
+rusty_http, rusty_libc, rusty_tokio, rusty_wire, …). None of them are. Building
+a clone URL from that column produced 404s for every one. Only **four** repos
+are actually in the `Rusty-Mill` org, listed below. If migration to the org is
+still intended, it hasn't happened yet — assume `baileyrd` unless this file
+says otherwise.
 
-Many of the `rusty_*` repos are purpose-built stand-ins for a specific
-external crate (`rusty_json` ~ `serde_json`, `rusty_regx` ~ `regex`,
-`rusty_url` ~ `url`, `rusty_tls` ~ `rustls`, `rusty_http`/`rusty_request` ~
-`reqwest`/`hyper`, `rusty_tokio` ~ `tokio`, `rusty_wire` ~ things like
-`bincode`/`prost`). That naming pattern is a decent first-pass heuristic,
-not proof; confirm by reading the actual source — a name match isn't the
-same as coverage.
+**Three repos in the old list don't exist under those names:** `rush`,
+`rusty_compactor` (it's `rusty_token_compactor`), and `rusty_tail` (it's
+`rusty_tailscale`).
+
+**Purpose column:** entries marked † are inferred from the repo name and have
+**not** been confirmed by reading the source. The `rusty_<thing>` ≈
+`<external crate>` pattern is a first-pass filter, not proof — a name match
+still needs a source read before it counts as `covered`. Unmarked entries were
+confirmed by reading the repo.
+
+## Rusty-Mill org (all four)
+
+| Repo | Purpose |
+| --- | --- |
+| rusty_foundation_akb | Architecture knowledge base — docs only, never a reuse candidate |
+| rusty_knowledge | Knowledge base † |
+| rusty_owl | Private; purpose unconfirmed † |
+| .github | Org-level community health files |
+
+## baileyrd — platform / stdlib layer
+
+| Repo | Purpose |
+| --- | --- |
+| rustils | OS abstraction / platform-core (`platform`, `platform-linux`, `platform-bsd`, `platform-windows`, `platform-mock`, `coreutils`, `winargv`). The designated floor per ADR-011 |
+| rustils_async | Async layer above rustils: `reactor-core` (runtime-agnostic, no I/O), `platform-async`, `platform-async-linux` (pidfd + epoll), `threading`, `coreutils-async` |
+| rusty_std | std reimplementation; depends on rusty_libc + rusty_win32 |
+| rusty_libc | libc reimplementation, tracked for parity against the `libc` crate |
+| rusty_win32 | Win32 API bindings |
+| rusty_tokio | Async runtime (tokio-adjacent) |
+| rusty_sync | `no_std` + alloc spinlock, spinlock-protected MPMC channel, ring buffer. **Not** a work-stealing deque |
+| rusty_parking_lot | Private; `parking_lot`-adjacent locks † |
+| rusty_async | **Empty repository** — nothing in it |
+| rusty_simd | SIMD † |
+| rusty_boot | Boot/init † |
+
+## baileyrd — data / encoding
+
+| Repo | Purpose |
+| --- | --- |
+| rusty_wire | Zero-dependency endian-explicit byte cursor Reader/Writer. **Not** the `bytes` `Buf`/`BufMut` trait ecosystem |
+| rusty_json | JSON parsing/serialization † |
+| rusty_serde | serde-adjacent † |
+| rusty_codec | Codec † |
+| rusty_compress | Compression † |
+| rusty_uuid | UUID † |
+| rusty_sha256 | SHA-256 † (private) |
+| rusty_crypto_key | Key handling † |
+| rusty_ansder | ASN.1 DER † |
+| rusty_regx | Regex engine † |
+| rusty_text | Text processing † |
+| rusty_lines | Line-oriented text processing † |
+| rusty_diff | Diffing † |
+| rusty_jinja | Jinja-style templating † |
+| rusty_font | Font handling † |
+
+## baileyrd — network / protocol
+
+| Repo | Purpose |
+| --- | --- |
+| rusty_http | HTTP client/server † |
+| rusty_h2 | HTTP/2 † |
+| rusty_request | HTTP request client (Requests-adjacent) † |
+| rusty_tls | TLS † |
+| rusty_url | URL parsing † |
+| rusty_croc | Peer-to-peer file transfer (croc-like) † |
+| rusty_rdp | RDP client † |
+| rusty_tailscale | Tailscale implementation † (private) — the dedicated-repo precedent for an XL hand-roll |
+| rusty_wiremock | HTTP mocking † |
+| rusty_oauth | OAuth † (private) |
+| rusty_stream | Streaming † — consumes rusty_tokio's io-uring surface |
+
+## baileyrd — storage / data stores
+
+| Repo | Purpose |
+| --- | --- |
+| rusty_db | Database abstraction (SQLAlchemy-like) † |
+| rusty_sqlite | SQLite † |
+| rusty_rusqlite | rusqlite-adjacent † (private) |
+| rusty_dbs | † (private) |
+| rusty_search | Search engine abstraction † |
+| rusty_config | Configuration † |
+| rusty_dirs | Directory/path conventions † (private) |
+| rusty_git | Git † |
+| rusty_inventrory | Inventory † (name is misspelled in the repo itself) |
+
+## baileyrd — terminal / UI / graphics
+
+| Repo | Purpose |
+| --- | --- |
+| rusty_term | Terminal emulation/handling † |
+| rusty_termius | Terminal † (private) |
+| rusty_naner | Cmder-adjacent terminal † |
+| rusty_ansi | ANSI escape handling † |
+| rusty_gui | GUI † |
+| rusty_gpu | GPU † |
+| rusty_vulkan | Vulkan † |
+| rusty_nexus | † |
+
+## baileyrd — AI / agent tooling
+
+| Repo | Purpose |
+| --- | --- |
+| rusty_prime_agent | Rust rewrite of Prime Agent's daemon/worker/session core |
+| rusty_provider | LLM provider/service abstraction † |
+| rusty_llama | Local LLM inference (llama.cpp-style) † |
+| rusty_llama-fs | LLM filesystem † |
+| rusty_embedder | Embeddings † |
+| rusty_whisper | Speech-to-text † |
+| rusty_voice | Voice † |
+| rusty_audio | Audio † |
+| rusty_mcp | Model Context Protocol † |
+| rusty_acp | Agent Client Protocol † |
+| rusty_a2a | Agent-to-agent † |
+| rusty_adk | Agent development kit † |
+| rusty_agent_gateway | Agent gateway † |
+| rusty_remind_me | Reminder/memory service (has a live MCP server) |
+| rusty_token_compactor | Token compactor † |
+| rusty_SkillOpt | Skill optimization † |
+| rusty_knowledge | see Rusty-Mill above |
+
+## baileyrd — tooling / meta
+
+| Repo | Purpose |
+| --- | --- |
+| rusty_lsp | Language Server Protocol † |
+| rusty_test | Test tooling † |
+| rusty_err / rusty_error | Error handling † (two repos; `rusty_error` is private — relationship unconfirmed) |
+| rusty_time / rusty_chrono | Time/date † (two repos; `rusty_chrono` is private) |
+| rusty_repo_checker | Repo checking † (private) |
+| rusty_repo_wise | Repo analysis † |
+| rusty_headroom | † |
+| Rusty_OMP | † (private) |
+| Rusty_Key | † (private) |
+| Atlas_Engineering_Standards_Library | Standards library — docs only, never a reuse candidate |
+
+## Known transitive-dependency note
+
+`rustils`' `platform` crate depends on `thiserror`, which pulls `thiserror-impl`
+→ `syn` + `quote` + `proc-macro2` + `unicode-ident` into **every** consumer of
+the platform layer. Worth knowing before classifying any of those four as a
+hand-roll candidate in a downstream repo: removing them there does not remove
+them from the build. See rusty_tokio's `dependency-audit.md` for the worked
+example, where this invalidated an entire audit row.
 
 ## Resolving a bare repo name
 
-`scripts/scan_rustymill_repos.sh` needs an owner/repo slug to clone a repo
-it doesn't have checked out locally. Use this table's **Namespace** column
-to build the slug — don't assume everything is still under the personal
-namespace or that migration to `Rusty-Mill` is finished for a given repo;
-check this table first, then fall back to trying both namespaces if a repo
-isn't listed here yet.
+Build the slug as `baileyrd/<repo>` unless the repo is one of the four
+Rusty-Mill entries above. If a clone 404s, try the other namespace before
+concluding the repo doesn't exist — and update this file when you find one that
+has moved.
