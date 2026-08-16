@@ -10,6 +10,40 @@ still open.
 
 ---
 
+## v1.3.0 — Preflight the loop's own tooling
+**2026-08-16**
+
+From a `skill-retro` pass on this skill, grounded in a run against
+`baileyrd/skill_pack` that **halted at step 1**. All three findings share a
+theme: the skill validated the *target repo* before starting and never
+validated its own execution environment.
+
+- **Added ([#61](https://github.com/baileyrd/skill_pack/issues/61)):** step 0
+  gains a tooling preflight — `command -v gh`, one cheap API read, and a note
+  on which CI-status mechanism the target uses. The run that prompted this
+  found `gh` **not installed at all** (Claude Code on the web), which makes all
+  three scripts unrunnable including `watch_and_merge.sh`, load-bearing for
+  step 3 rather than a convenience. The MCP substitution had to be improvised
+  mid-run; it's now named.
+- **Added:** an infrastructure **stop condition**. Every existing one was about
+  work state (no issues left, red CI, breaking change); none covered the
+  tooling going away, which is the case where partial state exists and matters.
+  It requires reporting completed / in-flight / never-started separately, and
+  explicitly forbids falling back to title-only triage to keep going — step 1
+  already says titles aren't sufficient, and a rate limit isn't a reason to
+  lower that bar.
+- **Changed:** Limitations now distinguishes `gh` *absent* from `gh`
+  *unauthenticated* — the second fails loudly on first use, the first silently
+  removes every script. The Scripts table says outright that all three need
+  `gh`.
+- **Note:** the sibling loops (`parity-loop`, `sovereignty-loop`,
+  `dedupe-loop`, `rust-migration`) share the same `gh`-shaped scripts and the
+  same Limitations wording, so they likely have the same gap. Not verified
+  here — only `issue-loop` actually ran — and left on #61 as a set to check
+  rather than patched blind.
+
+---
+
 ## v1.2.0 — Refresh the stale platform repo directory
 **2026-08-15**
 
