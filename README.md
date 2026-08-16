@@ -20,15 +20,16 @@ Bounded, unattended "work the backlog" loops for the Rusty-Mill/baileyrd platfor
 | [`docs-loop/`](my_loops/docs-loop) | Reviews a repo's docs against what the code actually does now — ground truth from the tree first, then a classified `docs-audit.md` checkpoint (stale / missing / orphaned / aspirational / unverifiable / accurate), then per-doc PRs. The currency counterpart to `repo-config`'s presence check. |
 | [`rust-migration/`](my_loops/rust-migration) | Migrates a repo/application (any source language) to Rust: inventories every existing capability into a manifest where each item defaults REQUIRED, files one issue per capability, implements with parity tests, and won't report the migration done while any required item is unresolved. |
 
-### [`yt_research_for_cc/`](yt_research_for_cc) — YouTube research pipeline
+### [`yt_research_for_cc/`](yt_research_for_cc) — video research
 
-Three skills that chain into an unattended YouTube research pipeline: search, curate, and hand off to NotebookLM for analysis and deliverables.
+Three skills chain into an unattended YouTube research pipeline — search, curate, and hand off to NotebookLM for analysis and deliverables. A fourth works a single video the other direction: deep enough to write documentation you can act on.
 
 | Skill | Does |
 |---|---|
 | [`yt-search/`](yt_research_for_cc/yt-search) | Searches YouTube via `yt-dlp`, returns structured results with an engagement (views/subscribers) ratio. |
 | [`notebooklm/`](yt_research_for_cc/notebooklm) | Full programmatic access to Google NotebookLM — notebooks, sources, chat, and every artifact type. Vendored from the third-party `notebooklm-py` package. |
 | [`yt-pipeline/`](yt_research_for_cc/yt-pipeline) | Orchestrates the two above: topic → search → auto-select best videos → NotebookLM notebook → analysis → optional deliverable. |
+| [`video-teardown/`](yt_research_for_cc/video-teardown) | Turns one video into a verified deliverable — captions plus triaged ffmpeg frames, then every reconstructed detail checked against official docs and marked on-screen vs reconstructed. |
 
 ### [`meta/`](meta) — tooling about this repo's own skills
 
