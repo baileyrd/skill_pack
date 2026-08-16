@@ -32,7 +32,10 @@ Columns:
 - **Status** — `proposed` (default, this report), `approved` (user signed
   off, about to be applied), `declined` (user said no, dropped from this
   run), `applied` (edited, versioned, and logged in the target skill's own
-  `RELEASE_NOTES.md`).
+  `RELEASE_NOTES.md`), `filed (#N)` (recorded as an issue in the target
+  skill's repo instead of being applied now — real, not dropped, but B is
+  unchanged so it gets no version bump or `RELEASE_NOTES.md` entry until
+  someone acts on the issue).
 
 ## Accumulating across runs (optional)
 

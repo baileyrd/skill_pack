@@ -9,6 +9,50 @@ still open.
 
 ---
 
+## v1.1.0 — Fix the two silent failures in the eval loop
+**2026-08-16**
+
+From a `skill-retro` pass on this skill, grounded in a real run of it
+(drafting `dev_practices/unix-philosophy` through two eval iterations).
+Both findings cost real time on that run and both failed *silently*, which
+is what makes them worth fixing rather than documenting.
+
+- **Fixed ([#50](https://github.com/baileyrd/skill_pack/issues/50)):** step 4.1
+  restated the `grading.json` schema inline as `text`/`passed`/`evidence` —
+  authoritative-sounding but incomplete. `scripts/aggregate_benchmark.py`
+  reads `summary.pass_rate`, defaulting to `0.0`. On the run that found this,
+  the benchmark reported **0.0% for both configurations** against actual
+  scores of 22/23 and 21/23, with no warning. Step 4.1 now shows both halves
+  of the schema and names which consumer reads which, and adds the diagnostic
+  that matters: *if a benchmark comes back at 0.0%, check for `summary`
+  before believing it.* The script now derives a summary from `expectations`
+  when it's missing and says so, rather than scoring zero in silence.
+- **Fixed ([#51](https://github.com/baileyrd/skill_pack/issues/51)):** the
+  documented workspace layout omitted the `run-N/` level that
+  `aggregate_benchmark.py` requires (`config_dir.glob("run-*")`), so
+  following the instructions exactly produced a workspace the aggregator
+  found zero runs in. The layout is now shown as a directory tree with
+  `run-1/` marked as required-even-with-one-run and the reason it exists,
+  and the paths in steps 1 and 3 match it. The script now warns when a
+  config directory holds a `grading.json` or `outputs/` but no `run-*`
+  child — the specific mistake the old layout invited.
+- **Note on the pattern:** in both cases the complete, correct information
+  already existed in `agents/grader.md`, `references/schemas.md`, or the
+  script's own docstring. The defect was SKILL.md restating a partial
+  version of it in the reader's path. Partial restatements of a schema
+  documented elsewhere are worse than a pointer, because they look complete.
+
+Still open from the same retro, filed but not fixed:
+[#52](https://github.com/baileyrd/skill_pack/issues/52) (hardcoded model
+name and run count in `benchmark.md`),
+[#53](https://github.com/baileyrd/skill_pack/issues/53) (no "Retro by
+default" shape for multi-mode skills),
+[#54](https://github.com/baileyrd/skill_pack/issues/54) (description length
+limit unstated), [#55](https://github.com/baileyrd/skill_pack/issues/55)
+(eval workflow assumes an interactive local session).
+
+---
+
 ## v1.0.1 — Declare the PyYAML dependency
 **2026-08-15**
 

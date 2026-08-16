@@ -1,7 +1,7 @@
 ---
 name: skill-retro
 description: Runs a post-execution retrospective on a skill (call it B) immediately after B finishes real work, treating what just happened as evidence about B's own instructions rather than about the task B was doing. Re-reads B's current SKILL.md/references/scripts and reconstructs what actually happened in this session against them — every ambiguity resolved by guessing, every question asked that B's instructions should have pre-answered, every step skipped/reordered/improvised, every stale reference or script that errored — reporting each as a finding: what happened, which file/section it traces to, and a concrete proposed edit. Never edits B's files unprompted; applies findings only on explicit approval, then bumps B's version and RELEASE_NOTES.md per this repo's versioning convention. Use immediately after finishing a task that leaned on another skill in this repo, when the user asks to retro/review/critique/post-mortem a skill that was just used, or references this by name (skill-retro, meta-review).
-version: 1.1.2
+version: 1.2.0
 ---
 
 # skill-retro
@@ -67,7 +67,11 @@ numbered/step structure (if it has one) and note, per step:
   run isn't enough to tell "always a no-op" from "no-op this time."
 
 **3. Classify each real finding** (skip step 2 items that resolved cleanly
-— this report is about friction, not a step-by-step recap):
+— this report is about friction, not a step-by-step recap). Read
+`references/retro-findings-format.md` before classifying, not after — it
+defines the columns each finding needs, and discovering them once the table
+is already drafted means going back to re-derive a File/Section and Status
+for every row:
 - **Category**: `ambiguous-instruction` / `missing-guardrail` (a stop-and-ask
   B should have had but didn't) / `stale-reference` / `redundant-step` (a
   step that added nothing, **or one stated unconditionally that's only
@@ -83,6 +87,12 @@ numbered/step structure (if it has one) and note, per step:
   skips a stop-and-ask B's own rules exist to enforce — e.g. a breaking
   change or an unattributed scope-narrowing on a skill like
   `rust-migration` whose entire point is that exact guardrail).
+  One case is easy to under-rate: a finding that puts a **false statement
+  into a user-facing artifact** (a generated report, a summary, a committed
+  doc) rates at least `costly-guess` regardless of whether this run was
+  harmed by it. The severity axis otherwise reads as "how bad was the guess
+  *during* the run," which lands wrong here — nothing went wrong during the
+  run; the cost lands on whoever reads the artifact later and believes it.
 - **File/section** — the precise place in B to edit (`SKILL.md` step N, a
   specific `references/*.md`, a script's flag handling).
 - **Proposed edit** — concrete replacement text or a specific line/step
@@ -101,6 +111,14 @@ batch:
 - Edit B's `SKILL.md`/`references/`/`scripts/` for the approved findings
   only. Declined findings are dropped from this run, not silently
   re-applied.
+- **Recording a finding as an issue is a third disposition** — neither
+  applied nor dropped. It's the right outcome for a finding that's real but
+  not worth interrupting the current work for, or one whose fix needs more
+  design than this run can give it. File it in the repo the target skill
+  lives in, link the issue in the finding's Status cell (`filed (#N)`), and
+  don't bump B's version or touch its `RELEASE_NOTES.md` — nothing about B
+  changed yet. A batch that's part applied and part filed is normal; report
+  which is which rather than implying the whole table landed.
 - Bump B's `version` in its `SKILL.md` frontmatter — semver, by hand, same
   rule the root `README.md`'s "Versioning" section already states for every
   skill here: patch for wording/doc-only fixes, minor for a new guardrail

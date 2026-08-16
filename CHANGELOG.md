@@ -4,6 +4,26 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Fixed
+- `meta/my-skill-creator` (v1.0.1 → v1.1.0) — the two silent failures in the
+  eval loop, both found by a `skill-retro` pass on a real run. `grading.json`
+  needs a `summary` block that step 4.1's inline schema omitted, and a missing
+  one scored **0.0% for every configuration** with no warning (#50); the
+  documented workspace layout omitted the `run-N/` level `aggregate_benchmark.py`
+  requires, so following the instructions exactly produced a benchmark of zero
+  runs (#51). Both are now documented correctly *and* fail loudly in the script.
+  In both cases the correct information already existed in `agents/grader.md`,
+  `references/schemas.md`, or the script's docstring — the defect was SKILL.md
+  restating a partial version of it in the reader's path.
+- `meta/skill-retro` (v1.1.2 → v1.2.0) — from its own step 6 self-retro:
+  recording a finding as an issue is now a named third disposition alongside
+  applied and declined, with a `filed (#N)` Status — the retro that found this
+  had all seven findings filed rather than applied, an outcome the skill had no
+  vocabulary for; the findings-format pointer moved from step 4 into step 3, so
+  the table's required columns are known before the table is drafted; and the
+  severity scale now rates a false statement in a user-facing artifact at least
+  `costly-guess` regardless of whether the run itself was harmed.
+
 ### Added
 - `dev_practices/unix-philosophy` (v1.1.0 → v1.1.1) — `evals/analysis/` now
   tracks the analyst passes and benchmark aggregates from both eval iterations.
