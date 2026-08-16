@@ -4,6 +4,22 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Added
+- `my_loops/issue-loop` (v1.2.0 → v1.3.0) — a **tooling preflight** in step 0
+  and an **infrastructure stop condition** (#61), both from a `skill-retro` on
+  a run that halted at step 1. The skill validated the target repo before
+  starting but never its own execution environment: `gh` turned out to be not
+  installed at all (not merely unauthenticated), which makes all three of its
+  scripts unrunnable, and the API was rate-limited — discovered only after the
+  loop had announced itself as started. The preflight also records the two
+  CI-status traps this session hit for real: a commit-status `total_count: 0`
+  is not evidence CI is missing when a repo reports via Actions checks, and
+  runs must be matched to a PR by `head_sha`, since branch-name association can
+  attach a stale green run from a previous PR on a reused branch.
+  The stop condition explicitly forbids falling back to title-only triage to
+  keep going. Sibling loops likely share the `gh` gap; left on #61 as a set to
+  check rather than patched blind, since only `issue-loop` actually ran.
+
 ### Fixed
 - `my_loops/docs-loop` (v1.3.1 → v1.3.2) — `check_references.py` stringified a
   `Path` into every row's `where` field, so a Windows checkout emitted
