@@ -5,6 +5,24 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Fixed
+- `my_loops/repo-config` (v1.3.3 → v1.4.0) — three findings from the
+  `rusty_recall` run. `copy_one` left a **zero-byte file** when a template was
+  missing, because the shell creates the redirect target before `sed` runs; one
+  such invalid workflow was committed and merged into a real repo. It now fails
+  the run and writes via temp-file-plus-`mv` (#40). `audit.sh`'s CI probe then
+  *matched* that zero-byte file and scored it a pass — the score improved
+  because of the bug — so presence checks now require `-size +0` (#40). The
+  probe also globbed `ci-*.yml`, missing a repo whose real gate is `ci.yml` and
+  inviting a second overlapping workflow; it now matches any non-empty
+  `*.yml`/`*.yaml`, and `apply.sh` skips CI when the target already has any
+  workflow (#42). Step 0 gains a scan for the standard set *below* the root,
+  with a "Multi-product repos" reference section — a merged workspace had two
+  ADR series each numbered from 0001, and seeding the root blind would have
+  made a third (#43).
+  Caught while testing: the first cut of the #42 fix ran `find` on a possibly
+  absent `.github/workflows` under `set -euo pipefail`, which silently aborted
+  the whole run on any repo without one — the common case, not an edge one.
+  Both `find` calls are now directory-guarded.
 - `meta/learn-it` (v1.1.2 → v1.2.0) — four findings from the run that produced
   PR #44. The conventions reference listed three category folders when there
   are five plus two non-category staging areas, so placement decisions were

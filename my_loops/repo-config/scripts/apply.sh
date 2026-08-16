@@ -68,9 +68,29 @@ copy_one() {
     skipped=$((skipped + 1))
     return
   fi
-  sed -e "s#{{OWNER_REPO}}#$OWNER_REPO#g" \
-      -e "s#{{SECURITY_CONTACT}}#$SECURITY_CONTACT#g" \
-      "$src" > "$dest"
+  # A missing template is a hard error, not a line of sed noise. The shell
+  # creates "$dest" for the redirect BEFORE sed runs, so a failed sed leaves a
+  # zero-byte file behind — and a zero-byte .github/workflows/*.yml is invalid
+  # to GitHub and reported red on every push. One was committed and merged into
+  # a real repo this way (issue #40).
+  if [[ ! -f "$src" ]]; then
+    echo "ERROR  $rel — template missing at $src" >&2
+    echo "       Refusing to write a partial file. This usually means the synced" >&2
+    echo "       copy of this skill is incomplete (see issue #41)." >&2
+    exit 1
+  fi
+  # Write via a temp file and mv on success, so a failed substitution can never
+  # leave a partial or empty destination behind.
+  local tmp
+  tmp="$(mktemp "${dest}.XXXXXX")"
+  if ! sed -e "s#{{OWNER_REPO}}#$OWNER_REPO#g" \
+           -e "s#{{SECURITY_CONTACT}}#$SECURITY_CONTACT#g" \
+           "$src" > "$tmp"; then
+    rm -f "$tmp"
+    echo "ERROR  $rel — substitution failed, destination left untouched" >&2
+    exit 1
+  fi
+  mv "$tmp" "$dest"
   echo "write  $rel"
   created=$((created + 1))
 }
@@ -86,12 +106,41 @@ done < <(find "$TEMPLATES_DIR" -type f -print0)
 # CI workflow selection, driven by which manifests the target actually has.
 # A polyglot repo legitimately gets both. A repo with neither manifest gets none —
 # there's nothing for CI to run yet, and an always-red workflow is worse than none.
-ci_selected=0
-if [[ -f "$TARGET_DIR/Cargo.toml" ]]; then
+#
+# Before selecting anything: if the target already has ANY non-empty workflow,
+# leave CI alone. The non-destructive skip in copy_one only protects a file at
+# the *same path* — it cannot know that a differently-named file already does
+# the job. A real repo with a tuned `ci.yml` (disk-reclaim steps, a scoped
+# Windows job, schema-drift and plugin-version checks) would otherwise get a
+# stock `ci-rust.yml` dropped alongside it, re-adding the very file that repo's
+# merge had just folded in, and ending with two overlapping gates (issue #42).
+# SKILL.md's own reason for including CI at all — "so the 'on green CI, merge'
+# rule has a real check to gate on" — is already satisfied by any working
+# workflow, whatever it is called.
+# NB: this script runs under `set -euo pipefail`, so `find` on a non-existent
+# directory would abort the whole run — and a target with no .github/workflows
+# yet is the *common* case, not an edge one. Guard on the directory first and
+# swallow a non-zero exit explicitly.
+existing_ci=""
+if [[ -d "$TARGET_DIR/.github/workflows" ]]; then
+  existing_ci="$(find "$TARGET_DIR/.github/workflows" -maxdepth 1 \
+                   \( -name '*.yml' -o -name '*.yaml' \) -size +0 2>/dev/null \
+                 | head -n 3 | xargs -r -n1 basename | paste -sd, - || true)"
+fi
+if [[ -n "$existing_ci" ]]; then
+  echo "skip   .github/workflows/ — target already has a workflow ($existing_ci);"
+  echo "       not adding a second, overlapping gate. Review it by hand if the"
+  echo "       existing one doesn't actually gate merges."
+  skipped=$((skipped + 1))
+  ci_selected=-1
+fi
+
+ci_selected=${ci_selected:-0}
+if [[ "$ci_selected" -ge 0 ]] && [[ -f "$TARGET_DIR/Cargo.toml" ]]; then
   copy_one "$TEMPLATES_DIR/.github/workflows/ci-rust.yml" ".github/workflows/ci-rust.yml"
   ci_selected=$((ci_selected + 1))
 fi
-if [[ -f "$TARGET_DIR/pyproject.toml" || -f "$TARGET_DIR/setup.py" ]]; then
+if [[ "$ci_selected" -ge 0 ]] && [[ -f "$TARGET_DIR/pyproject.toml" || -f "$TARGET_DIR/setup.py" ]]; then
   copy_one "$TEMPLATES_DIR/.github/workflows/ci-python.yml" ".github/workflows/ci-python.yml"
   ci_selected=$((ci_selected + 1))
 fi
