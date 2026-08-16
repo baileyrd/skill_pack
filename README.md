@@ -55,6 +55,16 @@ forward.
 |---|---|
 | [`datastar-pro/`](web_dev/datastar-pro) | Generates Datastar Pro web apps — attribute-driven reactivity (`data-*`, `$signals`, `@actions`), SSE server communication, Rocket components, Stellar CSS theming. Imported from [`baileyrd/datastar-pro-skill`](https://github.com/baileyrd/datastar-pro-skill)'s audited v1.0 milestone. |
 
+### [`dev_practices/`](dev_practices) — software design and coding discipline
+
+Skills that shape *how* software gets built rather than maintaining a
+particular repo — design guidance applied while a decision is live, and
+structured review of what already exists.
+
+| Skill | Does |
+|---|---|
+| [`unix-philosophy/`](dev_practices/unix-philosophy) | Applies Unix design philosophy in two modes: design mode (the `and` test, boundary format, output discipline, mechanism/policy split, failure behavior, earned complexity) and audit mode (eight dimensions scored Pass/Warn/Fail against cited evidence, findings ranked by the cost already being paid). Translates the principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code that has none. |
+
 ## Versioning
 
 Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver, bumped by hand on meaningful changes), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.

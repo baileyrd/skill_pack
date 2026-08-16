@@ -4,7 +4,59 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Fixed
+- `meta/my-skill-creator` (v1.0.1 → v1.1.0) — the two silent failures in the
+  eval loop, both found by a `skill-retro` pass on a real run. `grading.json`
+  needs a `summary` block that step 4.1's inline schema omitted, and a missing
+  one scored **0.0% for every configuration** with no warning (#50); the
+  documented workspace layout omitted the `run-N/` level `aggregate_benchmark.py`
+  requires, so following the instructions exactly produced a benchmark of zero
+  runs (#51). Both are now documented correctly *and* fail loudly in the script.
+  In both cases the correct information already existed in `agents/grader.md`,
+  `references/schemas.md`, or the script's docstring — the defect was SKILL.md
+  restating a partial version of it in the reader's path.
+- `meta/skill-retro` (v1.1.2 → v1.2.0) — from its own step 6 self-retro:
+  recording a finding as an issue is now a named third disposition alongside
+  applied and declined, with a `filed (#N)` Status — the retro that found this
+  had all seven findings filed rather than applied, an outcome the skill had no
+  vocabulary for; the findings-format pointer moved from step 4 into step 3, so
+  the table's required columns are known before the table is drafted; and the
+  severity scale now rates a false statement in a user-facing artifact at least
+  `costly-guess` regardless of whether the run itself was harmed.
+
 ### Added
+- `dev_practices/unix-philosophy` (v1.1.0 → v1.1.1) — `evals/analysis/` now
+  tracks the analyst passes and benchmark aggregates from both eval iterations.
+  The run outputs stay scratch under the gitignored `*-workspace/`, but the
+  conclusions were dying with the session: what the evidence supports (the skill
+  makes recommendations accountable; it does not make the analysis smarter),
+  what it doesn't (eval-5 scored 8/8 both ways, leaving the "when not to apply
+  this" section unvalidated), and the note that several discriminating
+  assertions were rewritten after a first iteration failed to discriminate.
+- `dev_practices/unix-philosophy` (v1.0.0 → v1.1.0) — the wrap-up `skill-retro`
+  step now fires only after an **audit report**, not after every invocation.
+  Two design-mode eval runs reported *skipping* it (read-only sandbox, no
+  subagents) and both were right to; a final step a run routinely reports not
+  doing is worse than no step. Design mode instead offers the retro as an
+  explicit request when a conversation turns into substantial work. This is the
+  one place where the repo's retro-by-default convention was applied by habit
+  rather than by fit — the sibling skills carrying it are long-running loops,
+  where a retrospective is small next to the work it reflects on.
+- `dev_practices/unix-philosophy` (v1.0.0) — new skill applying Unix software
+  design philosophy in two modes: design mode (a checklist for a live design
+  decision) and audit mode (eight dimensions scored Pass/Warn/Fail against
+  cited evidence, findings ranked by present cost, report-and-stop). Three
+  references carry the depth: the source philosophy plus the *cost* of each
+  principle, the audit rubric and report template, and translations to
+  non-CLI surfaces (libraries, HTTP/RPC services, background pipelines, agent
+  tools) including where the analogy breaks for distributed systems.
+- `dev_practices/` — fifth authored category folder, for design- and
+  coding-discipline skills. The four existing categories are each scoped to a
+  target (external repos, this repo's own skills, a research pipeline, a web
+  framework); guidance on how software is shaped fits none of them, so per
+  `meta/learn-it`'s category-placement rule this is a deliberate new category
+  rather than a forced fit. `ARCHITECTURE.md`'s Structure section and the root
+  `README.md` updated to match.
 - `yt_research_for_cc/video-teardown` (v1.0.0) — new skill for turning a video
   into a verified, structured deliverable (build guide, runbook, parts list,
   checklist) rather than a one-off answer about its contents. Pairs a cheap

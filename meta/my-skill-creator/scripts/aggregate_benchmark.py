@@ -103,6 +103,16 @@ def load_run_results(benchmark_dir: Path) -> dict:
                 continue
             # Skip non-config directories (inputs, outputs, etc.)
             if not list(config_dir.glob("run-*")):
+                # A config dir holding grading/output data but no run-* child is
+                # a flattened workspace, not an unrelated directory — silently
+                # skipping it yields a benchmark of zero runs that looks like a
+                # catastrophic result rather than a layout mistake.
+                if (config_dir / "grading.json").exists() or (config_dir / "outputs").is_dir():
+                    print(
+                        f"Warning: {config_dir} looks like a run directory but has no "
+                        f"run-* subdirectory, so it will not be counted. Expected "
+                        f"{config_dir}/run-1/grading.json — see the workspace layout in SKILL.md."
+                    )
                 continue
             config = config_dir.name
             if config not in results:
@@ -122,6 +132,25 @@ def load_run_results(benchmark_dir: Path) -> dict:
                 except json.JSONDecodeError as e:
                     print(f"Warning: Invalid JSON in {grading_file}: {e}")
                     continue
+
+                # A grading file with expectations but no summary scores 0.0 on
+                # every metric below. Left silent, that reads as the skill under
+                # test failing completely rather than as a missing key.
+                if "summary" not in grading and grading.get("expectations"):
+                    exps = grading["expectations"]
+                    passed = sum(1 for e in exps if e.get("passed") is True)
+                    print(
+                        f"Warning: {grading_file} has {len(exps)} expectations but no "
+                        f"'summary' block, so it would score 0.0. Deriving "
+                        f"{passed}/{len(exps)} from the expectations — add a summary "
+                        f"block (see agents/grader.md) to silence this."
+                    )
+                    grading["summary"] = {
+                        "passed": passed,
+                        "failed": len(exps) - passed,
+                        "total": len(exps),
+                        "pass_rate": round(passed / len(exps), 4) if exps else 0.0,
+                    }
 
                 # Extract metrics
                 result = {

@@ -1,7 +1,7 @@
 ---
 name: my-skill-creator
 description: This repo's own copy of the skill-creator workflow (draft → test → eval → iterate → optimize description → package), adapted to skill_pack's own authoring conventions and with one behavioral change from the upstream version — every skill it drafts or improves gets a wrap-up-retro step wired to meta/skill-retro by default, not as a separate follow-up change. Use when users want to create a skill from scratch, edit or optimize an existing skill in this repo, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy — same triggers as upstream skill-creator, but prefer this copy over the generic one whenever the target skill lives in (or is meant to land in) skill_pack, since it applies this repo's own conventions and the retro-by-default rule automatically.
-version: 1.0.1
+version: 1.1.0
 ---
 
 # My Skill Creator
@@ -266,7 +266,28 @@ See `references/schemas.md` for the full schema (including the `assertions` fiel
 
 This section is one continuous sequence — don't stop partway through. Do NOT use `/skill-test` or any other testing skill.
 
-Put results in `<skill-name>-workspace/` as a sibling to the skill directory. Within the workspace, organize results by iteration (`iteration-1/`, `iteration-2/`, etc.) and within that, each test case gets a directory (`eval-0/`, `eval-1/`, etc.). Don't create all of this upfront — just create directories as you go.
+Put results in `<skill-name>-workspace/` as a sibling to the skill directory. Within the workspace, organize results by iteration (`iteration-1/`, `iteration-2/`, etc.), then one directory per test case, then per configuration, then **one directory per run**:
+
+```
+<skill-name>-workspace/
+└── iteration-1/
+    └── eval-<ID>-<descriptive-name>/
+        ├── eval_metadata.json
+        ├── with_skill/
+        │   └── run-1/              <-- this level is required, even with one run
+        │       ├── outputs/
+        │       ├── grading.json
+        │       └── timing.json
+        └── without_skill/
+            └── run-1/
+                ├── outputs/
+                ├── grading.json
+                └── timing.json
+```
+
+The `run-N/` level exists so a configuration can hold several runs and the aggregator can compute a stddev across them. With a single run it looks like pointless nesting — don't flatten it. `scripts/aggregate_benchmark.py` discovers runs with `config_dir.glob("run-*")` and **silently skips** any configuration directory without one, so a flattened workspace produces a benchmark reporting zero runs rather than an error.
+
+Don't create all of this upfront — just create directories as you go.
 
 ### Step 1: Spawn all runs (with-skill AND baseline) in the same turn
 
@@ -279,13 +300,13 @@ Execute this task:
 - Skill path: <path-to-skill>
 - Task: <eval prompt>
 - Input files: <eval files if any, or "none">
-- Save outputs to: <workspace>/iteration-<N>/eval-<ID>/with_skill/outputs/
+- Save outputs to: <workspace>/iteration-<N>/eval-<ID>/with_skill/run-1/outputs/
 - Outputs to save: <what the user cares about — e.g., "the .docx file", "the final CSV">
 ```
 
 **Baseline run** (same prompt, but the baseline depends on context):
-- **Creating a new skill**: no skill at all. Same prompt, no skill path, save to `without_skill/outputs/`.
-- **Improving an existing skill**: the old version. Before editing, snapshot the skill (`cp -r <skill-path> <workspace>/skill-snapshot/`), then point the baseline subagent at the snapshot. Save to `old_skill/outputs/`.
+- **Creating a new skill**: no skill at all. Same prompt, no skill path, save to `without_skill/run-1/outputs/`.
+- **Improving an existing skill**: the old version. Before editing, snapshot the skill (`cp -r <skill-path> <workspace>/skill-snapshot/`), then point the baseline subagent at the snapshot. Save to `old_skill/run-1/outputs/`.
 
 Write an `eval_metadata.json` for each test case (assertions can be empty for now). Give each eval a descriptive name based on what it's testing — not just "eval-0". Use this name for the directory too. If this iteration uses new or modified eval prompts, create these files for each new eval directory — don't assume they carry over from previous iterations.
 
@@ -308,7 +329,7 @@ Update the `eval_metadata.json` files and `evals/evals.json` with the assertions
 
 ### Step 3: As runs complete, capture timing data
 
-When each subagent task completes, you receive a notification containing `total_tokens` and `duration_ms`. Save this data immediately to `timing.json` in the run directory:
+When each subagent task completes, you receive a notification containing `total_tokens` and `duration_ms`. Save this data immediately to `timing.json` in the run directory (`<workspace>/iteration-<N>/eval-<ID>/<configuration>/run-1/timing.json` — alongside `outputs/`, not inside it):
 
 ```json
 {
@@ -324,7 +345,22 @@ This is the only opportunity to capture this data — it comes through the task 
 
 Once all runs are done:
 
-1. **Grade each run** — spawn a grader subagent (or grade inline) that reads `agents/grader.md` and evaluates each assertion against the outputs. Save results to `grading.json` in each run directory. The grading.json expectations array must use the fields `text`, `passed`, and `evidence` (not `name`/`met`/`details` or other variants) — the viewer depends on these exact field names. For assertions that can be checked programmatically, write and run a script rather than eyeballing it — scripts are faster, more reliable, and can be reused across iterations.
+1. **Grade each run** — spawn a grader subagent (or grade inline) that reads `agents/grader.md` and evaluates each assertion against the outputs. Save results to `grading.json` in each run directory.
+
+   `grading.json` needs **both** an `expectations` array and a `summary` block — `agents/grader.md` and `references/schemas.md` carry the full schema, and it's worth passing the required shape to the grader explicitly rather than assuming it reads them:
+
+   ```json
+   {
+     "expectations": [
+       {"text": "<assertion verbatim>", "passed": true, "evidence": "<quote or specific reference>"}
+     ],
+     "summary": {"passed": 2, "failed": 1, "total": 3, "pass_rate": 0.67}
+   }
+   ```
+
+   Both halves are load-bearing and they're read by different consumers: the viewer renders `expectations` and depends on those exact field names (not `name`/`met`/`details` or other variants), while `scripts/aggregate_benchmark.py` reads `summary.pass_rate` and **defaults it to `0.0` when absent**. A grading file with a perfect `expectations` array and no `summary` therefore produces a benchmark reporting 0.0% for every configuration, with no warning — which reads as the skill under test having failed catastrophically rather than as a schema mismatch. If a benchmark comes back at 0.0%, check for `summary` before believing it.
+
+   For assertions that can be checked programmatically, write and run a script rather than eyeballing it — scripts are faster, more reliable, and can be reused across iterations.
 
 2. **Aggregate into benchmark** — run the aggregation script from the `my-skill-creator` directory:
    ```bash

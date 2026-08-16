@@ -1,0 +1,113 @@
+{
+  "skill_name": "unix-philosophy",
+  "notes": "Iteration 2 set. Evals 1-3 are carried over from iteration 1 with mis-specified assertions repaired (1-A4 tightened, 2 gained substance assertions A11/A12, 3-A6 rewritten to reward reframing rather than refusal). Evals 4-6 were added because iteration 1's prompts proved too easy to discriminate: 4 is a cold audit with no symptom disclosed on a non-CLI surface, 5 is a trap where applying the philosophy literally is the wrong answer, 6 exercises the agent-tool surface from references/beyond-the-cli.md.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "design-mode-feature-creep-no-keyword",
+      "prompt": "quick design question before i start writing this. we have an internal cli called `ingest` that reads vendor csv drops off an s3 prefix, normalizes them and writes parquet to our warehouse bucket. it's about 900 lines, one repo, we run it from airflow. product now wants a slack ping to #data-alerts whenever a vendor file arrives malformed, with the row numbers that failed. my instinct is to just add a --slack-webhook flag and a notify() call in the validation path since all the row info is already right there. my teammate thinks it belongs somewhere else but couldn't really say why. which way should i go, and if it's the second one how would the two pieces actually talk to each other?",
+      "expected_output": "Identifies the seam (normalize/write vs. notify), recommends ingest emitting structured validation failures on a defined channel with notification as a separate consumer, names concrete present costs of bundling, and specifies the actual interface. Must state the ongoing cost of its own recommendation without immediately waving it away.",
+      "files": [],
+      "assertions": [
+        {"id": "A1", "text": "Recommends against putting the Slack notification inside ingest's validation path — sides with the teammate and identifies the seam between normalizing/writing data and notifying humans"},
+        {"id": "A2", "text": "Specifies a concrete interface between the two pieces: names both a format (e.g. NDJSON/JSON lines/structured records/an event payload) and a channel (e.g. stderr, a rejects file/object, an exit code class, a queue)"},
+        {"id": "A3", "text": "Names at least one concrete present cost of bundling — e.g. a Slack outage or webhook failure affecting the ingest run, coupled release/test cadence, a second consumer requiring a second code change, or tests needing Slack mocked"},
+        {"id": "A4", "text": "States an ONGOING cost of its own recommended split that it does not immediately minimize or dismiss — an operational/maintenance cost carried forward (schema to version, extra task to monitor, extra hop for on-call, artifact lifecycle), not a one-time line-count or effort delta waved away in the same breath"},
+        {"id": "A5", "text": "Any design principle invoked is paired with a concrete consequence for this specific system — no recommendation rests on 'Unix philosophy says so' as its stated justification"},
+        {"id": "A6", "text": "Answers the user's actual second question — how the two pieces talk — rather than stopping at the which-way verdict"},
+        {"id": "A7", "text": "Offers a proportionate fallback for the case where the split isn't worth it (a stopgap, a same-repo second entry point, or an explicit 'if X then just add the flag'), rather than presenting the split as the only acceptable answer"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "audit-mode-existing-cli",
+      "prompt": "can you take a look at reportgen.py and tell me whether it's well designed? honestly the thing works fine but every time someone asks me for the deploy numbers in a different format i end up copy pasting bits of it into a new script, and last month it silently produced an empty report for two weeks and nobody noticed until the retro. i'd like to know what's actually wrong with it structurally and what to fix first, not a full rewrite.",
+      "expected_output": "Audit report with per-dimension Pass/Warn/Fail verdicts and citations. Must catch the bare except:pass and rank it top, and must go beyond the disclosed symptom to the non-obvious failure modes of that same block.",
+      "files": ["fixtures/reportgen.py"],
+      "assertions": [
+        {"id": "A1", "text": "Produces per-dimension verdicts using an explicit Pass/Warn/Fail (or N/A) scale rather than only prose observations"},
+        {"id": "A2", "text": "Findings cite specific locations in reportgen.py — line numbers or named functions/constants — and the citations are accurate"},
+        {"id": "A3", "text": "Identifies the bare `except Exception: pass` in fetch_deploys() as a finding AND ranks it the top/highest-severity item"},
+        {"id": "A4", "text": "Explicitly connects that swallowed exception to the two-week silent empty report the user described"},
+        {"id": "A5", "text": "Identifies that there is no machine-readable output path (render() produces terminal-only text; CSV is a side effect to a hardcoded directory) and connects it to the user's copy-paste-into-a-new-script complaint"},
+        {"id": "A6", "text": "Flags the hardcoded SLACK_WEBHOOK credential in source"},
+        {"id": "A7", "text": "Flags at least two of: --serve dashboard as an unrelated second job, sys.exit(0) regardless of outcome, progress prints on stdout interleaved with the report, hardcoded DB_PATH/OUTPUT_DIR as policy baked into the tool"},
+        {"id": "A8", "text": "Includes a section naming specific things that are already right and worth preserving"},
+        {"id": "A9", "text": "Findings are ordered/prioritized by severity or a stated fix-first order, matching the user's 'what to fix first' request"},
+        {"id": "A10", "text": "Reports without rewriting: no refactored replacement of reportgen.py is delivered as the answer"},
+        {"id": "A11", "text": "Goes beyond the disclosed symptom: identifies that because the try/except wraps the WHOLE read loop rather than one record, a single malformed line silently truncates the report to a prefix of the data — a partially-wrong report that looks correct, which is worse than the empty one the user noticed"},
+        {"id": "A12", "text": "Identifies that derived metrics (success rate, average duration) are recomputed independently in render() and write_csv() rather than produced once by summarize(), so the two outputs can drift — a structural cause of the copy-paste problem distinct from the missing machine-readable format"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "counterweight-resist-over-decomposition",
+      "prompt": "we're building the billing engine for our b2b saas (rust, ~6 person team, maybe 400 customers). i've been reading about doing one thing well and small composable pieces and i want to get this right from the start. my plan is to split it into six services: invoice generation, tax calculation, payment gateway adapter, dunning/retry, ledger writes, and a pdf renderer. each gets its own repo and deploys independently, they talk over an internal http api. does that decomposition look right? anything i should split further?",
+      "expected_output": "Pushes back on six deployables while keeping the six seams; names the transactional coupling of invoice/tax/ledger as the expensive place for a network boundary; reframes 'split further' onto module boundaries.",
+      "files": [],
+      "assertions": [
+        {"id": "A1", "text": "Pushes back on the six-service decomposition rather than validating it — recommends a single deployable (or two) with internal module/crate boundaries as the default at this scale"},
+        {"id": "A2", "text": "Names at least two concrete costs the user would be buying: e.g. distributed transactions/consistency across service boundaries, partial failure handling, added latency, or six repos of operational overhead for a six-person team"},
+        {"id": "A3", "text": "Identifies that invoice generation, tax calculation, and ledger writes are transactionally coupled, making a network boundary between them specifically expensive — money correctness, not just overhead"},
+        {"id": "A4", "text": "Identifies at least one piece (typically the PDF renderer, and/or the payment gateway adapter) as a more legitimate separation candidate, with a stated reason such as differing resource profile or third-party blast radius"},
+        {"id": "A5", "text": "Explicitly distinguishes module/crate boundaries from deployment boundaries, preserving the user's decomposition instinct rather than dismissing it"},
+        {"id": "A6", "text": "Reframes the 'anything I should split further' question rather than answering it on the user's premise: any further splits proposed are explicitly module/crate boundaries inside one deployable, not additional services, and the reframe is stated rather than left implicit"},
+        {"id": "A7", "text": "Explicitly addresses the reasoning the user cites ('do one thing well', 'small composable pieces') and explains why it does not translate to service-per-capability here"},
+        {"id": "A8", "text": "States a cost of its own recommendation (boundary discipline becomes voluntary rather than enforced, single blast radius, no independent scaling) and names a concrete trigger for revisiting the decision later"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "cold-audit-library-no-symptom",
+      "prompt": "before i socialize this more widely — we're planning to make svcclient.py the standard client every one of our services uses for internal calls, instead of everyone rolling their own requests wrapper. it's been running in two services for a few months without complaints. worth a look before i put it in the platform repo and tell people to adopt it?",
+      "expected_output": "A cold audit with no symptom disclosed, on a library rather than a CLI. Should catch: the module-level singleton + global cache making two configurations or any test impossible; call() returning a formatted string instead of data; print()/logging from library code; os.environ read inside the constructor; errors swallowed into a None return indistinguishable from a legitimate empty result; health() string-matching its own formatter's output; _format() lossily eliding nested structures and truncating lists at 10.",
+      "files": ["fixtures/svcclient.py"],
+      "assertions": [
+        {"id": "A1", "text": "Identifies that call() returns a human-formatted string rather than the parsed response data, so no caller can act on the actual values — flagged as a top-tier finding, since it is the defect that makes the library unusable as a library"},
+        {"id": "A2", "text": "Identifies that failures return None, indistinguishable from a legitimate empty or null response, so callers cannot tell success from failure"},
+        {"id": "A3", "text": "Identifies the module-level _INSTANCE singleton and/or the module-level _CACHE global as preventing two differently-configured clients in one process and making tests unable to isolate"},
+        {"id": "A4", "text": "Identifies that configuration is read from os.environ inside the constructor rather than passed in — policy baked into mechanism — and notes the practical consequence (untestable without environment manipulation, KeyError on import-time misconfiguration)"},
+        {"id": "A5", "text": "Identifies that library code writes to stdout via print() (the cache-hit line, the missing-token warning, metrics()), stealing a channel that belongs to the calling application"},
+        {"id": "A6", "text": "Catches the coupling bug in health(): it string-matches 'status: ok' against _format()'s rendered output, so a cosmetic change to the formatter silently breaks every health check"},
+        {"id": "A7", "text": "Catches that _format() is lossy — nested dicts/lists are replaced with a placeholder count and lists are truncated at 10 entries — so data is destroyed before any caller sees it"},
+        {"id": "A8", "text": "Produces per-dimension verdicts on an explicit Pass/Warn/Fail (or N/A) scale with accurate citations, rather than only prose"},
+        {"id": "A9", "text": "Frames the findings against the user's actual decision — whether this is ready to be adopted org-wide as a shared dependency — rather than delivering a generic code review"},
+        {"id": "A10", "text": "Names specific things worth preserving and does not respond with a full rewrite of the module"}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "trap-literal-application-is-wrong",
+      "prompt": "our image processing pipeline is 5 stages in one python process — decode, denoise, upscale, color correct, encode — passing numpy arrays between functions, roughly 4GB of float32 per batch. i've been reading about small sharp tools that do one thing and talk over text streams, and i want to restructure this so each stage is its own binary reading stdin and writing stdout, serializing the arrays as json between stages. then we could recombine stages and swap implementations freely. sound right?",
+      "expected_output": "The trap: applying 'text streams as the universal interface' literally here is catastrophically wrong. Should keep the five stage seams, reject JSON-between-stages on concrete throughput/precision grounds, and deliver swappability in-process. Explicitly naming that this principle has a throughput cost that dominates here is the behavior under test.",
+      "files": [],
+      "assertions": [
+        {"id": "A1", "text": "Rejects JSON serialization of the arrays between stages, with a concrete technical reason — size inflation of float32 as decimal text, parse/serialize CPU cost, and/or loss of exact float precision"},
+        {"id": "A2", "text": "Quantifies or concretely estimates the cost rather than asserting it — e.g. the multiple-x blowup of 4GB float32 rendered as JSON text, or the added per-batch latency/memory, in specific terms"},
+        {"id": "A3", "text": "Explicitly states that 'text streams as the universal interface' is a default with a throughput cost, and that this workload is a case where the cost dominates — naming the tradeoff rather than either applying the doctrine or silently ignoring it"},
+        {"id": "A4", "text": "Keeps the five stage boundaries as genuine seams — does not reject the user's decomposition instinct wholesale along with their transport choice"},
+        {"id": "A5", "text": "Recommends achieving the recombination/swappability goal in-process (a stage interface/protocol/ABC, a registry, a composed pipeline object) rather than requiring separate processes to get it"},
+        {"id": "A6", "text": "If separate processes are discussed at all, names a binary or columnar mechanism with a real schema (Arrow, .npy, protobuf, raw typed buffers) and/or shared memory / memory-mapped files, rather than text on stdout"},
+        {"id": "A7", "text": "Explicitly identifies the user's actual underlying goal (recombination and swapping implementations) and separates it from the transport decision, rather than answering only the stdin/stdout question as posed"},
+        {"id": "A8", "text": "Does not endorse the proposed JSON-over-stdout architecture, even partially or as a staged first step"}
+      ]
+    },
+    {
+      "id": 6,
+      "name": "design-mode-agent-tool-surface",
+      "prompt": "i'm writing an mcp server so claude can drive our internal deploy system. right now it's one tool called `deploy_ops` that takes an `action` string — status, deploy, rollback, logs, approve — plus a params object whose meaning changes per action. it returns a formatted markdown summary of what happened, since the model is just going to read it anyway. does that shape make sense or should i do it differently?",
+      "expected_output": "Non-CLI surface from beyond-the-cli.md. Should split the dispatch tool into per-action tools with the reason tied to triggering reliability and description clarity, return structured data rather than pre-rendered markdown, treat the context window as the boundary with a real cost, and separate read-only from irreversible operations.",
+      "files": [],
+      "assertions": [
+        {"id": "A1", "text": "Recommends splitting the single action-dispatch tool into separate per-action tools, rather than endorsing the current shape"},
+        {"id": "A2", "text": "Ties that recommendation specifically to how tool selection works — a tool doing five things cannot be described precisely, so the model triggers it unreliably or picks the wrong action — rather than justifying the split on generic modularity"},
+        {"id": "A3", "text": "Identifies that the per-action `params` object with shifting meaning cannot be given a precise schema, so the model must guess argument shapes"},
+        {"id": "A4", "text": "Recommends returning structured data rather than pre-rendered markdown, with the reason that a rendered summary has to be re-parsed by the model and cannot be fed into a subsequent call"},
+        {"id": "A5", "text": "Treats the context window as the boundary with a real cost — output verbosity is a measurable expense, so the tool should return what was asked for rather than everything"},
+        {"id": "A6", "text": "Distinguishes read-only operations (status, logs) from state-changing and irreversible ones (deploy, rollback, approve), and treats that as a boundary worth respecting in the tool surface"},
+        {"id": "A7", "text": "States a cost of the recommended split (more tools competing in the model's context, more surface to document and maintain, potential for the model to chain calls it shouldn't)"},
+        {"id": "A8", "text": "Addresses the user's stated reasoning ('the model is just going to read it anyway') directly rather than ignoring it"}
+      ]
+    }
+  ]
+}

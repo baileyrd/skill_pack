@@ -9,6 +9,40 @@ still open.
 
 ---
 
+## v1.2.0 — A third disposition for findings, plus two step-ordering fixes
+**2026-08-16**
+
+From this skill's own step 6 self-retro, during a run against
+`meta/my-skill-creator` (which was itself invoked to draft
+`dev_practices/unix-philosophy`). All three findings came out of the same
+run and each traces to a concrete incident in it.
+
+- **Added (S1):** step 5 now names **recording a finding as an issue** as a
+  third disposition alongside applied and declined, and the Status enum in
+  `references/retro-findings-format.md` gains `filed (#N)`. The retro that
+  found this had all seven of its findings filed as issues rather than
+  applied — a legitimate and probably common outcome that the skill had no
+  vocabulary for, leaving every row's Status undefined. The entry is
+  explicit that a filed finding gets **no** version bump or `RELEASE_NOTES.md`
+  entry on the target, since nothing about it changed yet, and that a
+  part-applied/part-filed batch should say which is which rather than
+  implying the whole table landed.
+- **Changed (S2):** the pointer to `references/retro-findings-format.md`
+  moved from step 4 into step 3. The pointer existed, but only after step 3
+  had already classified every finding — so the table's shape felt settled
+  before its required columns were known. That's exactly what happened on
+  this run: the first table shipped without the File/Section and Status
+  columns and had to be redone.
+- **Changed (S3):** the severity definitions now call out a case they
+  under-rated — a finding that puts a **false statement into a user-facing
+  artifact** rates at least `costly-guess` even when this run was unharmed.
+  The axis otherwise reads as "how bad was the guess *during* the run,"
+  which mis-sorts a generated report that confidently printed "3 runs each
+  per configuration" when there had been one. Nothing went wrong during that
+  run; the cost lands on whoever reads the artifact and believes it.
+
+---
+
 ## v1.1.2 — Description under claude.ai's upload limit
 **2026-08-16**
 
