@@ -59,3 +59,43 @@ owner, for instance).
 Don't ask about license, architecture pattern, or template selection — those follow
 the greenfield defaults unless the person says otherwise, even in a non-greenfield
 repo, since they're standing engineering principles rather than per-repo choices.
+
+## Multi-product repos
+
+A monorepo or a merged workspace can already carry the standard set *below* the
+root. `audit.sh` only looks at the root, so it reports those files as missing
+and the natural next move — seed them — silently creates a competing second
+(or third) series.
+
+Observed in `baileyrd/rusty_recall`, which merged two previously separate repos
+(`rusty_remind_me`, `rusty_dbs`) keeping each half under its own prefix:
+
+| Found | Consequence of seeding the root blind |
+|---|---|
+| `remind_me/docs/adr/` and `dbs/docs/adr/`, **each numbered from 0001** | a *third* ADR series, also `0001-…`, with nothing saying which of the three a reader should look in |
+| `remind_me/RELEASE_NOTES.md`, `dbs/RELEASE_NOTES.md` | a root notes file with no stated relationship to the two below it |
+| `dbs/CHANGELOG.md` | same, for changes |
+
+**Ask, don't assume** — these are the questions the scan can't answer:
+
+1. Should there be a root ADR series at all, given the per-product ones exist?
+2. If yes, what is its **remit**, so a reader knows which series a decision
+   belongs in? The workable answer there was "decisions belonging to the
+   repository rather than to either product," seeded with the merge ADR itself.
+3. Do root `RELEASE_NOTES.md` / `CHANGELOG.md` track the **repository**, the
+   **products**, or both — and does the root supersede the per-product files or
+   sit alongside them?
+
+Whatever is decided, **write the scope down in the file itself** rather than
+leaving it to be inferred: a remit line in the root ADR series, and an explicit
+pointer in each root notes file to the per-product ones. Two files that don't
+say which is authoritative are worse than one.
+
+On numbering: if per-product ADR series already start at 0001, a root series
+starting at 0001 too is legal but reads as a collision. Either give the root
+series an explicit remit line at the top, or start it at a distinct offset —
+state the choice rather than letting the next reader reverse-engineer it.
+
+Note the audit scores 11/11 either way. Nothing in the number distinguishes a
+thoughtful placement from files that contradict the ones a level down, which is
+why this is a step 2 question rather than something to infer from the score.

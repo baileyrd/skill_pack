@@ -59,11 +59,27 @@ echo "Score: $score/$total"
 # CI is stack-conditional, so it's reported separately from the core score rather
 # than as a fixed checklist item: only expected when a manifest exists to test.
 if [[ -f "$TARGET/Cargo.toml" || -f "$TARGET/pyproject.toml" || -f "$TARGET/setup.py" ]]; then
-  if find "$TARGET/.github/workflows" -maxdepth 1 -name 'ci-*.yml' 2>/dev/null | grep -q .; then
-    echo "[x] CI workflow (manifest present, workflow found)"
+  # Match ANY non-empty workflow, not the 'ci-*.yml' naming convention. Two
+  # separate false answers came from the narrow glob (issues #40, #42):
+  #   - A repo whose real, heavily-tuned gate is named `ci.yml` was reported as
+  #     having no CI. Repos predating the convention, or that merged their
+  #     workflows, are exactly where a wrong answer costs most — the "fix" is to
+  #     add a second, overlapping gate.
+  #   - A ZERO-BYTE `ci-rust.yml`, left behind by a failed template copy, matched
+  #     the glob and flipped the row to a pass. The audit reported 11/11 *because
+  #     of* a bug, concealing the broken state it exists to catch.
+  # `-size +0` is the general principle, not a special case: a presence check
+  # that accepts an empty file produces false passes for every row, not just this
+  # one.
+  if find "$TARGET/.github/workflows" -maxdepth 1 \
+       \( -name '*.yml' -o -name '*.yaml' \) -size +0 2>/dev/null | grep -q .; then
+    found="$(find "$TARGET/.github/workflows" -maxdepth 1 \
+               \( -name '*.yml' -o -name '*.yaml' \) -size +0 2>/dev/null \
+             | head -n 3 | xargs -r -n1 basename | paste -sd, - || true)"
+    echo "[x] CI workflow (manifest present, workflow found: $found)"
   else
-    echo "[ ] CI workflow (manifest present but no .github/workflows/ci-*.yml — the"
-    echo "    'on green CI, merge' rule has nothing to gate on)"
+    echo "[ ] CI workflow (manifest present but no non-empty .github/workflows/*.yml —"
+    echo "    the 'on green CI, merge' rule has nothing to gate on)"
   fi
 fi
 

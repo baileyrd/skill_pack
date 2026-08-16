@@ -10,6 +10,52 @@ what's still open.
 
 ---
 
+## v1.4.0 — Three findings from the rusty_recall run
+**2026-08-16**
+
+- **Fixed ([#40](https://github.com/baileyrd/skill_pack/issues/40)):** `copy_one`
+  piped a template through `sed` straight into `$dest`. The shell creates the
+  destination for the redirect *before* `sed` runs, so a missing template left a
+  **zero-byte file** behind — and a zero-byte `.github/workflows/*.yml` is
+  invalid to GitHub and reported red on every push. One was committed and merged
+  into a real repository. `copy_one` now verifies the source exists and fails the
+  run, and writes via a temp file with `mv` on success so a failed substitution
+  can never leave a partial destination.
+- **Fixed ([#40](https://github.com/baileyrd/skill_pack/issues/40), the
+  compounding half):** `audit.sh`'s CI probe matched that zero-byte file and
+  flipped the row to a pass — the score *improved* as a direct result of the bug,
+  and the target was reported 11/11 with an invalid workflow in it. Presence
+  checks now require `-size +0`. That is the general principle, not a special
+  case: a presence check that accepts an empty file produces false passes for
+  every row.
+- **Fixed ([#42](https://github.com/baileyrd/skill_pack/issues/42)):** the CI
+  probe globbed `ci-*.yml`, so a repo whose real, heavily-tuned gate is named
+  `ci.yml` was reported as having no CI — and `apply.sh` would then drop a stock
+  `ci-rust.yml` alongside it, producing two overlapping gates. The probe now
+  matches any non-empty `*.yml`/`*.yaml` and names what it found; `apply.sh`
+  skips the CI item entirely when the target already has any workflow. The
+  non-destructive skip in `copy_one` only ever protected a file at the *same
+  path* — it cannot know a differently-named file already does the job.
+- **Added ([#43](https://github.com/baileyrd/skill_pack/issues/43)):** step 0 now
+  looks for the standard set **below** the root, and
+  `references/scan-and-defaults.md` gains a "Multi-product repos" section. A
+  merged workspace had two ADR series each numbered from 0001; seeding the root
+  blind would have made a third. The failure is quiet — the audit reports 11/11
+  either way — so the remit of a root series and whether root notes supersede the
+  per-product ones are now step 2 questions, with an instruction to write the
+  answer into the files rather than leave it inferred.
+
+**Caught while testing, worth recording:** the first version of the #42 fix used
+`find` on `$TARGET/.github/workflows` without checking the directory exists.
+Under this script's `set -euo pipefail`, that aborted the entire run on any
+target with no workflows directory yet — the *common* case, not an edge one —
+and did so silently, after writing seven files. Both `find` calls are now guarded
+on the directory and end in `|| true`. Verified against fixtures covering a
+fresh repo, a repo with an existing `ci.yml`, a zero-byte workflow, and a missing
+template.
+
+---
+
 ## v1.3.3 — YAML-safe description
 **2026-08-16**
 

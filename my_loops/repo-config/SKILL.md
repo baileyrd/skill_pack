@@ -12,7 +12,7 @@ description: >-
   even if they only name one file, since this applies the whole set together. Also use on an
   ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md
   or CHANGELOG.md, add an entry to each before ending the turn.
-version: 1.3.3
+version: 1.4.0
 ---
 
 # repo-config
@@ -44,6 +44,27 @@ the two.
 - **Greenfield check**: no manifest, no existing standard files, no git remote yet →
   nothing to scan. Skip step 2 entirely and apply the greenfield defaults instead
   (details: `references/scan-and-defaults.md`).
+- **Multi-product check — look for the standard set *below* the root, not only
+  at it.** A merged workspace or monorepo can already carry governance files a
+  level down, and the root scan will report them as missing:
+
+  ```sh
+  find <target> -mindepth 2 -maxdepth 3 \
+    \( -name 'RELEASE_NOTES.md' -o -name 'CHANGELOG.md' -o -path '*/docs/adr' \) \
+    -not -path '*/.git/*'
+  ```
+
+  A real case (`rusty_recall`, two merged repos each under its own prefix) had
+  `remind_me/docs/adr/` and `dbs/docs/adr/` **each numbered from 0001**, plus two
+  `RELEASE_NOTES.md` and a `CHANGELOG.md`. Seeding the root set blind would have
+  produced a *third* ADR series also starting at 0001, and root notes files with
+  no stated relationship to the four already in the tree.
+
+  Surface any hits in step 1's gap table, and make it a step 2 question — see
+  "Multi-product repos" in `references/scan-and-defaults.md`. Note the failure is
+  quiet: the audit reports 11/11 either way, so nothing in the score distinguishes
+  "the root files were placed thoughtfully" from "the root files now contradict
+  the ones a level down."
 
 **1. Report** the gap table from `audit.sh`.
 
