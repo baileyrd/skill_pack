@@ -4,6 +4,21 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Changed
+- `dev_practices/unix-philosophy` (v1.1.2 → v1.1.3) — three eval-set refinements
+  raised by iteration 2's graders and deferred so the measurement wasn't changed
+  mid-run (#56). eval-3 A3 is reworded around the coupled money path rather than
+  an enumerated invoice/tax/ledger triple, since the runs made a sharper argument
+  than the assertion described; eval-2 A6 splits into A6 (hardcoded
+  configuration) and A6b (a secret committed to version control), which the old
+  wording could not tell apart; and eval-4 gains A11-A14 covering defects the
+  *baseline* found and the with-skill run missed — 429 never retried, no
+  connection pooling, no trace propagation, unquoted path in URL construction —
+  each verified present in the fixture rather than taken from the issue text.
+  58 assertions across 6 evals, up from 53. Two of the three deliberately move
+  the set away from format-rewarding assertions toward substance ones, the
+  direction `evals/analysis/iteration-2.md` identifies as the honest correction.
+
 ### Fixed
 - `meta/learn-it` (v1.1.2 → v1.2.0) — four findings from the run that produced
   PR #44. The conventions reference listed three category folders when there

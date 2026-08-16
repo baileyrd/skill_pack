@@ -12,7 +12,7 @@ description: >-
   Pass/Warn/Fail against cited evidence and ranks findings by present cost. Translates the
   principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code
   that has none, and treats each as a default with a cost, not a law.
-version: 1.1.2
+version: 1.1.3
 ---
 
 # unix-philosophy
