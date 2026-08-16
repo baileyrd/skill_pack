@@ -9,6 +9,32 @@ open.
 
 ---
 
+## v1.3.2 — `where` paths are forward-slashed on every platform
+**2026-08-16**
+
+- **Fixed ([#49](https://github.com/baileyrd/skill_pack/issues/49)):**
+  `check_references.py` built each row's `where` field by stringifying a
+  `Path`. On Windows that yields `meta\\skill-retro\\...` while
+  `docs-refs-baseline.tsv` stores `meta/skill-retro/...`. Since `baseline_key`
+  is kind+where+detail, **no baselined row ever matched on a Windows
+  checkout** — every accepted finding resurfaced as `NEW`.
+- **The cost was masking, not noise.** During PR #44 the local run showed three
+  `NEW` findings, all false; the reporter concluded `doc-refs` was
+  pre-existing-red and moved on. CI on Linux then showed a single, different,
+  genuine finding in a file they had just written. A check whose output depends
+  on the platform teaches you to ignore it, and then you miss the real one.
+- **Changed:** path relativization is now `rel_where()`, a small pure function
+  returning `.as_posix()`. It was split out specifically so the Windows
+  behaviour is testable from Linux by passing `PureWindowsPath` — the first
+  version of the test asserted "no backslash" against real `Path`s, **passed
+  with the fix reverted**, and would have shipped unable to fail. Two of the
+  five new tests in `tests/test_check_references.py` fail when `.as_posix()` is
+  dropped; verified by reverting and restoring, per ADR-0002.
+- The command-line `missing-doc` row got the same treatment — it is a `where`
+  field too, and had the identical bug on a path the user typed.
+
+---
+
 ## v1.3.1 — Description under claude.ai's upload limit
 **2026-08-16**
 

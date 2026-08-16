@@ -5,6 +5,18 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Fixed
+- `my_loops/docs-loop` (v1.3.1 → v1.3.2) — `check_references.py` stringified a
+  `Path` into every row's `where` field, so a Windows checkout emitted
+  backslash paths that could never match the forward-slash
+  `docs-refs-baseline.tsv`. **No baselined row matched on Windows**, and the
+  resulting three false `NEW` findings masked a real one that only CI surfaced
+  (#49). Relativization is now `rel_where()`, returning `.as_posix()`.
+  Worth recording how nearly this shipped untested: the first version of the
+  regression test asserted "no backslash in `where`" against real `Path`s,
+  **passed on Linux with the fix reverted**, and would have been a test
+  incapable of failing. `rel_where()` exists as a separate function so
+  `PureWindowsPath` can drive it from any platform. Two of the five new tests
+  fail when `.as_posix()` is dropped.
 - Four skills shipped a frontmatter `description` that **real YAML parsers
   reject** — an unquoted plain scalar containing `": "`, which reads as the
   start of a nested mapping (#59). `dev_practices/unix-philosophy` (v1.1.1 →
