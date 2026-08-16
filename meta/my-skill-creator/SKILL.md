@@ -1,7 +1,7 @@
 ---
 name: my-skill-creator
 description: This repo's own copy of the skill-creator workflow (draft → test → eval → iterate → optimize description → package), adapted to skill_pack's own authoring conventions and with one behavioral change from the upstream version — every skill it drafts or improves gets a wrap-up-retro step wired to meta/skill-retro by default, not as a separate follow-up change. Use when users want to create a skill from scratch, edit or optimize an existing skill in this repo, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy — same triggers as upstream skill-creator, but prefer this copy over the generic one whenever the target skill lives in (or is meant to land in) skill_pack, since it applies this repo's own conventions and the retro-by-default rule automatically.
-version: 1.1.1
+version: 1.2.0
 ---
 
 # My Skill Creator
@@ -100,6 +100,24 @@ detail; summarized here:
   by hand — semver: patch for wording/doc-only fixes, minor for new
   guidance/steps, major only for an actual contract change — when editing
   an existing one. Every skill in this repo carries this field.
+- **`description` has a hard ceiling of 1024 characters** — claude.ai's limit,
+  enforced by `scripts/check_repo.py`'s `manifests` check. Write it long and
+  information-dense as the guidance above and in
+  `meta/learn-it/references/skill-authoring-conventions.md` says, then *check
+  the length before committing*. Those two instructions genuinely conflict, and
+  the limit wins; following the "be thorough" advice as written naturally
+  overshoots. When trimming, cut trigger-phrase examples before cutting the
+  statement of what the skill does and how — triggering degrades gracefully
+  with fewer example phrasings, and not at all gracefully if the reader can no
+  longer tell what the skill is for.
+- **Write the description as a YAML block scalar** (`description: >-`, wrapped
+  and indented) rather than one long plain line, unless you are certain it
+  contains no `": "`. A colon followed by a space inside an unquoted plain
+  scalar is invalid YAML — the parser reads it as a nested mapping — and a
+  description that quotes a trigger phrase (`Audit mode reviews what exists:
+  "..."`) hits this easily. `check_repo.py`'s hand-rolled parser tolerates it,
+  so the repo's own checks stay green while every real consumer rejects the
+  file. Four skills shipped this way before it was noticed.
 - Add a `RELEASE_NOTES.md` next to the new/edited `SKILL.md`:
   reverse-chronological, one dated entry per meaningful change, explaining
   what changed and why.
@@ -144,6 +162,14 @@ convention already applied across every authored skill in `skill_pack`
 `version` are part of every draft — not an afterthought to suggest once
 the skill is otherwise "done."
 
+Before picking a shape, check the retro's cost against a **typical**
+invocation of the skill, not just its heaviest one. Every existing skill
+carrying a wrap-up retro is a long-running loop, where a retrospective is
+small next to the work it reflects on. Shape-matching without that check is
+how you end up with a final step that runs routinely fail to execute — and a
+step a run reports skipping is worse than no step, because it teaches the
+reader that this skill's instructions are advisory.
+
 How to phrase it depends on the skill's own shape — match what's already
 established here, don't invent a new pattern:
 - **A skill with numbered `Run`/`Procedure` steps** (the `my_loops` shape):
@@ -160,6 +186,20 @@ established here, don't invent a new pattern:
   one, or `skill-retro`): follow `skill-retro`'s own step 6 pattern —
   grounded in how *this run* of the tool went, guarded against firing
   twice on a direct self-invocation.
+- **A skill with multiple modes of differing weight** — a quick consultation
+  versus a full report-producing pass: scope the retro to the mode that
+  produces a substantial artifact, and say so in the section heading and its
+  first line, e.g. `## Wrap-up retro — audit mode only`. State plainly why the
+  lighter mode is excluded, and offer the retro there as an explicit user
+  request rather than an automatic step.
+  This bullet exists because `dev_practices/unix-philosophy` was drafted
+  against the three shapes above, none of which fit: it has a design mode that
+  may be three paragraphs answering one question and an audit mode that emits a
+  full report. Shape 2 was applied unconditionally, and **two independent
+  design-mode eval runs reported *skipping* the retro** — correctly, since a
+  retrospective on the skill's own instructions is disproportionate appended to
+  a short chat answer, and it fires in contexts that can't support it (a
+  read-only sandbox, no subagents). Fixed downstream in that skill's v1.1.0.
 
 Always state explicitly that running/reporting the retro is automatic and
 safe to run unattended, but *applying* anything `skill-retro` finds is a
@@ -243,6 +283,8 @@ Try to explain to the model why things are important in lieu of heavy-handed mus
 ### Test Cases
 
 After writing the skill draft, come up with 2-3 realistic test prompts — the kind of thing a real user would actually say. Share them with the user: [you don't have to use this exact language] "Here are a few test cases I'd like to try. Do these look right, or do you want to add more?" Then run them.
+
+Where the runs are backgroundable and cheap to redo, it is fine to launch them and present the prompts in the *same* turn rather than blocking on confirmation — say explicitly that you have done so, and that a changed prompt just means a rerun. Blocking a user on a confirm while nothing executes wastes their time for no gain. Do block when a run is expensive, slow, or has side effects outside the workspace.
 
 Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts. You'll draft assertions in the next step while the runs are in progress.
 
@@ -382,7 +424,7 @@ Put each with_skill version before its baseline counterpart.
    ```
    For iteration 2+, also pass `--previous-workspace <workspace>/iteration-<N-1>`.
 
-   **Cowork / headless environments:** If `webbrowser.open()` is not available or the environment has no display, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Feedback will be downloaded as a `feedback.json` file when the user clicks "Submit All Reviews". After download, copy `feedback.json` into the workspace directory for the next iteration to pick up.
+   **Any environment without a display** — Cowork, remote/web Claude Code, a headless server, CI: use `--static <output_path>` to write a standalone HTML file instead of starting a server, then surface that file to the user with whatever file-delivery tool is available. Decide by whether a browser can actually open, not by which product you think you are running in: this list will always lag the environments that exist, and `nohup ... &` plus "I've opened the results in your browser" is a confident lie anywhere it doesn't. Feedback downloads as a `feedback.json` when the user clicks "Submit All Reviews"; copy it into the workspace directory for the next iteration to pick up.
 
 Note: please use generate_review.py to create the viewer; there's no need to write custom HTML.
 
