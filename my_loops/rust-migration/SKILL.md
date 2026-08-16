@@ -1,7 +1,7 @@
 ---
 name: rust-migration
 description: Runs an autonomous "migrate this repo/application to Rust" loop built to prevent the recurring failure mode where a migration quietly treats an existing capability as optional and drops or downgrades it. Before any Rust is written, inventories every observable capability of the source (public APIs, CLI flags, HTTP routes, config/env, jobs, file formats, error/exit behavior, existing tests) into a manifest where every row defaults to REQUIRED — a row moves to OUT-OF-SCOPE only by explicit, written, user-attributed sign-off, never inferred by Claude. Files one issue per capability, checks platform siblings (Rusty-Mill/baileyrd rusty_* repos) for something to port before hand-rolling, verifies behavioral parity before closing, and won't report the migration done while any REQUIRED row is undone. Use whenever the user asks to migrate/port/rewrite a repo or application to Rust, wants a repeatable migration-to-merged-PR loop, or references this by name (rust-migration, migration loop).
-version: 1.1.2
+version: 1.2.0
 ---
 
 # rust-migration
@@ -56,6 +56,28 @@ Concretely, this means:
 ## Run (when invoked)
 
 **0. Settle scope and identify the source and target — before step 1 runs**
+- **Tooling preflight — do this before reporting that the loop has started.**
+  The bullets below validate the *target*; this one validates the loop's own
+  execution environment, which is what actually fails first when it fails.
+  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+     without it installed — the three scripts that shell out to it **cannot
+     run**. The GitHub MCP tools are the substitute: use them for step 2's issue
+     filing, step 3's capability picking, and step 3's CI-wait-and-merge. Say so
+     in the wrap-up report, so the run's mechanics are legible rather than
+     looking like the scripts ran, and do **not** silently skip a step just
+     because its script is unavailable.
+     (`check_manifest_coverage.sh` doesn't touch `gh` and still works.)
+  2. One cheap read against the API (list issues, page size 1). A rate limit or
+     an auth failure discovered here costs nothing; discovered mid-loop it
+     strands work in flight. See "Stop conditions" for what to do when it fails
+     later.
+  3. Note which CI-status mechanism the target uses. A repo whose CI reports via
+     **Actions checks** returns `total_count: 0` from the commit-status
+     endpoint — that is *not* evidence CI is missing, and reading it that way
+     will make you think a green run never happened. Match a run to the PR by
+     `head_sha`, never by branch: runs are associated to PRs by branch name, so
+     a stale run from an earlier PR on a reused branch can appear attached to
+     the current one and read as a pass for code it never ran against.
 - `SOURCE_REPO` (what's being migrated, any language) and `TARGET_REPO` (the
   Rust repo/crate the migration lands in — may be the same repo migrated in
   place, a new repo, or an existing `rusty_*` repo being extended).
@@ -262,6 +284,14 @@ Check these every iteration, not just at start:
   leave the PR open, report it, don't skip ahead silently.
 - A capability needs a breaking change or a new dependency, or step 3.3's
   "tempted to skip" moment fires → pause and ask, don't auto-resolve.
+- **The GitHub API is unreachable or rate-limited** → halt cleanly and report
+  three lists: capabilities completed, work *in flight* (naming the branch and
+  any open PR, so nothing is stranded unnamed), and capabilities never started —
+  plus the retry path. Every other stop condition here is about work state; this
+  one is about the tooling, and it's the case where partial state exists and
+  matters. Never lower the bar on step 1's inventory or step 3's triage to keep
+  going — waiting is cheap, and a capability misclassified from a title alone
+  and then worked unattended is not.
 
 ## Rules
 
@@ -311,9 +341,14 @@ Check these every iteration, not just at start:
   it can miss a match hiding under different naming, and
   `references/platform-directory.md` can drift from the live org; confirm
   rather than assume it's complete.
-- Assumes `gh` is authenticated and CI is configured as a required status
-  check on the default branch; the "on green CI" gate only actually gates
-  merges if branch protection requires it (same caveat as repo-config).
+- Assumes CI is configured as a required status check on the default branch;
+  the "on green CI" gate only actually gates merges if branch protection
+  requires it (same caveat as repo-config).
+- Three of the four scripts require `gh` on `PATH` and authenticated
+  (`check_manifest_coverage.sh` is the exception). Step 0's preflight checks
+  for it and routes to the GitHub MCP tools when it's missing, but that
+  fallback is a documented substitution the run has to make deliberately —
+  the scripts themselves have no MCP path.
 - Built for a single source/target pair per run. A multi-service migration
   run one service at a time means one capability manifest per service,
   reconciled by hand into an overall picture if the user wants one.
@@ -322,6 +357,11 @@ Check these every iteration, not just at start:
   capabilities are worth a spot-check beyond the automated gate.
 
 ## Scripts
+
+Three of these scripts shell out to `gh` — `next_capability.sh`,
+`watch_and_merge.sh`, and `scan_platform_repos.sh`. If step 0's preflight found
+`gh` absent they cannot run, and the GitHub MCP tools are the substitute; see
+step 0.
 
 | Script | Purpose | Args |
 | --- | --- | --- |

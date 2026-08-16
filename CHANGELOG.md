@@ -4,7 +4,34 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Added
+- `my_loops/parity-loop` (v1.3.0 → v1.4.0), `my_loops/sovereignty-loop`
+  (v1.2.0 → v1.3.0), `my_loops/dedupe-loop` (v1.2.0 → v1.3.0), and
+  `my_loops/rust-migration` (v1.1.2 → v1.2.0) — the same **tooling preflight**
+  and **infrastructure stop condition** `issue-loop` got in v1.4.0 (#61),
+  applied to its three siblings. Step 0 now checks `command -v gh` before
+  reporting the loop started, makes one cheap API read so an auth failure or
+  rate limit surfaces before work is in flight, and names the two CI-status
+  traps by symptom (`total_count: 0` from the commit-status endpoint is *not*
+  evidence CI is missing; runs associate to PRs by branch, so match by
+  `head_sha` or a stale run reads as a pass for code it never ran against). An
+  unreachable API now halts cleanly and reports completed / in-flight /
+  never-started rather than stranding a branch unnamed. Each skill's Scripts
+  section and Limitations now say which of its scripts need `gh`.
+  **Evidence:** only `issue-loop` failed this way in a live run; the gap in the
+  other three was confirmed by reading them, not by running them. The change is
+  documentation only, so the cost of being wrong is low — but it is inference,
+  not observation.
+
 ### Fixed
+- `my_loops/parity-loop` — the `## Stop conditions` heading was missing
+  outright. The bullets were present but unheaded, absorbed into `## Harness
+  mode`, and step 3's cross-reference to "Stop conditions" pointed at nothing.
+- `my_loops/dedupe-loop` — a Limitations bullet claimed porting
+  `scan_platform_repos.sh` here "would add a `gh` dependency this skill
+  otherwise doesn't need," but `next_issue.sh` and `watch_and_merge.sh` already
+  need one. Narrowed to the true claim: it would add one to *step 1*, which
+  otherwise runs entirely off local checkouts.
 - `my_loops/issue-loop` (v1.3.0 → v1.4.0) — step 8 said `Closes #<N>`,
   singular. Batching issues by target skill made multi-issue PRs the norm, and
   `Closes #52, #53, #54, #55` closes **only #52** — GitHub honours the keyword

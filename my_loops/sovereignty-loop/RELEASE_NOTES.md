@@ -10,6 +10,40 @@ still open.
 
 ---
 
+## v1.3.0 — Tooling preflight and an infrastructure stop condition
+**2026-08-16**
+
+- **Added:** a **tooling preflight** as the first bullet of step 0 — `command
+  -v gh`, one cheap API read, and a note on which CI-status mechanism the
+  target uses. The bullets it sits above all validate the *target*; this one
+  validates the loop's own execution environment, which is what actually fails
+  first when it fails.
+- **Added:** an **infrastructure stop condition** — an unreachable or
+  rate-limited GitHub API halts cleanly and reports three lists (completed, in
+  flight with branch and PR named, never started) plus the retry path. Every
+  other stop condition in this skill is about work state; this is the one where
+  partial state exists and something can be stranded unnamed.
+- **Added:** the preflight names the two CI-status traps by their symptom:
+  a repo reporting via Actions checks returns `total_count: 0` from the
+  commit-status endpoint (not evidence CI is missing), and runs associate to
+  PRs by *branch*, so a stale run from an earlier PR on a reused branch can
+  read as a pass for code it never ran against. Match by `head_sha`.
+- **Documented:** which scripts require `gh`, in both the Scripts section and
+  Limitations. All three (`next_issue.sh`, `watch_and_merge.sh`,
+  `scan_platform_repos.sh`) do; the fallback to the GitHub MCP tools is a
+  substitution the run makes deliberately, since the scripts have no MCP path
+  of their own. Limitations previously said nothing about `gh` at all.
+
+**Evidence, stated honestly:** only `issue-loop` actually failed this way in a
+live run — `gh` absent in a web session, so its scripts couldn't run and the
+loop had to be re-derived mid-flight. The gap here was confirmed structurally
+by reading this skill, not by a failing run of it. The change is documentation
+only — no behavior changes and no scripts touched — so the cost of being wrong
+is low, but it isn't the same grade of evidence
+([#61](https://github.com/baileyrd/skill_pack/issues/61)).
+
+---
+
 ## v1.2.0 — Require a reachability check before calling a dependency removable
 **2026-08-15**
 
