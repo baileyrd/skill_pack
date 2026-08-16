@@ -1,7 +1,7 @@
 ---
 name: unix-philosophy
 description: Applies Unix software design philosophy — do one thing well, compose small pieces, an open parseable format at every boundary, silence on success, mechanism not policy — in two modes. Design mode shapes what's being built: use it when a tool, CLI, service, module, library API, job, or agent tool is being designed, when the question is "extend this or build a second thing that composes with it", or when a decision turns on interface shape, output format, error behavior, or where a boundary goes — it applies even when nobody says "Unix". Audit mode reviews what exists: "review this against Unix principles", "is this doing too much", "why is this so painful to script against", "should this be one tool or two" — it scores eight dimensions Pass/Warn/Fail against cited evidence and ranks findings by present cost. Translates the principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code that has none, and treats each as a default with a cost, not a law.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # unix-philosophy
@@ -212,17 +212,33 @@ on the list deliberately and applies to the list. Back off when:
 | [`references/audit-rubric.md`](references/audit-rubric.md) | Any time audit mode runs — the eight dimensions' signal tables, Pass/Warn/Fail criteria, severity definitions, and the report template. |
 | [`references/beyond-the-cli.md`](references/beyond-the-cli.md) | Before applying this to a library, service, background pipeline, agent tool, or distributed system — i.e. almost always. |
 
-## Wrap-up retro
+## Wrap-up retro — audit mode only
 
-After a design-mode consultation or an audit report lands, run a
+**After an audit report lands**, run a
 [`meta/skill-retro`](../../meta/skill-retro) pass on **this skill**, grounded in
-what just happened: did design mode's step order match the order the decision
-actually needed answering in, did the rubric's dimensions fit the surface under
-audit or did one have to be stretched, did `beyond-the-cli.md` cover the surface
-in question or was a translation improvised on the spot, was a verdict recorded
-without a citation because the rubric's evidence bar was awkward to meet here?
+what just happened: did the rubric's eight dimensions fit the surface under
+audit or did one have to be stretched into an N/A, did
+[`beyond-the-cli.md`](references/beyond-the-cli.md) cover this surface or was a
+translation improvised on the spot, was a verdict recorded without a citation
+because the evidence bar was awkward to meet here, did the severity definitions
+sort these particular findings or did everything pile into one band?
 
 Running and reporting the retro is automatic and safe unattended — `skill-retro`
 never edits this skill's files on its own. *Applying* anything it finds is a
 separate, explicitly-approved follow-up through this repo's normal PR workflow,
 never bundled into the run that triggered it.
+
+**Design mode does not trigger a retro.** The sibling skills that carry a
+wrap-up retro are long-running loops that file issues and merge PRs, where a
+retrospective is small next to the work it reflects on. A design-mode
+consultation is often a few paragraphs answering one question — appending a
+retrospective on this skill's own instructions to that is disproportionate, and
+it fires in contexts that can't support it (a read-only sandbox, no subagents,
+an ephemeral session), where the honest outcome is a run that reports skipping
+its own final step. An audit is the substantial, artifact-producing invocation
+where the retro earns its cost.
+
+If a design-mode conversation does turn into substantial work — several rounds,
+a boundary reconsidered, a reference that didn't cover the surface — that's
+worth a retro, but as an explicit request rather than an automatic step. Say so
+in a sentence and let the user decide.

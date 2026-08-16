@@ -5,6 +5,15 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `dev_practices/unix-philosophy` (v1.0.0 → v1.1.0) — the wrap-up `skill-retro`
+  step now fires only after an **audit report**, not after every invocation.
+  Two design-mode eval runs reported *skipping* it (read-only sandbox, no
+  subagents) and both were right to; a final step a run routinely reports not
+  doing is worse than no step. Design mode instead offers the retro as an
+  explicit request when a conversation turns into substantial work. This is the
+  one place where the repo's retro-by-default convention was applied by habit
+  rather than by fit — the sibling skills carrying it are long-running loops,
+  where a retrospective is small next to the work it reflects on.
 - `dev_practices/unix-philosophy` (v1.0.0) — new skill applying Unix software
   design philosophy in two modes: design mode (a checklist for a live design
   decision) and audit mode (eight dimensions scored Pass/Warn/Fail against
