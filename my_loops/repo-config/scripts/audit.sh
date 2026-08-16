@@ -77,10 +77,15 @@ if [[ -f "$TARGET/.gitattributes" ]] && ! grep -q 'eol=lf' "$TARGET/.gitattribut
   echo "      that fail on their shebang. Presence alone doesn't fix that."
 fi
 
-# Presence != currency. If RELEASE_NOTES exists, flag that this check can't tell
-# whether it's up to date with the latest change — that's a human/agent judgment.
-if [[ -f "$TARGET/RELEASE_NOTES.md" ]]; then
+# Presence != currency. Flag every log-shaped file that exists, not just one:
+# naming RELEASE_NOTES.md alone implied it was the only file with this problem,
+# and a run once reported a repo current while CHANGELOG.md had no record of the
+# latest PR at all. Whether a log is up to date is a human/agent judgment either
+# way; the script's job is to make sure none of them gets silently skipped.
+for log in RELEASE_NOTES.md CHANGELOG.md; do
+  [[ -f "$TARGET/$log" ]] || continue
   echo
-  echo "Note: RELEASE_NOTES.md is present but this audit checks presence only —"
-  echo "      confirm separately that its newest entry covers the latest change."
-fi
+  echo "Note: $log is present but this audit checks presence only —"
+  echo "      confirm separately that its newest entry covers the latest change,"
+  echo "      and that entries whose PRs have merged carry their links."
+done
