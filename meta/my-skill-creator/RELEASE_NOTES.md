@@ -9,6 +9,42 @@ still open.
 
 ---
 
+## v1.1.1 — Allow `version` in the frontmatter allowlist
+**2026-08-16**
+
+- **Fixed ([#58](https://github.com/baileyrd/skill_pack/issues/58)):**
+  `scripts/quick_validate.py`'s `ALLOWED_PROPERTIES` is vendored from upstream
+  `skill-creator`, which has no `version` convention, so it rejected the key
+  outright. Since `validate_skill()` is a hard gate in front of
+  `package_skill.py`, and this repo *requires* `version` on every authored
+  skill, the two validators contradicted each other: `check_repo.py` fails a
+  skill without `version`, `quick_validate.py` failed the same skill with it.
+  Net effect — `package_skill.py` could not package **any** skill in this repo,
+  including the one it was pointed at (`yt_research_for_cc/video-teardown`).
+- **Added:** `tests/test_quick_validate.py` — 4 tests. Beyond asserting that
+  `version` validates, they pin the two ways a careless fix goes wrong: that
+  adding the key doesn't make it *required* here (`check_repo.py` owns that),
+  and that the allowlist still rejects a misspelled key, so replacing the check
+  with a no-op wouldn't pass. Per ADR-0002, verified by reverting the fix and
+  watching the two relevant tests go red.
+- **Note for future re-syncs:** this is a deliberate local divergence from
+  upstream and is easy to lose. The line carries a comment saying so, and the
+  end-to-end test fails loudly if it's dropped.
+
+### Found while fixing this, not fixed here
+
+The end-to-end test was written as "every skill in this repo validates
+cleanly" and failed — for a *different* reason. Four skills
+(`dev_practices/unix-philosophy`, `meta/learn-it`, `meta/skill-retro`,
+`my_loops/repo-config`) have descriptions containing an unquoted `": "`, which
+is invalid YAML that `check_repo.py`'s hand-rolled parser tolerates and PyYAML
+rejects. Filed as [#59](https://github.com/baileyrd/skill_pack/issues/59). The
+test is scoped to allowlist rejections until that's fixed, with a comment
+explaining why — narrowing it was preferable to shipping a red test, but the
+narrowing is temporary and marked as such.
+
+---
+
 ## v1.1.0 — Fix the two silent failures in the eval loop
 **2026-08-16**
 

@@ -5,6 +5,25 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Fixed
+- `meta/my-skill-creator` (v1.1.0 → v1.1.1) — `quick_validate.py`'s vendored
+  frontmatter allowlist rejected `version`, and since it gates
+  `package_skill.py`, **no skill in this repo could be packaged by it** (#58).
+  This repo requires `version`; upstream `skill-creator`, where the allowlist
+  comes from, has no such convention — so `check_repo.py` failed a skill
+  *without* the key and `quick_validate.py` failed the same skill *with* it.
+  `version` is now allowed, with a comment marking the divergence for future
+  upstream re-syncs.
+
+### Added
+- `tests/test_quick_validate.py` — 4 tests over the frontmatter allowlist,
+  including the end-to-end invariant that no skill in the repo is rejected by
+  it. Pins the two ways a careless fix goes wrong: adding `version` must not
+  make it *required* (that's `check_repo.py`'s job), and a misspelled key must
+  still be rejected. 76 tests total. Writing them surfaced #59 — four skills
+  have descriptions containing an unquoted `": "`, invalid YAML that
+  `check_repo.py`'s hand-rolled parser tolerates and PyYAML rejects.
+
+### Fixed
 - `meta/my-skill-creator` (v1.0.1 → v1.1.0) — the two silent failures in the
   eval loop, both found by a `skill-retro` pass on a real run. `grading.json`
   needs a `summary` block that step 4.1's inline schema omitted, and a missing

@@ -80,8 +80,19 @@ def validate_skill(skill_path):
     except yaml.YAMLError as e:
         return False, f"Invalid YAML in frontmatter: {e}"
 
-    # Define allowed properties
-    ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata', 'compatibility'}
+    # Define allowed properties.
+    #
+    # `version` is a deliberate skill_pack-local addition to the vendored
+    # upstream allowlist. This repo *requires* it on every authored skill (root
+    # README's "Versioning" section; scripts/check_repo.py's manifests check
+    # fails a skill without it; build_skill_zips.py reads it to name the
+    # archive). Upstream skill-creator has no such convention, so its allowlist
+    # correctly omits it — but without this addition the two validators in this
+    # repo contradict each other and package_skill.py cannot package any skill
+    # here. See issue #58. Re-apply this line on any future re-sync from
+    # upstream.
+    ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata',
+                          'compatibility', 'version'}
 
     # Check for unexpected properties (excluding nested keys under metadata)
     unexpected_keys = set(frontmatter.keys()) - ALLOWED_PROPERTIES
