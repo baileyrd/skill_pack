@@ -20,7 +20,7 @@ this log tracks commits against `main`.
   script with its tuning notes and known failure modes, and the verification
   pass checklist.
 
-- **Scope note:** deliberately *not* an edit to `trying/watch`, which overlaps
+- **Scope note:** deliberately *not* an edit to `trying/watch.skill`, which overlaps
   on the first half (yt-dlp download, ffmpeg frames, read-and-answer). `watch`
   is vendored third-party MIT code by `bradautomates` with its own
   `LICENSE`/`CHANGELOG.md` and upstream repo, shipped here as a zip archive

@@ -11,8 +11,9 @@ A video is two cheap streams (narration, still frames) and one expensive one
 where frames actually carry information — and then not shipping anything you
 inferred from narration without checking it against a real source first.
 
-**Scope boundary.** `trying/watch` already does "download it, sample frames,
-answer a question." Prefer it for one-off comprehension. Reach for this skill
+**Scope boundary.** [`trying/watch.skill`](../../trying/watch.skill) already does
+"download it, sample frames, answer a question." Prefer it for one-off
+comprehension — it is the cheaper tool. Reach for this skill
 when the output is a document someone will *follow* — where a wrong menu path
 or an invented part number costs them an afternoon.
 
