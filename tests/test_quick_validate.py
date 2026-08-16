@@ -15,8 +15,7 @@ divergence from upstream is deliberate and easy to lose on a re-sync, which is
 exactly why it needs a test rather than only a comment.
 
 Verified by reverting the fix (removing 'version' from ALLOWED_PROPERTIES) and
-watching test_version_is_allowed and
-test_no_repo_skill_rejected_for_an_unexpected_key fail.
+watching test_version_is_allowed and test_every_repo_skill_validates fail.
 """
 
 import importlib.util
@@ -114,21 +113,24 @@ class AllowlistTest(unittest.TestCase):
 class RealSkillsTest(unittest.TestCase):
     """The end-to-end invariant, checked against the skills actually in this repo."""
 
-    def test_no_repo_skill_rejected_for_an_unexpected_key(self):
-        """No skill here may be rejected by the frontmatter allowlist.
+    def test_every_repo_skill_validates(self):
+        """Every skill in this repo must pass `quick_validate`, for any reason.
 
-        This is the assertion that would have caught #58 without anyone
-        thinking to test the allowlist specifically, and it keeps catching it
-        for any future frontmatter convention this repo adopts that the
-        vendored upstream validator doesn't know about.
+        Deliberately unscoped. It catches two distinct bugs already seen here,
+        and would catch a third of a kind nobody has thought of yet:
 
-        Scoped to allowlist rejections on purpose. A broader "every skill
-        validates cleanly" assertion currently fails for a *different* reason
-        — four skills have descriptions containing an unquoted ': ', which is
-        invalid YAML that check_repo.py's hand-rolled parser tolerates and
-        PyYAML rejects (issue #59). That's a real defect, but it is not this
-        one, and folding it in here would mean shipping a red test or, worse,
-        quietly loosening this assertion until it caught nothing.
+        - #58: the frontmatter allowlist rejected `version`, a key this repo
+          requires, so `package_skill.py` could package nothing.
+        - #59: four skills had a description containing an unquoted ': ',
+          invalid YAML that `check_repo.py`'s hand-rolled parser tolerates and
+          PyYAML rejects — so a file could be "valid" here and invalid to
+          every real consumer.
+
+        The second is the reason this assertion is worth keeping broad rather
+        than narrowed to allowlist rejections: the interesting failures are the
+        ones where this repo's own tooling is more permissive than the tools
+        that actually load these skills, and those don't announce which
+        validation rule they'll trip.
         """
         qv = load_module()
         skills = sorted(
@@ -139,13 +141,11 @@ class RealSkillsTest(unittest.TestCase):
         failures = []
         for skill_dir in skills:
             ok, message = qv.validate_skill(str(skill_dir))
-            if not ok and "Unexpected key" in message:
+            if not ok:
                 failures.append(f"{skill_dir.relative_to(REPO_ROOT)}: {message}")
 
         self.assertEqual(
-            failures,
-            [],
-            "skills rejected by the frontmatter allowlist:\n" + "\n".join(failures),
+            failures, [], "skills rejected by quick_validate.py:\n" + "\n".join(failures)
         )
 
 

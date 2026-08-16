@@ -1,7 +1,18 @@
 ---
 name: learn-it
-description: Runs a post-session distillation pass that turns what actually happened in this session into a new (or updated) Claude skill, using the same evidence-grounded, report-before-write discipline as skill-retro but pointed the opposite direction: it reconstructs the preferred patterns, anti-patterns, gotchas, and sequencing this session actually demonstrated, checks whether an existing skill in this repo already covers the ground (merge) or nothing does (create new), drafts a SKILL.md matching this repo's authoring conventions (frontmatter, versioning, category placement, RELEASE_NOTES), and reports the full draft for approval before writing anything. Use when a session's problem-solving revealed reusable guidance worth keeping past this conversation, when the user says "turn this into a skill", "save this as a skill", "capture what we just learned", "update the X skill with this", or references this by name (learn-it). Never write one for a one-off fact or fix specific to this task; qualify first.
-version: 1.1.1
+description: >-
+  Runs a post-session distillation pass that turns what actually happened in this session into a
+  new (or updated) Claude skill, using the same evidence-grounded, report-before-write discipline
+  as skill-retro but pointed the opposite direction: it reconstructs the preferred patterns,
+  anti-patterns, gotchas, and sequencing this session actually demonstrated, checks whether an
+  existing skill in this repo already covers the ground (merge) or nothing does (create new),
+  drafts a SKILL.md matching this repo's authoring conventions (frontmatter, versioning, category
+  placement, RELEASE_NOTES), and reports the full draft for approval before writing anything. Use
+  when a session's problem-solving revealed reusable guidance worth keeping past this
+  conversation, when the user says "turn this into a skill", "save this as a skill", "capture what
+  we just learned", "update the X skill with this", or references this by name (learn-it). Never
+  write one for a one-off fact or fix specific to this task; qualify first.
+version: 1.1.2
 ---
 
 # learn-it

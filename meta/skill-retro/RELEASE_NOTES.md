@@ -9,6 +9,23 @@ still open.
 
 ---
 
+## v1.2.1 — YAML-safe description
+**2026-08-16**
+
+- **Fixed ([#59](https://github.com/baileyrd/skill_pack/issues/59)):** the
+  frontmatter `description` was an unquoted plain scalar containing `": "`,
+  which is invalid YAML — a colon-space inside a plain scalar reads as the start
+  of a nested mapping. It is now a `>-` block scalar. The *value* is byte-for-byte
+  unchanged; this is a representation fix, verified by round-tripping the parsed
+  string before and after.
+- **Why it went unnoticed:** `scripts/check_repo.py` parses frontmatter with a
+  hand-rolled line-based parser that tolerates the construct, so CI stayed green
+  and packaging worked, while anything using a real YAML parser rejected the file
+  outright. `quick_validate.py` was the instance that surfaced it. The repo was
+  validating with a parser more permissive than its consumers'.
+
+---
+
 ## v1.2.0 — A third disposition for findings, plus two step-ordering fixes
 **2026-08-16**
 

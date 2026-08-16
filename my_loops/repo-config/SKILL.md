@@ -1,7 +1,18 @@
 ---
 name: repo-config
-description: Scans a repo and applies the standard governance file set — PR templates, issue templates, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, an ADR seed, and a `.gitattributes` that forces LF line endings so a Windows-authored repo stops shipping scripts that die on their own shebang. Asks only what the scan can't infer, falling back to greenfield defaults (modular monolith, ports-and-adapters), deferring to `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` where more concrete. Use whenever the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES — even if they only name one file, since this applies the whole set together. Also use on an ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md or CHANGELOG.md, add an entry to each before ending the turn.
-version: 1.3.2
+description: >-
+  Scans a repo and applies the standard governance file set — PR templates, issue templates,
+  README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, RELEASE_NOTES, ARCHITECTURE, an ADR
+  seed, and a `.gitattributes` that forces LF line endings so a Windows-authored repo stops
+  shipping scripts that die on their own shebang. Asks only what the scan can't infer, falling
+  back to greenfield defaults (modular monolith, ports-and-adapters), deferring to
+  `rusty_foundation_akb`/`Atlas_Engineering_Standards_Library` where more concrete. Use whenever
+  the user wants to set up repo standards, bootstrap a new repo, add PR/issue templates, run a
+  "new repo checklist," or add any of CONTRIBUTING/SECURITY/ARCHITECTURE/CHANGELOG/RELEASE_NOTES —
+  even if they only name one file, since this applies the whole set together. Also use on an
+  ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md
+  or CHANGELOG.md, add an entry to each before ending the turn.
+version: 1.3.3
 ---
 
 # repo-config

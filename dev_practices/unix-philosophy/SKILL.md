@@ -1,7 +1,18 @@
 ---
 name: unix-philosophy
-description: Applies Unix software design philosophy — do one thing well, compose small pieces, an open parseable format at every boundary, silence on success, mechanism not policy — in two modes. Design mode shapes what's being built: use it when a tool, CLI, service, module, library API, job, or agent tool is being designed, when the question is "extend this or build a second thing that composes with it", or when a decision turns on interface shape, output format, error behavior, or where a boundary goes — it applies even when nobody says "Unix". Audit mode reviews what exists: "review this against Unix principles", "is this doing too much", "why is this so painful to script against", "should this be one tool or two" — it scores eight dimensions Pass/Warn/Fail against cited evidence and ranks findings by present cost. Translates the principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code that has none, and treats each as a default with a cost, not a law.
-version: 1.1.1
+description: >-
+  Applies Unix software design philosophy — do one thing well, compose small pieces, an open
+  parseable format at every boundary, silence on success, mechanism not policy — in two modes.
+  Design mode shapes what's being built: use it when a tool, CLI, service, module, library API,
+  job, or agent tool is being designed, when the question is "extend this or build a second thing
+  that composes with it", or when a decision turns on interface shape, output format, error
+  behavior, or where a boundary goes — it applies even when nobody says "Unix". Audit mode reviews
+  what exists: "review this against Unix principles", "is this doing too much", "why is this so
+  painful to script against", "should this be one tool or two" — it scores eight dimensions
+  Pass/Warn/Fail against cited evidence and ranks findings by present cost. Translates the
+  principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code
+  that has none, and treats each as a default with a cost, not a law.
+version: 1.1.2
 ---
 
 # unix-philosophy
