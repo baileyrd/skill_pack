@@ -12,7 +12,7 @@ description: >-
   conversation, when the user says "turn this into a skill", "save this as a skill", "capture what
   we just learned", "update the X skill with this", or references this by name (learn-it). Never
   write one for a one-off fact or fix specific to this task; qualify first.
-version: 1.1.2
+version: 1.2.0
 ---
 
 # learn-it
@@ -80,15 +80,43 @@ because it "seems like the kind of thing that should be true"):
   session, not an invented illustration.
 
 **2. Find or pick the target** — check this repo's existing skills first
-(all category folders — `my_loops/`, `yt_research_for_cc/`, `meta/` — and
-the staging areas `need_to_productize/`, `trying/`) for something this
-should extend instead of duplicate.
-- **Match found** → this is an update. Read the existing `SKILL.md` (and
-  its `references/`) in full first. Identify what's genuinely new, what
-  contradicts existing guidance (flag this explicitly to the user — old
-  guidance may have been intentional; don't silently overwrite it), and
-  what's already covered and shouldn't be repeated. Merge into the
-  existing structure rather than appending a changelog-shaped tail.
+(every category folder, plus the staging areas `need_to_productize/` and
+`trying/`) for something this should extend instead of duplicate.
+`references/skill-authoring-conventions.md` lists the categories, with an
+instruction to confirm the list against the repo rather than trusting it.
+
+**Locate the repo before searching.** `${CLAUDE_SKILL_DIR}` and
+`~/.claude/skills/` are the **installed** copy: a flat directory of skills by
+name, with no category folders, no `scripts/`, no root `README.md`, and no git
+history. It looks enough like the repo to fool a search — you get plausible
+hits while silently missing the layout every instruction here depends on. Work
+from the source checkout instead, and confirm you're in it by the presence of
+`scripts/build_skill_zips.py` *alongside* the category folders. If you can't
+determine where it is, ask; it is one question, and guessing costs a turn.
+
+- **Match found** → usually an update. Two cases first, because both make
+  "update in place" the wrong answer:
+  - **The candidate is a `.skill` zip archive** (everything in
+    `need_to_productize/` and `trying/` is). `cat` gives you binary; extract it
+    to a temp dir before you can read its `SKILL.md` at all.
+  - **The candidate is vendored third-party code** — it carries `LICENSE`,
+    `homepage`, `repository` or `author` frontmatter, or the root `README.md`
+    lists it as vendored (`notebooklm` is called out there explicitly). Editing
+    it forks someone else's work and forfeits upstream updates, however good
+    the match is.
+
+  In either vendored case, take the third outcome this step used to lack:
+  **adjacent** — build a new skill that explicitly scopes itself against the
+  existing one, states the relationship in its own `description`, and records
+  the rationale in its `RELEASE_NOTES.md`. That is what `video-teardown` did
+  against the vendored `trying/watch.skill`.
+
+  Otherwise: read the existing `SKILL.md` (and its `references/`) in full
+  first. Identify what's genuinely new, what contradicts existing guidance
+  (flag this explicitly to the user — old guidance may have been intentional;
+  don't silently overwrite it), and what's already covered and shouldn't be
+  repeated. Merge into the existing structure rather than appending a
+  changelog-shaped tail.
 - **No match** → this is a new skill. Pick a name (lowercase-hyphenated,
   specific enough to be unambiguous — `fastapi-async-patterns`, not
   `python`) and a category: an existing one it genuinely fits, or flag
@@ -126,11 +154,26 @@ written on this step.
 - Bookkeeping: add the new/changed skill's row to the root `README.md`'s
   category table (or its Categories section blurb, for a new category),
   and a root `CHANGELOG.md` `Unreleased/Added` (or `Changed`) line.
-- Sanity-check with `python3 scripts/build_skill_zips.py` before
-  committing. If any scripts were added, verify their exec bits landed as
-  `100755` after `git add` — this repo runs `core.fileMode=false`, so a
-  brand-new script needs an explicit check (`git ls-files -s`), not an
-  assumption that `chmod +x` alone survives staging.
+- **Gate on `python3 scripts/check_repo.py`** — that is what CI runs, and it
+  enforces five checks (`exec-bits`, `line-ends`, `doc-refs`, `manifests`,
+  `packaging`). Run it **after `git add`**: `exec-bits` reads the git index, so
+  a file that isn't staged is invisible to it.
+  `python3 scripts/build_skill_zips.py` is a secondary packaging check, not the
+  gate. It covers only the packaging concern and reports `Built N skill zip(s)`
+  regardless — it happily packaged a skill whose description was over
+  `manifests`' 1024-character limit, and said nothing about an unresolvable
+  inline path that `doc-refs` caught. Naming it as *the* pre-commit check gives
+  false confidence: the named command passes while the actual gate fails.
+- If any scripts were added, verify their exec bits landed as `100755` after
+  `git add` — this repo runs `core.fileMode=false`, so a brand-new script needs
+  an explicit check (`git ls-files -s`), not an assumption that `chmod +x`
+  alone survives staging. Note `scripts/restore_exec_bits.py` does **not** help
+  here: it only repairs files whose content matches an already-`100755` blob at
+  `HEAD`, which a genuinely new file never does. Use
+  `git update-index --chmod=+x`.
+- Caveat on `doc-refs` output from a Windows checkout: fixed in `docs-loop`
+  v1.3.2, but if you are on an older copy, its findings there were unreliable
+  (see #49) — trust CI over a local run.
 - No shortcut around the standing workflow: branch, PR, green CI if
   configured, merge with a **merge commit** — same as
   `CONTRIBUTING.md` requires for any other change here.

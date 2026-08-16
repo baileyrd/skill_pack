@@ -4,6 +4,21 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Fixed
+- `meta/learn-it` (v1.1.2 → v1.2.0) — four findings from the run that produced
+  PR #44. The conventions reference listed three category folders when there
+  are five plus two non-category staging areas, so placement decisions were
+  made against a stale picture (#45); step 2 now anticipates candidates that
+  are `.skill` **zip archives** or **vendored third-party code**, and names a
+  third outcome — **adjacent** — alongside new/update, since editing vendored
+  code forks someone else's work however good the match (#46); a "locate the
+  repo" note distinguishes the *installed* flat copy under `~/.claude/skills/`
+  from the source checkout, which look similar enough that a search returns
+  plausible hits while missing every category folder (#47); and step 5 now
+  gates on `check_repo.py` rather than `build_skill_zips.py`, since CI runs the
+  former and the latter reports success regardless — it packaged an
+  over-length description and missed an unresolvable path (#48).
+
 ### Added
 - `my_loops/issue-loop` (v1.2.0 → v1.3.0) — a **tooling preflight** in step 0
   and an **infrastructure stop condition** (#61), both from a `skill-retro` on
