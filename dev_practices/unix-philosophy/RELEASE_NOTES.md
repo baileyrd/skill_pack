@@ -6,6 +6,42 @@ this log tracks commits against `main`.
 
 ---
 
+## v1.1.3 — Eval assertion refinements from iteration 2's graders
+**2026-08-16**
+
+Doc/eval-only; `SKILL.md`'s instructions are unchanged. Three refinements raised
+independently by grading passes during iteration 2 and deliberately deferred so
+the measurement wasn't changed mid-run
+([#56](https://github.com/baileyrd/skill_pack/issues/56)).
+
+- **eval-3 A3** required naming invoice + tax + ledger as an enumerated triple.
+  The with-skill run made the money-correctness argument for the invoice↔ledger
+  pair and kept tax in-process on different grounds (it's a pure function) — a
+  *sharper* argument than the assertion described. Reworded around the coupled
+  cluster: credit identifying that a network boundary anywhere in the money path
+  is a correctness problem rather than an overhead one, whichever pair is named.
+- **eval-2 A6** passed on a technicality. The with-skill run named the constant
+  and prescribed env vars while explicitly scoping "security of the webhook"
+  *out*, so it never framed it as a live credential in version control — which
+  the baseline did. Split into **A6** (hardcoded configuration in the wrong
+  place) and **A6b** (a secret committed to VCS). They are different findings and
+  only the second is the security one.
+- **eval-4 gains A11-A14.** A1-A7 had become non-discriminating and A8 (the
+  verdict table) was doing nearly all the separating work, making it a formatting
+  test rather than the cold-audit depth test it was designed as. The four new
+  assertions cover defects the **baseline** found and the with-skill run missed:
+  429 never retried, no connection pooling, no trace propagation, and URL
+  injection via an unquoted path segment. Each was verified present in
+  `evals/fixtures/svcclient.py` rather than taken from the issue's summary.
+
+58 assertions across 6 evals, up from 53. Items 1 and 3 deliberately push the
+set *away* from format-rewarding assertions and toward substance ones — the
+direction `evals/analysis/iteration-2.md` flags as the honest one, given that
+two of the eight discriminating slots there rewarded a format this skill
+prescribes.
+
+---
+
 ## v1.1.2 — YAML-safe description
 **2026-08-16**
 
