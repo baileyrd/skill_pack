@@ -9,6 +9,22 @@ still open.
 
 ---
 
+## v1.1.1 — Description under claude.ai's upload limit
+**2026-08-16**
+
+- **Fixed:** the `description` was 1209 characters, over the 1024-character
+  limit claude.ai enforces on skill upload, so the zip was rejected outright.
+  Trimmed to 1008 (16 characters of headroom) with every trigger phrase kept —
+  the cuts are the "bias toward proposing" preamble, keeping the one-off-fix
+  exclusion that actually gates triggering. Nothing about what the skill does
+  changed.
+- **Context:** five skills here shipped over the limit at once, and none of the
+  local tooling noticed: `install_skills.py` copies frontmatter without reading
+  it, `build_skill_zips.py` zips it the same way, and Claude Code itself loads
+  an over-length description fine. Only claude.ai rejects it, at upload, one
+  file at a time. `check_repo.py`'s `manifests` check now enforces the limit so
+  this fails locally and in CI instead.
+
 ## v1.1.0 — Wire skill-retro into learn-it's own wrap-up (step 6)
 **2026-08-13**
 

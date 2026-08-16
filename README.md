@@ -94,7 +94,7 @@ Narrow on purpose: silent for skills with no retro step, silent for `skill-retro
 
 ### `scripts/check_repo.py`
 
-The five checks CI runs, runnable locally with `python3 scripts/check_repo.py` (or `--only <name>` for one). Each exists because the thing it checks for actually broke here and cost a PR to fix — exec bits (18 scripts shipped non-executable), line endings, doc references, skill manifests, packaging. The script's own docstring names the failure behind each one.
+The five checks CI runs, runnable locally with `python3 scripts/check_repo.py` (or `--only <name>` for one). Each exists because the thing it checks for actually broke here and cost a PR to fix — exec bits (18 scripts shipped non-executable), line endings, doc references, skill manifests (including the 1024-character `description` limit claude.ai enforces on upload — five skills shipped over it and were rejected one at a time at upload, since no local tool reads frontmatter), packaging. The script's own docstring names the failure behind each one.
 
 `doc-refs` runs `my_loops/docs-loop`'s `check_references.py` against `docs-refs-baseline.tsv`, so it fails on *new* broken references only. The baseline exists because this repo has a permanent structural false-positive class — most docs here describe *other* repos — and a check that's red on day one gets ignored. Every baseline entry carries a written reason; entries that stop matching are reported as stale.
 

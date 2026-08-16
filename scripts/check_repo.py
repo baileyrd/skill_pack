@@ -16,9 +16,13 @@ it.
               (issues #16/#17). Runs against a baseline so only NEW breakage
               fails — see docs-refs-baseline.tsv.
   manifests   Every skill needs `name` matching its directory, a semver
-              `version`, and a RELEASE_NOTES.md. repo-config's own notes
-              record a real fix shipping with no entry, caught only because
-              the repo owner noticed.
+              `version`, a RELEASE_NOTES.md, and a `description` within the
+              1024-character limit claude.ai enforces on upload. repo-config's
+              own notes record a real fix shipping with no entry, caught only
+              because the repo owner noticed; five skills shipped with
+              over-length descriptions and were rejected only at upload time,
+              after install_skills.py and build_skill_zips.py had both passed
+              them (neither validates frontmatter).
   packaging   build_skill_zips.py runs clean — a smoke test that the tooling
               still works before anyone relies on its output.
 
@@ -44,6 +48,11 @@ CHECK_REFERENCES = REPO_ROOT / "my_loops/docs-loop/scripts/check_references.py"
 VENDORED = {"yt_research_for_cc/notebooklm"}
 
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
+
+# claude.ai rejects a skill zip whose frontmatter `description` exceeds this,
+# and it's the only install path for claude.ai/Desktop -- so an over-length
+# description is a hard ship blocker there while Claude Code loads it fine.
+MAX_DESCRIPTION = 1024
 BINARY_SUFFIXES = {".skill", ".zip", ".png", ".jpg", ".jpeg", ".gif", ".pdf", ".ico"}
 
 
@@ -135,6 +144,42 @@ def read_frontmatter(path: Path) -> dict:
     return fields
 
 
+def read_description(path: Path) -> str:
+    """The `description` as YAML would parse it, inline or block scalar.
+
+    `read_frontmatter` deliberately skips continuation lines, which makes it
+    useless for measuring a description written as a `>` or `|` block (as
+    datastar-pro's is) -- it reports the scalar indicator as the whole value.
+    Folding is approximated by joining the block's lines with single spaces,
+    which is what `>` does and is within a byte or two of `|` for a length
+    check. Deliberately not a YAML parser: this repo is stdlib-only.
+    """
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    if not text.startswith("---"):
+        return ""
+    _, _, rest = text.partition("---\n")
+    body, _, _ = rest.partition("\n---")
+
+    lines = body.splitlines()
+    for i, line in enumerate(lines):
+        key, sep, value = line.partition(":")
+        if not sep or key.strip() != "description":
+            continue
+        value = value.strip()
+        if not value.startswith((">", "|")):
+            return value
+        block = []
+        for cont in lines[i + 1 :]:
+            if cont.strip() and not cont.startswith((" ", "\t")):
+                break  # next top-level key ends the block
+            block.append(cont.strip())
+        return " ".join(part for part in block if part)
+    return ""
+
+
 def check_manifests() -> list[str]:
     failures = []
     for path in sorted(REPO_ROOT.rglob("SKILL.md")):
@@ -150,6 +195,13 @@ def check_manifests() -> list[str]:
             failures.append(f"{rel_dir}/SKILL.md: version '{version}' is not semver")
         if not (path.parent / "RELEASE_NOTES.md").exists():
             failures.append(f"{rel_dir}: no RELEASE_NOTES.md")
+        description = read_description(path)
+        if len(description) > MAX_DESCRIPTION:
+            failures.append(
+                f"{rel_dir}/SKILL.md: description is {len(description)} chars, "
+                f"over claude.ai's {MAX_DESCRIPTION} limit (trim "
+                f"{len(description) - MAX_DESCRIPTION})"
+            )
     return failures
 
 

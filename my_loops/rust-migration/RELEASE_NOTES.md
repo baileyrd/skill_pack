@@ -9,6 +9,22 @@ still open.
 
 ---
 
+## v1.1.2 — Description under claude.ai's upload limit
+**2026-08-16**
+
+- **Fixed:** the `description` was 1354 characters, over the 1024-character
+  limit claude.ai enforces on skill upload, so the zip was rejected outright.
+  Trimmed to 994 (30 characters of headroom) with every trigger phrase kept —
+  the cuts are the capability-type list, and the sibling-skill/repo-config
+  cross-reference already stated in the body. Nothing about what the skill
+  does changed.
+- **Context:** five skills here shipped over the limit at once, and none of the
+  local tooling noticed: `install_skills.py` copies frontmatter without reading
+  it, `build_skill_zips.py` zips it the same way, and Claude Code itself loads
+  an over-length description fine. Only claude.ai rejects it, at upload, one
+  file at a time. `check_repo.py`'s `manifests` check now enforces the limit so
+  this fails locally and in CI instead.
+
 ## v1.1.1 — Declare jq and ripgrep
 **2026-08-15**
 
