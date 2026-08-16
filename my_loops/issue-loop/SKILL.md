@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # issue-loop
@@ -21,6 +21,27 @@ doesn't file them. `references/` describes the loop's supporting data
 
 **0. Scope**
 - `TARGET_REPO` — whose open issues are being worked.
+- **Tooling preflight — do this before reporting that the loop has started.**
+  This skill validates the *target repo* below; this bullet validates its own
+  execution environment, which is the thing that actually failed first.
+  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+     without it installed — **none of this skill's scripts can run**, since all
+     three shell out to it. The GitHub MCP tools are the substitute: use them
+     for step 1's issue list, step 2's reuse search, and step 3.9's
+     CI-wait-and-merge. Say so in the wrap-up report, so the run's mechanics
+     are legible rather than looking like the scripts ran. Do **not** silently
+     skip the reuse check just because its script is unavailable.
+  2. One cheap read against the API (list issues, page size 1). A rate limit or
+     an auth failure discovered here costs nothing; discovered at issue 12 of
+     20 it strands work in flight. See "Stop conditions" for what to do when it
+     fails mid-loop.
+  3. Note which CI-status mechanism the target uses. A repo whose CI reports
+     via **Actions checks** returns `total_count: 0` from the commit-status
+     endpoint — that is *not* evidence CI is missing, and reading it that way
+     will make you think a green run never happened. Match a run to the PR by
+     `head_sha`, never by branch: runs are associated to PRs by branch name, so
+     a stale run from a previous PR on a reused branch can appear attached to
+     the current one and read as a pass for code it never ran against.
 - **repo-config prerequisite**: run `repo-config`'s `scripts/audit.sh
   <TARGET_REPO>` first. If the standard governance-file score is
   low/missing, run repo-config on the target before doing any issue-loop
@@ -134,6 +155,15 @@ issues already proceed to PR/merge unattended in both modes, same as
   leave the PR open, report it, don't skip ahead silently.
 - A breaking-change or needs-new-dependency issue → pause and ask (step
   3.3), in both harness modes.
+- **The GitHub API is unreachable or rate-limited** → halt cleanly and report
+  three lists: issues completed, issues *in flight* (naming the branch and any
+  open PR, so nothing is stranded unnamed), and issues never started — plus the
+  retry path. Every other stop condition here is about work state; this one is
+  about the tooling, and it's the one where partial state exists and matters.
+  **Never fall back to triaging from issue titles alone in order to keep
+  going** — step 1 says titles and existing labels aren't sufficient, and a
+  rate limit is not a reason to lower that bar. Waiting is cheap; a
+  misclassified issue worked unattended is not.
 
 ## Rules
 
@@ -167,13 +197,22 @@ issues already proceed to PR/merge unattended in both modes, same as
 - No issue-sizing control like `parity-loop`'s gap-analysis step — an issue
   that's really ten unrelated asks stays one issue unless the user splits it
   first; this skill doesn't split issues on its own.
-- Assumes `gh` is authenticated and CI is a required status check on the
-  default branch, same as the sibling skills.
+- Assumes `gh` is **installed and** authenticated, and that CI is a required
+  status check on the default branch, same as the sibling skills. Step 0's
+  tooling preflight covers the case where `gh` is missing entirely — worth
+  distinguishing, because "present but unauthenticated" fails loudly on first
+  use while "not installed" makes every script in the table below unrunnable.
+  Where CI is *not* actually a required check, a green run means the checks
+  passed, not that GitHub would have blocked a merge without them.
 - Rust/cargo-shaped by default for the local gate command; swap for the
   target ecosystem's equivalent same as `parity-loop`'s "Adapting to other
   stacks."
 
 ## Scripts
+
+**All three require `gh`** (`next_issue.sh` additionally requires `jq`). If
+step 0's preflight found `gh` absent, none of them run and the GitHub MCP tools
+are the substitute — see step 0.
 
 | Script | Purpose | Args |
 | --- | --- | --- |
