@@ -6,6 +6,27 @@ this log tracks commits against `main`.
 
 ---
 
+## v1.1.1 — Track the eval analysis alongside the evals
+**2026-08-16**
+
+- **Added:** `evals/analysis/` — the analyst passes and benchmark aggregates
+  from both eval iterations, with a README summarizing what the evidence
+  supports. Doc-only; no change to the skill's instructions.
+- **Why:** the run outputs live under `*-workspace/`, which is gitignored as
+  scratch, so the conclusions were about to die with the session that produced
+  them. What the evidence supports (this skill makes recommendations
+  *accountable* — it does not make the analysis smarter) and what it does not
+  (the "when not to apply this" section is unvalidated; eval-5 scored 8/8 both
+  with and without the skill) are exactly the things that get quietly
+  overstated once the numbers are gone.
+- **Kept deliberately:** the note that five of the eight discriminating
+  assertion-slots come from assertions rewritten after iteration 1 failed to
+  discriminate, and which of those survive scrutiny. A benchmark whose
+  measurements were revised until they showed a result should carry that fact
+  next to the result.
+
+---
+
 ## v1.1.0 — Scope the wrap-up retro to audit mode
 **2026-08-16**
 

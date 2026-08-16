@@ -5,6 +5,14 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `dev_practices/unix-philosophy` (v1.1.0 → v1.1.1) — `evals/analysis/` now
+  tracks the analyst passes and benchmark aggregates from both eval iterations.
+  The run outputs stay scratch under the gitignored `*-workspace/`, but the
+  conclusions were dying with the session: what the evidence supports (the skill
+  makes recommendations accountable; it does not make the analysis smarter),
+  what it doesn't (eval-5 scored 8/8 both ways, leaving the "when not to apply
+  this" section unvalidated), and the note that several discriminating
+  assertions were rewritten after a first iteration failed to discriminate.
 - `dev_practices/unix-philosophy` (v1.0.0 → v1.1.0) — the wrap-up `skill-retro`
   step now fires only after an **audit report**, not after every invocation.
   Two design-mode eval runs reported *skipping* it (read-only sandbox, no
