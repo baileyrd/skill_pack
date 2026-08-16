@@ -4,6 +4,18 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Fixed
+- `my_loops/issue-loop` (v1.3.0 → v1.4.0) — step 8 said `Closes #<N>`,
+  singular. Batching issues by target skill made multi-issue PRs the norm, and
+  `Closes #52, #53, #54, #55` closes **only #52** — GitHub honours the keyword
+  only where it immediately precedes a number. **Eight issues stayed open after
+  their fixes merged** (#42, #43, #46, #47, #48, #53, #54, #55), caught only by
+  re-listing the backlog at wrap-up. Step 8 now requires one `Closes` per issue;
+  step 10 requires re-listing open issues rather than assuming the keyword
+  fired, since the failure is silent — the merge succeeds and the PR looks
+  finished. From this skill's own wrap-up retro on the run that cleared this
+  repo's backlog.
+
 ### Changed
 - `dev_practices/unix-philosophy` (v1.1.2 → v1.1.3) — three eval-set refinements
   raised by iteration 2's graders and deferred so the measurement wasn't changed

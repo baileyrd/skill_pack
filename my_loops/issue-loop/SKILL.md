@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # issue-loop
@@ -111,13 +111,22 @@ stop condition below fires, or the user says stop:
    cargo fmt --check` for Rust, the ecosystem equivalent otherwise (see
    `parity-loop`'s "Adapting to other stacks" for the general pattern).
 7. If the repo has `RELEASE_NOTES.md`, add the dated entry now.
-8. Commit (`Closes #<N>` in the message), push, `gh pr create` against the
-   default branch — use repo-config's PR template.
+8. Commit, push, `gh pr create` against the default branch — use
+   repo-config's PR template. **One `Closes` keyword per issue**:
+   `Closes #52, Closes #53, Closes #54`. GitHub only honours the keyword when
+   it *immediately precedes* each number, so the natural-looking
+   `Closes #52, #53, #54` closes **only #52** and leaves the rest silently
+   open. This applies whenever one PR covers more than one issue.
 9. `scripts/watch_and_merge.sh <pr-number>`: waits for CI, and on green,
    merges with a **merge commit** and syncs. On red, one bounded fix-up
    attempt before surfacing the failure — never force a merge, never drop
    the issue silently.
-10. Confirm the issue actually closed.
+10. **Confirm every issue this PR was meant to close is actually closed** —
+    re-list open issues rather than assuming the keyword fired. A malformed
+    `Closes` list fails silently: the merge succeeds, the PR looks finished,
+    and the issue stays open until someone re-reads the backlog. Close any
+    stragglers by hand before moving on, so the next loop-around isn't
+    triaging work that is already done.
 11. Back to step 1's issue list (a re-triage isn't needed unless new issues
     were filed since the last pass — check for new ones each loop-around).
 

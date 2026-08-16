@@ -10,6 +10,37 @@ still open.
 
 ---
 
+## v1.4.0 — One `Closes` keyword per issue, and verify it fired
+**2026-08-16**
+
+From this skill's own wrap-up retro, grounded in the run that cleared
+`skill_pack`'s backlog — 15 issues across 7 PRs.
+
+- **Fixed (finding J1):** step 8 said `Closes #<N>`, singular. Batching issues
+  by target skill made multi-issue PRs the norm, and the natural-looking
+  `Closes #52, #53, #54, #55` closes **only #52** — GitHub honours the keyword
+  only where it *immediately precedes* a number. **Eight issues stayed open
+  after their fixes merged** (#42, #43, #46, #47, #48, #53, #54, #55) and were
+  only caught by re-listing the backlog at wrap-up. Step 8 now requires one
+  `Closes` per issue and says why the comma form fails.
+- **Changed:** step 10 was "confirm the issue actually closed" — easy to read as
+  a formality. It now requires re-listing open issues rather than assuming the
+  keyword fired, names the failure as silent (the merge succeeds, the PR looks
+  finished), and says to close stragglers by hand before continuing, so the next
+  loop-around isn't triaging work that is already done.
+
+**Severity note:** this is `costly-guess`, not `cosmetic`. Nothing broke, but
+the backlog was left in a state that misrepresented what had been done — and the
+next run of this loop would have re-triaged and potentially re-worked eight
+already-fixed issues.
+
+Two sibling findings from the same retro were reported and **not** applied:
+anticipating shared-file conflicts across sequential batch PRs, and giving the
+skill vocabulary for the batching deviation itself. Both are real but
+single-run; logged here rather than acted on, per `skill-retro`'s Limitations.
+
+---
+
 ## v1.3.0 — Preflight the loop's own tooling
 **2026-08-16**
 
