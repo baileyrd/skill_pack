@@ -39,6 +39,17 @@ A strong description (every existing skill here follows this shape):
   relevant (e.g. "Companion to parity-loop... same PR/CI/merge mechanics").
 - Errs toward encouraging triggering when in doubt over a narrow exact-match
   phrasing — a skill that only fires on its own name is nearly useless.
+- **Has a hard ceiling of 1024 characters** — claude.ai's limit, enforced by
+  `scripts/check_repo.py`'s `manifests` check. This and the "is long" rule
+  below genuinely pull against each other, and the ceiling wins; following
+  "is long" as written naturally overshoots. Trim trigger-phrase examples
+  before trimming the statement of what the skill does and how.
+- **Is written as a `>-` block scalar**, not one long plain line, unless you
+  are certain it contains no `": "`. A colon-space inside an unquoted plain
+  scalar is invalid YAML, and a description quoting a trigger phrase hits it
+  easily. `check_repo.py`'s hand-rolled parser tolerates it, so the repo's own
+  checks stay green while every real consumer rejects the file — four skills
+  shipped that way before anyone noticed.
 - Is long. Every skill in this repo has a multi-sentence, information-dense
   description — this is deliberate, not something to trim for brevity.
 
@@ -95,23 +106,42 @@ this log tracks commits against `main`.
 
 ## Category placement
 
-Three category folders exist today:
+**Confirm this list against the repo before relying on it** — `ls -d */` at
+the root, or the category tables in the root `README.md`. It has been stale
+before, and a placement decision made against a stale list is wrong in a way
+that is expensive to undo once the directory exists.
+
+Five category folders exist as of 2026-08-16:
 - `my_loops/` — autonomous, bounded backlog loops maintaining the
   Rusty-Mill/`baileyrd` Rust platform repos (assess → issue → implement →
   PR → merge → repeat).
-- `yt_research_for_cc/` — the YouTube research pipeline (search → curate →
-  NotebookLM → deliverable).
-- `meta/` — tooling about this repo's own skills (`skill-retro`,
-  `learn-it`) — retrospection and distillation, not external repo
+- `yt_research_for_cc/` — video research: the YouTube search → curate →
+  NotebookLM pipeline, plus `video-teardown` for working a single video into
+  a verified deliverable.
+- `meta/` — tooling about this repo's own skills (`skill-retro`, `learn-it`,
+  `my-skill-creator`) — retrospection and distillation, not external repo
   maintenance.
+- `web_dev/` — skills for generating applications in a specific web framework
+  (`datastar-pro`), reviewed and imported from their own standalone repos then
+  maintained here.
+- `dev_practices/` — software design and coding discipline
+  (`unix-philosophy`). The one category defined by *subject* rather than by
+  target: its skills are invoked against whatever the user happens to be
+  building.
 
-A skill that clearly fits one of these goes there. A skill that doesn't fit
-any of them is a real decision, not a default — flag it rather than forcing
-a fit or silently creating a fourth category. If a new category genuinely
-is warranted, `ARCHITECTURE.md`'s "Structure" section names the category
-folders explicitly and needs a matching update, and the root `README.md`
-needs a new "### `<folder>/` — ..." section with its own skill table (same
-shape as the existing two/three sections).
+Two further top-level folders are **not** categories and hold no skill
+directories — `need_to_productize/` and `trying/` contain exported `.skill`
+zip archives. Nothing in either has a `SKILL.md`, so `build_skill_zips.py`
+and `install_skills.py` skip them entirely: they are neither versioned,
+packaged, nor installed. A skill does not "live" there in any working sense.
+
+A skill that clearly fits one of the five goes there. A skill that fits none
+is a real decision, not a default — flag it rather than forcing a fit or
+silently creating a new category. If a new one genuinely is warranted,
+`ARCHITECTURE.md`'s "Structure" section names the category folders explicitly
+and needs a matching update, and the root `README.md` needs a new
+"### `<folder>/` — ..." section with its own skill table, same shape as the
+existing ones.
 
 ## Standing rules nearly every skill here repeats
 
