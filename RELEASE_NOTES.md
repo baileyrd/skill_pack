@@ -6,7 +6,7 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 ---
 
 ## repo-config's currency check stops having a blind spot
-**2026-08-16**
+**2026-08-16** — [#39](https://github.com/baileyrd/skill_pack/pull/39)
 
 Applied from the step-5 wrap-up retro on the `/repo-config` run that produced
 [#36](https://github.com/baileyrd/skill_pack/pull/36). Both findings were filed
