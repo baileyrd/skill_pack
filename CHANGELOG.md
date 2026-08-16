@@ -57,6 +57,19 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   `meta/learn-it`'s category-placement rule this is a deliberate new category
   rather than a forced fit. `ARCHITECTURE.md`'s Structure section and the root
   `README.md` updated to match.
+- `yt_research_for_cc/video-teardown` (v1.0.0) — new skill for turning a video
+  into a verified, structured deliverable (build guide, runbook, parts list,
+  checklist) rather than a one-off answer about its contents. Pairs a cheap
+  captions pass with targeted ffmpeg extraction, then triages frames by
+  scene-change detection and `showinfo` mean-luma sorting so only the few
+  carrying real information get read — 73 frames down to the 9 that held every
+  config value in the originating session. Second half is the verification
+  discipline: reconstructed menu paths, flags and versions checked against
+  official docs before shipping, each claim tagged on-screen-with-timestamp or
+  reconstructed. Distilled by `meta/learn-it`. Deliberately a new skill rather
+  than an edit to `trying/watch`, which overlaps on download-and-sample but is
+  vendored third-party MIT code with its own upstream — rationale recorded in
+  the skill's `RELEASE_NOTES.md`.
 - `my_loops/repo-config` (v1.3.1 → v1.3.2) — step 4's currency check now covers
   **every log-shaped file in the set**, not just `RELEASE_NOTES.md`, and also
   verifies that entries whose PRs have merged carry their links. Written as a
