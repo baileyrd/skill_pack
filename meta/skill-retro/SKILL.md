@@ -1,7 +1,19 @@
 ---
 name: skill-retro
-description: Runs a post-execution retrospective on a skill (call it B) immediately after B finishes real work, treating what just happened as evidence about B's own instructions rather than about the task B was doing. Re-reads B's current SKILL.md/references/scripts and reconstructs what actually happened in this session against them — every ambiguity resolved by guessing, every question asked that B's instructions should have pre-answered, every step skipped/reordered/improvised, every stale reference or script that errored — reporting each as a finding: what happened, which file/section it traces to, and a concrete proposed edit. Never edits B's files unprompted; applies findings only on explicit approval, then bumps B's version and RELEASE_NOTES.md per this repo's versioning convention. Use immediately after finishing a task that leaned on another skill in this repo, when the user asks to retro/review/critique/post-mortem a skill that was just used, or references this by name (skill-retro, meta-review).
-version: 1.2.0
+description: >-
+  Runs a post-execution retrospective on a skill (call it B) immediately after B finishes real
+  work, treating what just happened as evidence about B's own instructions rather than about the
+  task B was doing. Re-reads B's current SKILL.md/references/scripts and reconstructs what
+  actually happened in this session against them — every ambiguity resolved by guessing, every
+  question asked that B's instructions should have pre-answered, every step
+  skipped/reordered/improvised, every stale reference or script that errored — reporting each as a
+  finding: what happened, which file/section it traces to, and a concrete proposed edit. Never
+  edits B's files unprompted; applies findings only on explicit approval, then bumps B's version
+  and RELEASE_NOTES.md per this repo's versioning convention. Use immediately after finishing a
+  task that leaned on another skill in this repo, when the user asks to
+  retro/review/critique/post-mortem a skill that was just used, or references this by name
+  (skill-retro, meta-review).
+version: 1.2.1
 ---
 
 # skill-retro

@@ -5,6 +5,24 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Fixed
+- Four skills shipped a frontmatter `description` that **real YAML parsers
+  reject** — an unquoted plain scalar containing `": "`, which reads as the
+  start of a nested mapping (#59). `dev_practices/unix-philosophy` (v1.1.1 →
+  v1.1.2), `meta/learn-it` (v1.1.1 → v1.1.2), `meta/skill-retro` (v1.2.0 →
+  v1.2.1) and `my_loops/repo-config` (v1.3.2 → v1.3.3) now use `>-` block
+  scalars. The values are unchanged — verified by round-tripping the parsed
+  string before and after, not by eye.
+  The reason none of this repo's tooling noticed is the point worth keeping:
+  `check_repo.py` parses frontmatter with a hand-rolled line-based parser that
+  tolerates the construct, so a file could be "valid" here and invalid to every
+  consumer that uses a real parser. `tests/test_quick_validate.py`'s end-to-end
+  assertion is correspondingly restored to its original unscoped form ("every
+  skill validates cleanly"), which now passes 16/16 and was fault-injected to
+  confirm it catches a regressed description.
+  **Not done, and deliberately:** the issue's second guard — a YAML-parse check
+  inside `check_repo.py` — would put PyYAML in CI, and `.github/workflows/ci.yml`
+  states that adding a dependency is "a decision to make explicitly, not to
+  discover here." Left open on #59 as a stop-and-ask.
 - `meta/my-skill-creator` (v1.1.0 → v1.1.1) — `quick_validate.py`'s vendored
   frontmatter allowlist rejected `version`, and since it gates
   `package_skill.py`, **no skill in this repo could be packaged by it** (#58).
