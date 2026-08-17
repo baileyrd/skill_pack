@@ -1,7 +1,7 @@
 ---
 name: video-teardown
 description: Turns a video into a verified, structured deliverable — build guide, runbook, parts list, checklist — not just an answer about it. Reads video without video/audio input by pairing a cheap yt-dlp captions pass with targeted ffmpeg extraction, triaging frames by scene-change detection and mean-luma sorting so only the few carrying information get read. The second half is the point - any menu path, flag, field name or version reconstructed from narration is verified against official docs before shipping, and every claim is marked shown-on-screen with a timestamp or reconstructed. Use when someone wants a video turned into instructions, documentation, a parts list or checklist - "turn this video into a guide", "write up what they did", "document this tutorial", "what hardware and software did they use", "make a checklist from this" - or hands over a local video file wanting more than a summary. Companion to the vendored trying/watch skill, the better pick for one-off "what happens in this video" questions.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # video-teardown
@@ -121,3 +121,22 @@ or older, `-vsync vfr` is still the correct spelling.
 
 Luma-triage thresholds are **single-video evidence** — one 4K tutorial with a
 dark-grid graphic style. Treat as a method, not a calibrated constant.
+
+## Wrap-up retro
+
+**After the deliverable ships**, run a
+[`meta/skill-retro`](../../meta/skill-retro) pass on **this skill**, grounded
+in what just happened: did the transcript-first ordering in step 1 actually
+save the frame budget it claims to, or did the video's structure force frames
+before the map was useful; did the luma-triage thresholds (Y<45 / Y>150) need
+hand-correction the way the Gotchas section already warns they might, and by
+how much; did every reconstructed claim actually get checked against a real
+source before shipping, or did step 4 get skipped under time pressure for a
+claim that felt obvious; did a new anti-pattern show up that isn't one of the
+four already listed; did the ffmpeg/yt-dlp version notes still hold, or did a
+flag behave differently than documented.
+
+Running and reporting the retro is automatic and safe unattended —
+`skill-retro` never edits this skill's files on its own. *Applying* anything
+it finds is a separate, explicitly-approved follow-up through this repo's
+normal PR workflow, never bundled into the run that triggered it.
