@@ -10,6 +10,37 @@ still open.
 
 ---
 
+## v1.6.0 — Infer TARGET_REPO when obvious, scope free-text args, don't bootstrap before triage
+**2026-08-17**
+
+- **Added:** `TARGET_REPO` may be inferred when exactly one repo is attached
+  to the session, instead of always halting when it isn't spelled out
+  explicitly. The halt rule in step 0's last bullet is unchanged for real
+  ambiguity (multiple repos, none named).
+- **Added:** explicit scope for free-text arguments beyond `TARGET_REPO` —
+  they filter which *already-open* issues get worked, never license to
+  invent issues from a doc's prose or a file's TODOs. A filter matching
+  zero issues gets reported as such, not reinterpreted more expansively.
+- **Changed:** the repo-config prerequisite no longer bootstraps
+  unconditionally whenever the governance score is low. The `audit.sh`
+  check still always runs (cheap), but the actual `repo-config` invocation
+  now waits for step 1's triage to confirm at least one actionable issue
+  exists first — bootstrapping a repo's full governance-file set ahead of
+  a triage pass that turns up nothing was pure waste.
+- **Why:** found by a `skill-retro` pass grounded in a real run against
+  `baileyrd/rusty_prime_agent` — args were "against &lt;two doc filenames&gt;"
+  with no repo named (only one repo attached to that session), triage found
+  zero open issues, and the repo-config prerequisite would otherwise have
+  bootstrapped a full governance-file set for a repo with nothing to
+  actually work.
+- **Scope note:** that same retro pass also flagged the gap `gh`-unavailable
+  environments have no fallback — already closed independently by v1.3.0's
+  tooling preflight, before this run's synced copy of the skill (v1.1.1)
+  had caught up to it. No action needed here; recorded so the retro's
+  finding doesn't look silently dropped.
+
+---
+
 ## v1.5.0 — Don't depend on an executable bit the sync drops
 **2026-08-17**
 
