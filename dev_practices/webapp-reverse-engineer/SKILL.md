@@ -11,7 +11,7 @@ description: >
   or any request that involves understanding the internals of a running web application.
   Even if the user just pastes a URL and says "analyze this" or "tell me about this app",
   use this skill.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Webapp Reverse Engineering
@@ -1252,3 +1252,22 @@ completely different codebase and irrelevant to understanding the product.
 - **Coverage is bounded by what got clicked.** Phase 1's exploration finds what the
   explored paths surface — a feature behind a flow nobody walked through won't appear.
   State what was and wasn't explored in the report rather than implying full coverage.
+
+## Wrap-up retro
+
+**After the report (or rebuild blueprint) lands**, run a
+[`meta/skill-retro`](../../meta/skill-retro) pass on **this skill**, grounded
+in what just happened: did the Scope section actually settle what was in and
+out of bounds before Phase 0, or did a judgment call get made mid-run that
+should have been pre-answered there; did a phase's instructions assume
+tooling (a particular browser-automation call) that wasn't available, and if
+so how was that handled; did the confidence-marking convention (High/Medium/
+Low) hold up in practice or did an inferred finding end up stated as
+observed; did Phase 2's network analysis or Phase 3's JS analysis run into a
+target shape (heavy obfuscation, an unusual bundler, a GraphQL-only API) the
+phase file didn't anticipate.
+
+Running and reporting the retro is automatic and safe unattended —
+`skill-retro` never edits this skill's files on its own. *Applying* anything
+it finds is a separate, explicitly-approved follow-up through this repo's
+normal PR workflow, never bundled into the run that triggered it.

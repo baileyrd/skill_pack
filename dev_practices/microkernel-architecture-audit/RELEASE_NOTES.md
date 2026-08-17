@@ -7,6 +7,23 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.1.0 — Add wrap-up retro
+**2026-08-17**
+
+- **Added:** a `Wrap-up retro` step, run after the scorecard and report land —
+  a [`meta/skill-retro`](../../meta/skill-retro) pass on this skill itself: did
+  the eight dimensions fit the target or did one get stretched into an N/A
+  beyond dimension 4's documented case, did the target match a named archetype
+  or fall to the generic path and did Rule 6's idiom-matched language still
+  read naturally there, was a verdict recorded without the citation Rule 1
+  requires, did Rule 8's ask-before-assuming-scope step actually fire.
+- **Why:** productized into `dev_practices/` alongside `unix-philosophy`, which
+  already carries this step for its audit mode. The omission was noticed only
+  after the fact. Read-only and safe unattended; applying findings is a
+  separate, explicitly-approved follow-up.
+
+---
+
 ## v1.0.0 — Productized out of `need_to_productize/`
 **2026-08-17**
 

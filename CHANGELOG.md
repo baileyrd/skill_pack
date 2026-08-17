@@ -4,6 +4,18 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Changed
+- `dev_practices/shell-ui-architecture-audit` (v1.0.0 → v1.1.0),
+  `dev_practices/webapp-reverse-engineer` (v1.0.0 → v1.1.0), and
+  `dev_practices/microkernel-architecture-audit` (v1.0.0 → v1.1.0) — added a
+  `Wrap-up retro` step to each, wired to `meta/skill-retro`, matched to that
+  skill's own structure rather than copy-pasted between the three. All three
+  landed in this repo alongside `unix-philosophy`, which already carries this
+  step for its audit mode, and the omission wasn't noticed until asked about
+  directly — none of the three were productized against that convention on
+  the first pass. Read-only and safe unattended in each; applying anything
+  the retro finds is a separate, explicitly-approved follow-up.
+
 ### Removed
 - `need_to_productize/research-to-skill.skill`. `meta/learn-it`'s own
   `SKILL.md` already stated it "absorbs and supersedes the draft approach" in

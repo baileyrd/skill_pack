@@ -7,6 +7,24 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.1.0 — Add wrap-up retro
+**2026-08-17**
+
+- **Added:** a `Wrap-up retro` step, run after the report or rebuild blueprint
+  lands — a [`meta/skill-retro`](../../meta/skill-retro) pass on this skill
+  itself: did the Scope section settle what was in and out of bounds before
+  Phase 0 or did a judgment call get made mid-run that should have been
+  pre-answered there, did a phase assume browser-automation tooling that wasn't
+  available, did the confidence-marking convention hold up or did an inferred
+  finding end up stated as observed, did Phase 2 or Phase 3 hit a target shape
+  the phase file didn't anticipate.
+- **Why:** productized into `dev_practices/` alongside `unix-philosophy`, which
+  already carries this step for its audit mode. The omission was noticed only
+  after the fact. Read-only and safe unattended; applying findings is a
+  separate, explicitly-approved follow-up.
+
+---
+
 ## v1.0.0 — Productized out of `need_to_productize/`
 **2026-08-17**
 
