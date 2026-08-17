@@ -66,6 +66,16 @@ structured review of what already exists.
 |---|---|
 | [`unix-philosophy/`](dev_practices/unix-philosophy) | Applies Unix design philosophy in two modes: design mode (the `and` test, boundary format, output discipline, mechanism/policy split, failure behavior, earned complexity) and audit mode (eight dimensions scored Pass/Warn/Fail against cited evidence, findings ranked by the cost already being paid). Translates the principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code that has none. |
 
+### [`diagrams/`](diagrams) — the diagram is the deliverable
+
+Skills whose output is a picture rather than code, prose, or a change to a
+repo. Distinct from `dev_practices/`, which reasons *about* software without
+producing an artifact.
+
+| Skill | Does |
+|---|---|
+| [`fireworks-tech-graph/`](diagrams/fireworks-tech-graph) | Generates technical diagrams as SVG (PNG via `rsvg-convert`) across 15 types — architecture, data flow, flowchart, sequence, agent/memory, comparison matrix, timeline, mind map, ER, network topology, and the UML set — in seven named visual styles, with per-type layout rules and a structural validator. Imported from `yizhiyanhua-ai/fireworks-tech-graph` (MIT). |
+
 ## Versioning
 
 Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver, bumped by hand on meaningful changes), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.

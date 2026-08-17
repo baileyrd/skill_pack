@@ -5,6 +5,26 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `diagrams/fireworks-tech-graph` (v1.0.0) — imported from
+  `yizhiyanhua-ai/fireworks-tech-graph` (MIT) and maintained here from now on.
+  Generates technical diagrams as SVG (PNG via `rsvg-convert`) across 15 types
+  in seven visual styles, with per-type layout rules and a structural validator.
+  **Fixed on import:** every text file was CRLF and all three shell scripts were
+  broken — `validate-svg.sh` died with `$'\r': command not found` — plus no
+  script carried an executable bit while every invocation in `SKILL.md` is
+  written `./scripts/…`. Both fixed, and the exec-bit recovery documented per
+  #1. **Changed on import:** `version`/`RELEASE_NOTES.md` added; the
+  `Install Source` section replaced (it told the reader to re-install from
+  upstream with `--force -g -y`, which would overwrite this copy and undo the
+  line-ending fix); a `Requirements` section added, since `rsvg-convert` is
+  absent in many sandboxes and workflow step 9 produces nothing without it; and
+  a `Limitations` section, whose load-bearing entry is that validation checks
+  structure, not meaning — a diagram can be valid SVG and wrong.
+- Opens a sixth category folder, `diagrams/`, defined by *deliverable*: skills
+  whose output is a picture. `dev_practices/` reasons about software without
+  emitting an artifact; this one emits the artifact. `ARCHITECTURE.md` and
+  `README.md` updated, including a note that this is the first category
+  dominated by binary assets (~1.5 MB of style-preview PNGs).
 - `meta/find-skills` (v1.0.0) — imported from the open agent-skills ecosystem
   and maintained here from now on, same posture as `web_dev/datastar-pro`.
   Finds a skill someone else already wrote: leaderboard first, `npx skills find`
