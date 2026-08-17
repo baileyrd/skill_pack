@@ -31,19 +31,20 @@ Three skills chain into an unattended YouTube research pipeline — search, cura
 | [`yt-pipeline/`](yt_research_for_cc/yt-pipeline) | Orchestrates the two above: topic → search → auto-select best videos → NotebookLM notebook → analysis → optional deliverable. |
 | [`video-teardown/`](yt_research_for_cc/video-teardown) | Turns one video into a verified deliverable — captions plus triaged ffmpeg frames, then every reconstructed detail checked against official docs and marked on-screen vs reconstructed. |
 
-### [`meta/`](meta) — tooling about this repo's own skills
+### [`meta/`](meta) — tooling with skills as the subject matter
 
-Evidence-grounded, report-before-write passes aimed at the skills in this
-repo itself rather than at an external target repo — closing the loop on
-an existing skill's own instructions, opening one by turning session
-experience into a new or updated skill, or drafting one from scratch with
-that loop-closing step already built in.
+Evidence-grounded, report-before-write passes over skills themselves — closing
+the loop on an existing skill's own instructions, opening one by turning session
+experience into a new or updated skill, or drafting one from scratch with that
+loop-closing step already built in. Mostly aimed at the skills in this repo;
+`find-skills` is the exception, pointed at the external ecosystem instead.
 
 | Skill | Does |
 |---|---|
 | [`skill-retro/`](meta/skill-retro) | Post-execution retrospective on a skill just used: reconstructs what actually happened against its stated steps, reports friction as findings with concrete proposed edits, applies only on approval, then versions and logs the target skill. |
 | [`learn-it/`](meta/learn-it) | Distills a session's actual patterns/anti-patterns/gotchas into a new (or updated) skill matching this repo's own authoring conventions, reported for approval before anything is written. |
 | [`my-skill-creator/`](meta/my-skill-creator) | This repo's own fork of Anthropic's `skill-creator` (draft → test → eval → iterate → optimize description → package), with `skill_pack`'s own authoring conventions applied automatically and a `skill-retro` wrap-up step built into every skill it drafts or improves by default. |
+| [`find-skills/`](meta/find-skills) | Finds a skill someone else already wrote: checks the skills.sh leaderboard, searches `npx skills find`, and screens install count and source reputation before recommending. The only `meta/` skill pointed outward rather than at this repo. |
 
 ### [`web_dev/`](web_dev) — web framework code generation
 
