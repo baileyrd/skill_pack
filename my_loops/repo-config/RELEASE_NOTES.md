@@ -2,11 +2,25 @@
 
 repo-config lives at
 [github.com/baileyrd/skill_pack](https://github.com/baileyrd/skill_pack/tree/main/my_loops/repo-config),
-pushed direct to `main` (no PR workflow yet) — this log tracks commits instead of
-PRs, the same way
+where changes land through a PR per `CONTRIBUTING.md` — this log tracks
+merged PRs, the same way
 [AISF's RELEASE_NOTES.md](https://github.com/baileyrd/AISF/blob/main/RELEASE_NOTES.md)
 tracks PRs: reverse chronological, one entry per meaningful change, honest about
 what's still open.
+
+---
+
+## v1.6.1 — Fix this log's own stale "no PR workflow yet" header
+**2026-08-17**
+
+- **Fixed:** this file's own preamble still said "pushed direct to `main`
+  (no PR workflow yet)." `CONTRIBUTING.md` shows that's no longer true —
+  changes here land through a PR like everywhere else in this repo.
+  Reworded to say so.
+- **Why:** `issue-loop`'s `RELEASE_NOTES.md` carried the identical stale
+  claim, cited this file as the convention it was following, and got fixed
+  in [PR #80](https://github.com/baileyrd/skill_pack/pull/80) — this file
+  was the source of that claim, so it needed the same fix.
 
 ---
 

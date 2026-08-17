@@ -12,7 +12,7 @@ description: >-
   even if they only name one file, since this applies the whole set together. Also use on an
   ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md
   or CHANGELOG.md, add an entry to each before ending the turn.
-version: 1.6.0
+version: 1.6.1
 ---
 
 # repo-config
