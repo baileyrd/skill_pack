@@ -26,3 +26,9 @@ inline-path	my_loops/dedupe-loop/SKILL.md	scripts/audit.sh
 # a category README that isn't itself inside a component, so the checker has
 # no component root to resolve against.
 inline-path	yt_research_for_cc/README.md	scripts/select_videos.py
+
+# Runtime output directory, not a checked-in path: test-all-styles.sh
+# creates it at line 15 (`TEST_DIR="${SKILL_DIR}/test-output"`) and the README
+# refers to it from scripts/, so it exists only after a test run.
+inline-path	diagrams/fireworks-tech-graph/scripts/README.md	../test-output/
+shell-path	diagrams/fireworks-tech-graph/scripts/README.md	../test-output/
