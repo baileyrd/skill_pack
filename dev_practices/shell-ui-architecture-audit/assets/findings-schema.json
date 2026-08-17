@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Shell UI Architecture Audit — Findings",
+  "type": "object",
+  "required": ["target", "shellType", "startedAt", "phasesCompleted", "dimensions"],
+  "properties": {
+    "target": {
+      "type": "object",
+      "description": "What is being audited.",
+      "properties": {
+        "name": { "type": "string", "description": "Human-readable app name." },
+        "codePath": { "type": ["string", "null"], "description": "Local path or repo URL." },
+        "runtimeUrl": { "type": ["string", "null"], "description": "URL or process descriptor for the live target." },
+        "scope": {
+          "type": "string",
+          "enum": ["code", "runtime", "both"]
+        }
+      }
+    },
+    "shellType": {
+      "type": "string",
+      "enum": ["desktop", "web", "cli"],
+      "description": "Primary classification driving probe selection."
+    },
+    "shellTypeSecondary": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["desktop", "web", "cli"] },
+      "description": "Secondary surfaces if the app spans multiple."
+    },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": ["string", "null"], "format": "date-time" },
+    "phasesCompleted": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Phase identifiers like '00-preparation', '03-layout'."
+    },
+    "staticInventory": {
+      "type": "object",
+      "description": "Output of Phase 01 — repo/framework inventory. Schema is open by design.",
+      "additionalProperties": true
+    },
+    "runtimeBootstrap": {
+      "type": "object",
+      "description": "Output of Phase 02 — confirms the live probe pack works.",
+      "properties": {
+        "probePackLoaded": { "type": "string", "enum": ["web", "desktop", "cli"] },
+        "reachable": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "dimensions": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Dimension" }
+    },
+    "report": {
+      "type": "object",
+      "description": "Synthesis output paths and summary counts.",
+      "properties": {
+        "reportPath": { "type": "string" },
+        "backlogPath": { "type": "string" },
+        "verdictCounts": {
+          "type": "object",
+          "properties": {
+            "Pass": { "type": "integer" },
+            "Warn": { "type": "integer" },
+            "Fail": { "type": "integer" },
+            "Unknown": { "type": "integer" }
+          }
+        },
+        "severityCounts": {
+          "type": "object",
+          "properties": {
+            "Critical": { "type": "integer" },
+            "High": { "type": "integer" },
+            "Medium": { "type": "integer" },
+            "Low": { "type": "integer" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Dimension": {
+      "type": "object",
+      "required": ["id", "name", "verdict"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Phase identifier, e.g. '03-layout', '05-accessibility'."
+        },
+        "name": { "type": "string" },
+        "verdict": {
+          "type": "string",
+          "enum": ["Pass", "Warn", "Fail", "Unknown", "Skipped"]
+        },
+        "verdictRationale": { "type": "string" },
+        "skipReason": { "type": ["string", "null"] },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Evidence" }
+        },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Finding" }
+        },
+        "completedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["file", "snippet", "probe", "screenshot", "log", "screencast"]
+        },
+        "ref": { "type": "string", "description": "Path, URL, or anchor." },
+        "summary": { "type": "string" },
+        "data": { "description": "Optional inline payload (small probes)." }
+      }
+    },
+    "Finding": {
+      "type": "object",
+      "required": ["id", "title", "severity", "description"],
+      "properties": {
+        "id": { "type": "string", "description": "e.g. SH-014. Sequential across the whole audit." },
+        "title": { "type": "string" },
+        "severity": {
+          "type": "string",
+          "enum": ["Critical", "High", "Medium", "Low"]
+        },
+        "description": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string", "description": "Evidence ref." }
+        },
+        "remediation": { "type": "string" },
+        "scope": {
+          "type": "string",
+          "description": "Where the issue manifests (e.g., 'all routes', 'settings panel only')."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        }
+      }
+    }
+  }
+}
