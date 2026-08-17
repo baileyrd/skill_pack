@@ -59,6 +59,28 @@ SECURITY_CONTACT="${SECURITY_CONTACT:-<fill in — team alias or individual>}"
 created=0
 skipped=0
 
+# Templates that land as dotfiles are STORED under a `dot-` prefix
+# (`dot-gitattributes`, `dot-github/...`) and get their real name back here.
+#
+# This is deliberate and load-bearing — do not "tidy" the names back. The sync
+# that delivers this skill to a session copies with a glob that doesn't match
+# dot-prefixed entries, so every one of them was silently missing from the
+# delivered copy: .gitattributes, both issue/PR template trees, and both CI
+# workflows (issue #41). apply.sh cannot write a template that isn't there, so
+# a target repo could not reach 11/11 and the operator had to hand-write the
+# gap. The sync lives outside this repo; not depending on it does not.
+#
+# tests/test_no_dotfiles_in_assets.py enforces the convention repo-wide.
+undot() {
+  local path="$1" out="" seg
+  local IFS=/
+  for seg in $path; do
+    [[ "$seg" == dot-* ]] && seg=".${seg#dot-}"
+    out="${out:+$out/}$seg"
+  done
+  printf '%s' "$out"
+}
+
 copy_one() {
   local src="$1" rel="$2"
   local dest="$TARGET_DIR/$rel"
@@ -98,7 +120,7 @@ copy_one() {
 # Copy everything EXCEPT the CI workflows — those are stack-selected below, not
 # copied blanket (a Rust repo must not get a Python workflow that fails every run).
 while IFS= read -r -d '' f; do
-  rel="${f#"$TEMPLATES_DIR"/}"
+  rel="$(undot "${f#"$TEMPLATES_DIR"/}")"
   [[ "$rel" == .github/workflows/* ]] && continue
   copy_one "$f" "$rel"
 done < <(find "$TEMPLATES_DIR" -type f -print0)
@@ -137,11 +159,11 @@ fi
 
 ci_selected=${ci_selected:-0}
 if [[ "$ci_selected" -ge 0 ]] && [[ -f "$TARGET_DIR/Cargo.toml" ]]; then
-  copy_one "$TEMPLATES_DIR/.github/workflows/ci-rust.yml" ".github/workflows/ci-rust.yml"
+  copy_one "$TEMPLATES_DIR/dot-github/workflows/ci-rust.yml" ".github/workflows/ci-rust.yml"
   ci_selected=$((ci_selected + 1))
 fi
 if [[ "$ci_selected" -ge 0 ]] && [[ -f "$TARGET_DIR/pyproject.toml" || -f "$TARGET_DIR/setup.py" ]]; then
-  copy_one "$TEMPLATES_DIR/.github/workflows/ci-python.yml" ".github/workflows/ci-python.yml"
+  copy_one "$TEMPLATES_DIR/dot-github/workflows/ci-python.yml" ".github/workflows/ci-python.yml"
   ci_selected=$((ci_selected + 1))
 fi
 if [[ "$ci_selected" -eq 0 ]]; then

@@ -4,7 +4,29 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Changed
+- `my_loops/repo-config` (v1.4.0 → v1.5.0) — templates that land as dotfiles are
+  now **stored** under a `dot-` prefix (`dot-gitattributes`, `dot-github/…`), and
+  `apply.sh` restores the real name on write. Target repos receive
+  `.gitattributes` and `.github/` exactly as before; only the storage names here
+  changed. The sync that delivers a skill to a session copies with a glob that
+  doesn't match dot-prefixed paths, so three of the eleven checklist items were
+  silently missing from the delivered copy and **a target could not reach 11/11**
+  (#41) — it also caused #40, since the absent `ci-rust.yml` is what made `sed`
+  fail and leave a zero-byte workflow behind. Verified by running `apply.sh`
+  against three scratch targets rather than by reading it: Rust (17 files,
+  `ci-rust.yml`, `audit.sh` scores 11/11), Python (`ci-python.yml`), and
+  no-manifest (16 files, no workflow). **#41 and #1 stay open** — this stops
+  repo-config depending on the broken sync, it does not fix the sync, and it does
+  nothing for the lost-executable-bits half of the same pattern.
+
 ### Added
+- `tests/test_no_dotfiles_in_assets.py` — fails if any skill ships a
+  dot-prefixed path under `assets/`. Repo-wide on purpose: repo-config is the
+  only skill shipping dotfiles today, and the point is that the next one to try
+  fails in CI rather than in a target repo six months later. Per ADR-0002 it was
+  written first and **shown failing** on the pre-rename tree, naming all fourteen
+  affected paths.
 - `my_loops/parity-loop` (v1.3.0 → v1.4.0), `my_loops/sovereignty-loop`
   (v1.2.0 → v1.3.0), `my_loops/dedupe-loop` (v1.2.0 → v1.3.0), and
   `my_loops/rust-migration` (v1.1.2 → v1.2.0) — the same **tooling preflight**

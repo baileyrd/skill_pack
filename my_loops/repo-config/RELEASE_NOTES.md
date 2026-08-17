@@ -10,6 +10,45 @@ what's still open.
 
 ---
 
+## v1.5.0 — Stop depending on a sync that drops dotfiles
+**2026-08-17**
+
+- **Changed:** templates that land as dotfiles are now **stored** under a `dot-`
+  prefix — `dot-gitattributes`, `dot-github/ISSUE_TEMPLATE/…` — and `apply.sh`
+  restores the real name on write via a new `undot` helper. The target repo
+  receives `.gitattributes` and `.github/` byte-for-byte as before; only the
+  storage names in this repo changed.
+- **Why ([#41](https://github.com/baileyrd/skill_pack/issues/41)):** the sync
+  that delivers this skill to a session copies with a glob that doesn't match
+  dot-prefixed entries, so `.gitattributes`, both template trees, and both CI
+  workflows were silently absent from the delivered copy. `apply.sh` cannot
+  write a template that isn't there, so **a target repo could not reach 11/11
+  through the skill as synced** — three of eleven rows were unreachable and the
+  operator had to notice and hand-write them. `rusty_recall`'s `.gitattributes`
+  was written by hand for exactly this reason. It also caused
+  [#40](https://github.com/baileyrd/skill_pack/issues/40) directly: the missing
+  `ci-rust.yml` is what made `sed` fail and leave a zero-byte workflow behind.
+- **Added:** `tests/test_no_dotfiles_in_assets.py`, repo-wide rather than scoped
+  to this skill — repo-config is the only skill shipping dotfiles today, and the
+  point is that the next one to try fails in CI instead of in a target repo six
+  months later. Per
+  [ADR-0002](https://github.com/baileyrd/skill_pack/blob/main/docs/adr/0002-repo-checks-earn-their-place.md),
+  it was written before the rename and **shown failing** on the then-current
+  tree, naming all fourteen affected paths.
+- **Verified by running it, not by reading it:** `apply.sh` against three
+  scratch targets — a Rust one (17 files written, `ci-rust.yml` selected,
+  `audit.sh` scores **11/11**), a Python one (`ci-python.yml` selected), and one
+  with no manifest (16 files, no workflow). No `dot-` name reached any target.
+
+**This is a workaround, not a fix, and #41 stays open.** The sync is still
+broken and still lives outside this repo. It also drops executable bits on
+`scripts/*.sh` — the other half of the pattern
+[#1](https://github.com/baileyrd/skill_pack/issues/1) tracks — which renaming
+does nothing for. What changed is that repo-config no longer depends on the
+broken behavior; what didn't change is that the behavior is still broken.
+
+---
+
 ## v1.4.0 — Three findings from the rusty_recall run
 **2026-08-16**
 
