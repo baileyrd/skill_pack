@@ -6,6 +6,30 @@ this log tracks commits against `main`.
 
 ---
 
+## v1.1.0 — Add wrap-up retro
+**2026-08-17**
+
+- **Added:** a `Wrap-up retro` step, run after the deliverable ships — a
+  [`meta/skill-retro`](../../meta/skill-retro) pass on this skill itself:
+  did the transcript-first ordering in step 1 actually save the frame budget
+  it claims to; did the luma-triage thresholds need hand-correction and by
+  how much; did every reconstructed claim get checked against a real source
+  before shipping, or did verification get skipped under time pressure for
+  something that felt obvious; did a new anti-pattern turn up that isn't
+  already one of the four listed; did the ffmpeg/yt-dlp version notes still
+  hold.
+- **Why:** this repo's audit- and artifact-producing skills — `unix-philosophy`
+  in audit mode, and the three `dev_practices/` skills productized alongside
+  it — all carry this step; `video-teardown` fits the same shape (a
+  substantial, artifact-producing invocation with a real verification pass)
+  and was found missing it only when every skill in the repo was checked
+  against the convention directly, not as part of any prior change to this
+  skill. Read-only and safe unattended; applying anything the retro finds is
+  a separate, explicitly-approved follow-up, never bundled into the run that
+  triggered it.
+
+---
+
 ## v1.0.0 — Initial release
 **2026-08-16**
 

@@ -5,6 +5,14 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Changed
+- `yt_research_for_cc/video-teardown` (v1.0.0 → v1.1.0) — added a `Wrap-up
+  retro` step, wired to `meta/skill-retro`, matched to this skill's own
+  five-step workflow: did the transcript-first ordering save the frame budget
+  it claims to, did the luma-triage thresholds need hand-correction, did every
+  reconstructed claim actually get checked against a source before shipping.
+  Found missing while auditing every skill in the repo against the retro
+  convention — a request prompted by the previous three additions below, not
+  by anything specific to this skill.
 - `dev_practices/shell-ui-architecture-audit` (v1.0.0 → v1.1.0),
   `dev_practices/webapp-reverse-engineer` (v1.0.0 → v1.1.0), and
   `dev_practices/microkernel-architecture-audit` (v1.0.0 → v1.1.0) — added a
