@@ -5,6 +5,33 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- Three skills productized out of `need_to_productize/` into `dev_practices/`,
+  each at v1.0.0:
+  - **`shell-ui-architecture-audit`** — audits the *shell* of a UI (chrome,
+    layout, navigation, theming, persistence, extensibility) across desktop,
+    web, and terminal targets; 15 phases, runtime probes by detected shell
+    type. Dropped the bundled `install-claude-code.sh` (a second installer
+    that would disagree with `scripts/install_skills.py`) and the
+    unsupported `tags:` frontmatter key; added a `Limitations` section.
+  - **`webapp-reverse-engineer`** — deconstructs a running web app from
+    client-observable signals into a tech-stack report and rebuild
+    blueprint. Moved its one scope line from the end of a 1200-line file to
+    a `Scope` section at the top, read before Phase 0, and reworded the
+    "Permission boundaries" step — which read *"try accessing admin-only
+    routes or performing actions you shouldn't be able to"* — to observe how
+    the UI enforces access with the user's own session rather than probing
+    past it. Added `version`/`Limitations`.
+  - **`microkernel-architecture-audit`** — eight-dimension audit for
+    microkernel systems (core/plugin boundaries, IPC, capability security,
+    WASM sandbox, plugin lifecycle, dependency inversion, async concurrency,
+    test coverage), archetype-aware for Nexus Forge (Rust/Tauri) and FORGE
+    (FastAPI). Fixed `name: Microkernel Architecture Audit` → the
+    lowercase-hyphenated slug this repo's naming check requires, dropped
+    `tags:`, added `Limitations`.
+
+  None evaluated — doc-only imports, no eval sets built. `need_to_productize/`
+  drops from 4 files to 1; `research-to-skill.skill` stays pending its overlap
+  with `meta/learn-it`.
 - `diagrams/fireworks-tech-graph` (v1.0.0) — imported from
   `yizhiyanhua-ai/fireworks-tech-graph` (MIT) and maintained here from now on.
   Generates technical diagrams as SVG (PNG via `rsvg-convert`) across 15 types

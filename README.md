@@ -65,6 +65,9 @@ structured review of what already exists.
 | Skill | Does |
 |---|---|
 | [`unix-philosophy/`](dev_practices/unix-philosophy) | Applies Unix design philosophy in two modes: design mode (the `and` test, boundary format, output discipline, mechanism/policy split, failure behavior, earned complexity) and audit mode (eight dimensions scored Pass/Warn/Fail against cited evidence, findings ranked by the cost already being paid). Translates the principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code that has none. |
+| [`shell-ui-architecture-audit/`](dev_practices/shell-ui-architecture-audit) | Audits the *shell* of a UI — chrome, layout, navigation, command surfaces, theming, persistence, extensibility — across desktop, web, and terminal targets. Fifteen phases opened one at a time, runtime probes selected by detected shell type, verdicts cited against evidence, backlog ranked by CVSS-style severity. |
+| [`webapp-reverse-engineer/`](dev_practices/webapp-reverse-engineer) | Deconstructs a running web application from client-observable signals — DOM, network traffic, JS bundles, headers — into a tech-stack report and optional rebuild blueprint. Scoped to the user's own access; observes how authorization is enforced rather than probing for a way past it. |
+| [`microkernel-architecture-audit/`](dev_practices/microkernel-architecture-audit) | Audits a microkernel-style system across eight dimensions — core/plugin boundaries, IPC contracts, capability-based security, WASM sandbox integrity, plugin lifecycle, dependency inversion, async concurrency, test coverage — with archetype-aware language for Rust/Tauri and FastAPI targets plus a generic fallback. |
 
 ### [`diagrams/`](diagrams) — the diagram is the deliverable
 
