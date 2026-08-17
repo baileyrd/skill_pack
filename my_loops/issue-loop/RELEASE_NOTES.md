@@ -2,11 +2,28 @@
 
 issue-loop lives at
 [github.com/baileyrd/skill_pack](https://github.com/baileyrd/skill_pack/tree/main/my_loops/issue-loop),
-pushed direct to `main` (no PR workflow yet) — this log tracks commits instead of
-PRs, the same convention as
+where changes land through a PR per `CONTRIBUTING.md` — this log tracks
+merged PRs, the same convention as
 [repo-config's RELEASE_NOTES.md](../repo-config/RELEASE_NOTES.md):
 reverse chronological, one entry per meaningful change, honest about what's
 still open.
+
+---
+
+## v1.6.1 — Fix this log's own stale "no PR workflow yet" header
+**2026-08-17**
+
+- **Fixed:** this file's own preamble still said "pushed direct to `main`
+  (no PR workflow yet)." `CONTRIBUTING.md` and the merge history for v1.6.0
+  itself (PR [#79](https://github.com/baileyrd/skill_pack/pull/79)) show
+  that's no longer true — changes here land through a PR like everywhere
+  else in this repo. Reworded to say so.
+- **Why:** flagged as a follow-up in the v1.6.0 entry's own PR description
+  rather than fixed inline there, to keep that PR's diff scoped to the
+  `skill-retro` findings it was actually about.
+- **Scope note:** `repo-config`'s own `RELEASE_NOTES.md` carries the
+  identical stale claim and wasn't touched here — out of scope for this
+  skill's own log.
 
 ---
 
