@@ -12,7 +12,7 @@ description: >-
   even if they only name one file, since this applies the whole set together. Also use on an
   ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md
   or CHANGELOG.md, add an entry to each before ending the turn.
-version: 1.4.0
+version: 1.5.0
 ---
 
 # repo-config
@@ -26,6 +26,15 @@ yet to scan.
 `assets/templates/` is the payload written into the TARGET repo. This skill's own
 files (SKILL.md, scripts/, references/) describe repo-config itself — never confuse
 the two.
+
+Templates that land as dotfiles are **stored** under a `dot-` prefix —
+`dot-gitattributes`, `dot-github/ISSUE_TEMPLATE/…` — and `apply.sh` restores the
+real name on write. The target still receives `.gitattributes` and `.github/`
+exactly as before. The prefix exists because the sync that delivers this skill to
+a session drops dot-prefixed paths, which silently removed three of the eleven
+checklist items from the delivered copy
+([#41](https://github.com/baileyrd/skill_pack/issues/41)). Don't rename them back;
+`tests/test_no_dotfiles_in_assets.py` enforces it.
 
 ## Run (when invoked)
 
