@@ -1,7 +1,7 @@
 ---
 name: yt-pipeline
 description: End-to-end automated YouTube research pipeline for a topic — searches YouTube (via the yt-search skill), auto-selects the 5-8 best videos by relevance/engagement/recency/diversity, loads them into a new NotebookLM notebook (via the notebooklm skill), runs a trends/outliers/gaps analysis, presents key takeaways, and optionally generates a podcast, slide deck, or report. Runs fully unattended once given a topic — no confirmation pauses. Use when the user asks to "research X on YouTube", "run the YouTube pipeline on X", or wants a NotebookLM notebook built from YouTube sources on a topic.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # YouTube Research Pipeline
@@ -22,6 +22,15 @@ Both dependency skills must be installed and working:
   ```
   If auth fails, run `notebooklm login` (opens a browser for Google sign-in) before continuing —
   this is the one step that may need the user present. Everything after that is unattended.
+
+**Restore the executable bit before running any of these** —
+`chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`. The sync that
+delivers a skill to a session doesn't preserve mode bits — every script arrives
+as `0644`, measured at 31 of 31 in a live session — so a step written
+`scripts/select_videos.py` fails with `permission denied`
+([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
+directory is read-only and `chmod` can't take, name the interpreter instead
+(`python3 scripts/select_videos.py`): it doesn't need the bit.
 
 ## Autonomy — this skill overrides the base notebooklm caution
 

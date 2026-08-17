@@ -12,7 +12,7 @@ description: >-
   even if they only name one file, since this applies the whole set together. Also use on an
   ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md
   or CHANGELOG.md, add an entry to each before ending the turn.
-version: 1.5.0
+version: 1.6.0
 ---
 
 # repo-config
@@ -246,6 +246,16 @@ current — `RELEASE_NOTES.md` and `CHANGELOG.md` alike, each in its own format:
   not a template engine — anything beyond that needs a manual edit after the copy.
 
 ## Scripts
+
+**Restore the executable bit before running any of these** —
+`chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`. The sync that
+delivers a skill to a session doesn't preserve mode bits — every script
+arrives as `0644`, measured at 31 of 31 in a live session — so a step written
+`scripts/audit.sh` fails with `permission denied`
+([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
+directory is read-only and `chmod` can't take, name the interpreter instead
+(`bash scripts/audit.sh`): it doesn't need the bit.
+
 | Script | Purpose | Args |
 | --- | --- | --- |
 | `audit.sh` | Gap checklist against the 11 standard items, with a score | `[target-dir]` (default `.`) |

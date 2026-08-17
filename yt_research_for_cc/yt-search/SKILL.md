@@ -1,7 +1,7 @@
 ---
 name: yt-search
 description: Searches YouTube by query using yt-dlp and returns structured, human-readable video results — title, channel, subscriber count, view count, duration, upload date, URL, and a views-to-subscribers engagement ratio. Defaults to the top 20 results from the last 6 months. Use this skill whenever the user asks to search YouTube, find videos on a topic, research YouTube content, pull video stats/metadata, or wants to see which videos on a topic are overperforming (engagement ratio).
-version: 1.1.0
+version: 1.2.0
 ---
 
 # YouTube Search
@@ -27,6 +27,15 @@ pip install yt-dlp
 ```
 
 ## Running a search
+
+**Restore the executable bit before running any of these** —
+`chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`. The sync that
+delivers a skill to a session doesn't preserve mode bits — every script arrives
+as `0644`, measured at 31 of 31 in a live session — so a step written
+`scripts/search.py` fails with `permission denied`
+([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
+directory is read-only and `chmod` can't take, name the interpreter instead
+(`python3 scripts/search.py`): it doesn't need the bit.
 
 Invoke the bundled script with Bash, passing the query as free text plus optional flags:
 

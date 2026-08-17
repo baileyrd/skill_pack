@@ -1,7 +1,7 @@
 ---
 name: my-skill-creator
 description: This repo's own copy of the skill-creator workflow (draft → test → eval → iterate → optimize description → package), adapted to skill_pack's own authoring conventions and with one behavioral change from the upstream version — every skill it drafts or improves gets a wrap-up-retro step wired to meta/skill-retro by default, not as a separate follow-up change. Use when users want to create a skill from scratch, edit or optimize an existing skill in this repo, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy — same triggers as upstream skill-creator, but prefer this copy over the generic one whenever the target skill lives in (or is meant to land in) skill_pack, since it applies this repo's own conventions and the retro-by-default rule automatically.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # My Skill Creator
@@ -140,6 +140,17 @@ detail; summarized here:
   runs `core.fileMode=false`, so a brand-new script needs an explicit check
   (`git ls-files -s <path>`), not an assumption that `chmod +x` alone
   survives staging.
+- **The bit does not survive delivery, so don't let a skill depend on it.**
+  Whatever it is in git, the sync that hands a skill to a session drops mode
+  bits — every script arrives as `0644`, measured at 31 of 31 in a live
+  session — so a drafted step that names a script path on its own fails with
+  `permission denied`
+  ([#1](https://github.com/baileyrd/skill_pack/issues/1)). Any skill drafted
+  here that ships scripts must either name the interpreter at each invocation
+  (prefix it with `bash` or `python3`) or document the recovery
+  (`chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`).
+  `tests/test_script_invocation.py` enforces this and will fail the PR
+  otherwise.
 - Land the change through this repo's standing PR workflow (branch, PR,
   merge with a merge commit on green CI or no CI) — same as
   `CONTRIBUTING.md` requires for anything else here.

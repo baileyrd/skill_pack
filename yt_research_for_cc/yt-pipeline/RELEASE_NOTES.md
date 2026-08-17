@@ -10,6 +10,23 @@ still open.
 
 ---
 
+## v1.2.0 — Don't depend on an executable bit the sync drops
+**2026-08-17**
+
+- **Added:** a note in Prerequisites documenting how to restore the executable bit —
+  `chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`, with naming the
+  interpreter (`bash scripts/x.sh`) as the fallback where the skill directory
+  is read-only.
+- **Why ([#1](https://github.com/baileyrd/skill_pack/issues/1)):** the sync
+  that delivers a skill to a session doesn't preserve mode bits. Measured in a
+  live session: **31 of 31 shebanged scripts across all ten skills arrive as
+  `0644`**, so any step written `scripts/x.sh` fails with `permission denied`.
+  The issue had recorded this as an occasional symptom; it is universal.
+- **Scope note:** this documents a recovery rather than fixing the sync, which
+  lives outside this repo. #1 stays open.
+
+---
+
 ## v1.1.0 — Wire skill-retro into wrap-up (step 8)
 **2026-08-13**
 
