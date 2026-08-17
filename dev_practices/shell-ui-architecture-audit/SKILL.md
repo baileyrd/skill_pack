@@ -15,7 +15,7 @@ description: >
   theming system'. Trigger even if the user doesn't say 'shell' — 'chrome
   around the pages' or 'parts of the app that aren't feature screens'
   qualify.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Shell UI Architecture Audit
@@ -218,3 +218,21 @@ dimension, and again any time you're uncertain.
   infers desktop/web/terminal from what's in the repo. A hybrid or unusual
   stack can be misclassified, which points phase 02 at the wrong probe pack —
   check its verdict before trusting the probes that follow.
+
+## Wrap-up retro
+
+**After the report lands**, run a [`meta/skill-retro`](../../meta/skill-retro)
+pass on **this skill**, grounded in what just happened: did phase 02's
+shell-type detection call it correctly, or did a phase downstream have to
+work around a misclassification it should have caught itself; did any phase
+run degraded (no runtime target) without that showing up clearly in the
+final report; did the fifteen phases actually stay independent in practice,
+or did a later one silently assume state a skipped earlier one would have
+established; did a runtime probe in `references/runtime-probes-*.md` not
+match what the target actually needed, forcing an improvised one; did the
+severity rubric sort these findings or did most of them pile into one band.
+
+Running and reporting the retro is automatic and safe unattended —
+`skill-retro` never edits this skill's files on its own. *Applying* anything
+it finds is a separate, explicitly-approved follow-up through this repo's
+normal PR workflow, never bundled into the run that triggered it.

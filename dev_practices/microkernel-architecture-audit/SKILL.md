@@ -1,7 +1,7 @@
 ---
 name: microkernel-architecture-audit
 description: Perform a detailed, multi-dimensional audit of a microkernel-style system. Evaluates core/plugin boundaries, IPC contracts, capability-based security, WASM sandbox integrity, plugin lifecycle, dependency inversion, async concurrency, and test coverage. Produces a structured markdown report with Pass/Warn/Fail verdicts per dimension. Targets Nexus Forge (Rust/Tauri), FORGE (FastAPI), or any generic microkernel codebase.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Skill: Microkernel Architecture Audit
@@ -419,3 +419,21 @@ capability checks in the same crates"]
   integrity (dimension 4) and async concurrency (dimension 7) in particular are easier to
   get wrong from code reading alone than from watching the system misbehave. Treat a
   clean static read on either as provisional, not final.
+
+## Wrap-up retro
+
+**After the scorecard and report land**, run a
+[`meta/skill-retro`](../../meta/skill-retro) pass on **this skill**, grounded
+in what just happened: did the eight dimensions fit the target or did one
+have to be stretched into an N/A beyond dimension 4's documented case; did
+the target actually match one of the two named archetypes or fall to the
+generic path, and if generic, was Rule 6's idiom-matched language still
+usable or did it read as forced; was a verdict recorded without the citation
+Rule 1 requires because the evidence was awkward to produce for this
+codebase; did Rule 8's ask-before-assuming-scope step actually get asked, or
+did scope get inferred from a large codebase without checking.
+
+Running and reporting the retro is automatic and safe unattended —
+`skill-retro` never edits this skill's files on its own. *Applying* anything
+it finds is a separate, explicitly-approved follow-up through this repo's
+normal PR workflow, never bundled into the run that triggered it.

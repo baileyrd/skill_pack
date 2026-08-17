@@ -7,6 +7,26 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.1.0 — Add wrap-up retro
+**2026-08-17**
+
+- **Added:** a `Wrap-up retro` step, run after the report and backlog land — a
+  [`meta/skill-retro`](../../meta/skill-retro) pass on this skill itself, prompted
+  by its own structure: did phase 02's shell-type detection call it correctly, did
+  any phase run degraded without that surfacing clearly in the final report, did
+  the fifteen phases stay independent in practice or did a later one assume state
+  an earlier skipped one would have set, did a runtime probe reference not match
+  what the target needed.
+- **Why:** this skill was productized into `dev_practices/` alongside
+  `unix-philosophy`, which already carries this step for its own audit mode —
+  the omission here was noticed only after the fact, not decided against. Same
+  reasoning applies: a multi-phase audit that produces a report and a backlog is
+  substantial enough that the retro is small next to the work it reflects on.
+  Read-only and safe unattended; applying anything it finds is a separate,
+  explicitly-approved follow-up, never bundled into the run that triggered it.
+
+---
+
 ## v1.0.0 — Productized out of `need_to_productize/`
 **2026-08-17**
 
