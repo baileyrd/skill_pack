@@ -4,6 +4,25 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Added
+- `meta/find-skills` (v1.0.0) — imported from the open agent-skills ecosystem
+  and maintained here from now on, same posture as `web_dev/datastar-pro`.
+  Finds a skill someone else already wrote: leaderboard first, `npx skills find`
+  second, install count and source reputation screened before recommending.
+  Changes made on import: added `version`/`RELEASE_NOTES.md`, a longer
+  description naming the boundary against `my-skill-creator` and `learn-it`, a
+  `Limitations` section the original lacked, and a pointer to `my-skill-creator`
+  for skills meant to live in this repo. **One behavioral edit:** step 6's
+  install command was `npx skills add <pkg> -g -y`; the `-y` is gone. It
+  suppresses the CLI's own confirmation prompt — the last checkpoint before
+  third-party instructions install at user level and run in every later
+  session — and presenting options is not consent to install.
+- `meta/`'s definition widened from "tooling about this repo's own skills" to
+  "tooling with skills as the subject matter" in `README.md` and
+  `ARCHITECTURE.md`. `find-skills` points outward at the external ecosystem
+  while its three siblings point at this repo, and widening the category beat
+  opening a sixth folder for one skill.
+
 ### Changed
 - **All ten skills that ship scripts** now document how to restore the
   executable bit the sync drops — `chmod +x scripts/*.sh scripts/*.py
