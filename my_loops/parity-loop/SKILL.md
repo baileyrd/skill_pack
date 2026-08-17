@@ -1,7 +1,7 @@
 ---
 name: parity-loop
 description: Runs an autonomous "close the capability gap" loop against a reference API surface — assess what a target codebase is missing relative to a reference (e.g. the `libc` crate, POSIX, another package/spec), check whether a sibling repo across the Rusty-Mill/baileyrd platform namespaces already implements the gap before writing anything from scratch, open one GitHub issue per gap, then work each issue end-to-end (implement or port, test, PR, wait for green CI, merge with a merge commit, sync) — looping until the gap list is empty or told to stop. Use whenever the user asks to assess a codebase for missing coverage against a reference library/spec and close the gaps, wants "parity" or "coverage" work automated as a repeatable issue-to-merged-PR loop, or references this by name (parity-loop, gap loop, coverage loop). Companion to the repo-config skill — assumes repo-config's PR/issue templates and RELEASE_NOTES.md convention if present, but works without them.
-version: 1.4.0
+version: 1.5.0
 ---
 
 # parity-loop
@@ -24,18 +24,26 @@ before step 1 runs**
 - **Tooling preflight — do this before reporting that the loop has started.**
   The bullets below validate the *target*; this one validates the loop's own
   execution environment, which is what actually fails first when it fails.
-  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+  1. Restore this skill's own script permissions:
+     `chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`. The sync that
+     delivers a skill to a session doesn't preserve mode bits — every script
+     arrives as `0644`, measured at 31 of 31 in a live session — so a step
+     written `scripts/next_issue.sh` fails with `permission denied`
+     ([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
+     directory is read-only and `chmod` can't take, name the interpreter
+     instead (`bash scripts/next_issue.sh`): it doesn't need the bit.
+  2. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
      without it installed — the three scripts that shell out to it **cannot
      run**. The GitHub MCP tools are the substitute: use them for step 2's issue
      filing, step 3's issue picking, and step 3's CI-wait-and-merge. Say so in
      the wrap-up report, so the run's mechanics are legible rather than looking
      like the scripts ran, and do **not** silently skip a step just because its
      script is unavailable.
-  2. One cheap read against the API (list issues, page size 1). A rate limit or
+  3. One cheap read against the API (list issues, page size 1). A rate limit or
      an auth failure discovered here costs nothing; discovered mid-loop it
      strands work in flight. See "Stop conditions" for what to do when it fails
      later.
-  3. Note which CI-status mechanism the target uses. A repo whose CI reports via
+  4. Note which CI-status mechanism the target uses. A repo whose CI reports via
      **Actions checks** returns `total_count: 0` from the commit-status
      endpoint — that is *not* evidence CI is missing, and reading it that way
      will make you think a green run never happened. Match a run to the PR by

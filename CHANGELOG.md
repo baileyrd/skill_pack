@@ -5,6 +5,28 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Changed
+- **All ten skills that ship scripts** now document how to restore the
+  executable bit the sync drops — `chmod +x scripts/*.sh scripts/*.py
+  2>/dev/null || true`, with naming the interpreter (`bash scripts/x.sh`) as
+  the fallback where the skill directory is read-only. `my-skill-creator`
+  (v1.2.0 → v1.3.0), `dedupe-loop` (v1.3.0 → v1.4.0), `docs-loop` (v1.3.2 →
+  v1.4.0), `issue-loop` (v1.4.0 → v1.5.0), `parity-loop` (v1.4.0 → v1.5.0),
+  `repo-config` (v1.5.0 → v1.6.0), `rust-migration` (v1.2.0 → v1.3.0),
+  `sovereignty-loop` (v1.3.0 → v1.4.0), `yt-pipeline` (v1.1.0 → v1.2.0),
+  `yt-search` (v1.1.0 → v1.2.0). The five loop skills carrying a step-0 tooling
+  preflight got it as that preflight's first item; the rest got a note where
+  their scripts are introduced.
+- **Why (#1):** the sync that delivers a skill to a session doesn't preserve
+  mode bits. Measured directly in a live session against the synced tree:
+  **31 of 31 shebanged scripts across all ten skills arrive as `0644`.** The
+  issue had this recorded as an occasional symptom of a broader sync gap — it
+  is universal, and any step written `scripts/x.sh` fails with `permission
+  denied`. `my-skill-creator` additionally now states the rule for the skills
+  *it drafts*, not only for itself.
+- **Scope:** this documents a recovery; it does not fix the sync, which lives
+  outside this repo. #1 stays open. Same posture as the `dot-` rename for #41.
+
+### Changed
 - `my_loops/repo-config` (v1.4.0 → v1.5.0) — templates that land as dotfiles are
   now **stored** under a `dot-` prefix (`dot-gitattributes`, `dot-github/…`), and
   `apply.sh` restores the real name on write. Target repos receive

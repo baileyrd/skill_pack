@@ -1,7 +1,7 @@
 ---
 name: rust-migration
 description: Runs an autonomous "migrate this repo/application to Rust" loop built to prevent the recurring failure mode where a migration quietly treats an existing capability as optional and drops or downgrades it. Before any Rust is written, inventories every observable capability of the source (public APIs, CLI flags, HTTP routes, config/env, jobs, file formats, error/exit behavior, existing tests) into a manifest where every row defaults to REQUIRED — a row moves to OUT-OF-SCOPE only by explicit, written, user-attributed sign-off, never inferred by Claude. Files one issue per capability, checks platform siblings (Rusty-Mill/baileyrd rusty_* repos) for something to port before hand-rolling, verifies behavioral parity before closing, and won't report the migration done while any REQUIRED row is undone. Use whenever the user asks to migrate/port/rewrite a repo or application to Rust, wants a repeatable migration-to-merged-PR loop, or references this by name (rust-migration, migration loop).
-version: 1.2.0
+version: 1.3.0
 ---
 
 # rust-migration
@@ -59,7 +59,15 @@ Concretely, this means:
 - **Tooling preflight — do this before reporting that the loop has started.**
   The bullets below validate the *target*; this one validates the loop's own
   execution environment, which is what actually fails first when it fails.
-  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+  1. Restore this skill's own script permissions:
+     `chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`. The sync that
+     delivers a skill to a session doesn't preserve mode bits — every script
+     arrives as `0644`, measured at 31 of 31 in a live session — so a step
+     written `scripts/next_capability.sh` fails with `permission denied`
+     ([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
+     directory is read-only and `chmod` can't take, name the interpreter
+     instead (`bash scripts/next_capability.sh`): it doesn't need the bit.
+  2. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
      without it installed — the three scripts that shell out to it **cannot
      run**. The GitHub MCP tools are the substitute: use them for step 2's issue
      filing, step 3's capability picking, and step 3's CI-wait-and-merge. Say so
@@ -67,11 +75,11 @@ Concretely, this means:
      looking like the scripts ran, and do **not** silently skip a step just
      because its script is unavailable.
      (`check_manifest_coverage.sh` doesn't touch `gh` and still works.)
-  2. One cheap read against the API (list issues, page size 1). A rate limit or
+  3. One cheap read against the API (list issues, page size 1). A rate limit or
      an auth failure discovered here costs nothing; discovered mid-loop it
      strands work in flight. See "Stop conditions" for what to do when it fails
      later.
-  3. Note which CI-status mechanism the target uses. A repo whose CI reports via
+  4. Note which CI-status mechanism the target uses. A repo whose CI reports via
      **Actions checks** returns `total_count: 0` from the commit-status
      endpoint — that is *not* evidence CI is missing, and reading it that way
      will make you think a green run never happened. Match a run to the PR by

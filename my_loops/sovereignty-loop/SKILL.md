@@ -1,7 +1,7 @@
 ---
 name: sovereignty-loop
 description: Audits a repo's external dependencies, checks whether an existing repo, library, or component across the Rusty-Mill org or baileyrd's personal rusty_* repos already covers the same capability, and proposes a swap-to-internal or a scoped hand-rolled replacement for each — turning "we depend on too many external crates" into a bounded loop. Trigger on requests to reduce external dependencies, consolidate around the platform layer, check for supply-chain/sovereignty exposure, or "do we already have something for this" against the user's own repo ecosystem. Companion to parity-loop (same PR/CI/merge mechanics) and repo-config (same governance conventions) — checkpointed with per-row sign-off by default since replacing a dependency is a toolchain change, but proceeds unattended on pre-classified-safe rows when `LOOP_HARNESS_MODE=auto` (hand-roll L/XL and ambiguous rows always still wait).
-version: 1.3.0
+version: 1.4.0
 ---
 
 # sovereignty-loop
@@ -27,18 +27,26 @@ the two.
 - **Tooling preflight — do this before reporting that the loop has started.**
   The bullets below validate the *target*; this one validates the loop's own
   execution environment, which is what actually fails first when it fails.
-  1. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
+  1. Restore this skill's own script permissions:
+     `chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`. The sync that
+     delivers a skill to a session doesn't preserve mode bits — every script
+     arrives as `0644`, measured at 31 of 31 in a live session — so a step
+     written `scripts/next_issue.sh` fails with `permission denied`
+     ([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
+     directory is read-only and `chmod` can't take, name the interpreter
+     instead (`bash scripts/next_issue.sh`): it doesn't need the bit.
+  2. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
      without it installed — the three scripts that shell out to it **cannot
      run**. The GitHub MCP tools are the substitute: use them for the issue
      list, the sibling-repo search, and the CI-wait-and-merge. Say so in the
      wrap-up report, so the run's mechanics are legible rather than looking like
      the scripts ran, and do **not** silently skip a step just because its
      script is unavailable.
-  2. One cheap read against the API (list issues, page size 1). A rate limit or
+  3. One cheap read against the API (list issues, page size 1). A rate limit or
      an auth failure discovered here costs nothing; discovered mid-loop it
      strands work in flight. See "Stop conditions" for what to do when it fails
      later.
-  3. Note which CI-status mechanism the target uses. A repo whose CI reports via
+  4. Note which CI-status mechanism the target uses. A repo whose CI reports via
      **Actions checks** returns `total_count: 0` from the commit-status
      endpoint — that is *not* evidence CI is missing, and reading it that way
      will make you think a green run never happened. Match a run to the PR by

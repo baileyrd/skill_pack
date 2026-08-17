@@ -1,7 +1,7 @@
 ---
 name: docs-loop
 description: Reviews a repo's documentation against what the code actually does right now, then updates it — builds ground truth from the manifest, entry points, CLI help, scripts, CI workflows, and the real directory tree FIRST, then audits every checkable claim in README/ARCHITECTURE/CONTRIBUTING/docs/ADRs, classifying each as accurate, stale, missing, orphaned, aspirational, or unverifiable in a `docs-audit.md` checkpoint before a single edit lands. Use whenever the user asks for a documentation review, wants docs updated to match the current state of the repo, wants drift/rot checked after a batch of merged work, wants README or ARCHITECTURE brought up to date, wants broken doc links and dead file paths found, asks "are the docs still right", or names it (docs-loop, doc review loop, docs drift loop). Counterpart to repo-config's presence check. Per-finding sign-off by default; verifiable stale-fact and broken-reference rows proceed unattended under `LOOP_HARNESS_MODE=auto`.
-version: 1.3.2
+version: 1.4.0
 ---
 
 # docs-loop
@@ -265,6 +265,15 @@ regardless of harness setting:
   exists, what's wrong, and what's undocumented but real.
 
 ## Scripts
+
+**Restore the executable bit before running any of these** —
+`chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`. The sync that
+delivers a skill to a session doesn't preserve mode bits — every script arrives
+as `0644`, measured at 31 of 31 in a live session — so a step written
+`scripts/inventory_docs.sh` fails with `permission denied`
+([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
+directory is read-only and `chmod` can't take, name the interpreter instead
+(`bash scripts/inventory_docs.sh`): it doesn't need the bit.
 
 | Script | Purpose | Args |
 | --- | --- | --- |
