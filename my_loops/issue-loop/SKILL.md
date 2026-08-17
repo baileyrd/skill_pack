@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.5.0
+version: 1.6.0
 ---
 
 # issue-loop
@@ -20,7 +20,20 @@ doesn't file them. `references/` describes the loop's supporting data
 ## Run (when invoked)
 
 **0. Scope**
-- `TARGET_REPO` — whose open issues are being worked.
+- `TARGET_REPO` — whose open issues are being worked. Not always passed
+  explicitly: if exactly one repo is attached to the session, infer
+  `TARGET_REPO` from it rather than halting on a technicality — the halt
+  rule below is for genuine ambiguity (multiple repos attached, none
+  named), not for "the caller didn't spell out a name that was already
+  obvious from context."
+- **Extra arguments beyond `TARGET_REPO`** (a caller can pass free text —
+  e.g. "against &lt;file&gt;", a label, a keyword) are a **filter** on which
+  *already-open* issues to work, nothing more. They are never license to
+  manufacture new issues out of a doc's own prose, a file's TODO comments,
+  or anything else that isn't a real, already-filed issue — this skill
+  doesn't generate issues (see the intro). If a filter matches zero open
+  issues, say so plainly in the wrap-up report and stop there; don't
+  reinterpret the filter more expansively to find something to do.
 - **Tooling preflight — do this before reporting that the loop has started.**
   This skill validates the *target repo* below; this bullet validates its own
   execution environment, which is the thing that actually failed first.
@@ -51,11 +64,15 @@ doesn't file them. `references/` describes the loop's supporting data
      a stale run from a previous PR on a reused branch can appear attached to
      the current one and read as a pass for code it never ran against.
 - **repo-config prerequisite**: run `repo-config`'s `scripts/audit.sh
-  <TARGET_REPO>` first. If the standard governance-file score is
-  low/missing, run repo-config on the target before doing any issue-loop
-  work — the PR mechanics and RELEASE_NOTES convention this skill leans on
-  assume it's already there. Skip only if a prior step in the same session
-  already confirmed it.
+  <TARGET_REPO>` first — this part always runs, it's cheap. If the score is
+  low/missing, **don't bootstrap yet**: run step 1's triage first. Only
+  invoke `repo-config` on the target once triage confirms at least one
+  actionable issue actually exists — the PR mechanics and RELEASE_NOTES
+  convention this skill leans on need to be there before that first
+  actionable issue is worked, not before triage even runs. Bootstrapping a
+  repo's full governance-file set ahead of a triage pass that turns up
+  zero open issues is pure waste. Skip the bootstrap entirely if a prior
+  step in the same session already confirmed it's present.
 - **Harness mode**: check the `LOOP_HARNESS_MODE` environment variable
   (`auto` or unset/anything else = `interactive`) — see "Harness mode"
   below for what it changes here.
