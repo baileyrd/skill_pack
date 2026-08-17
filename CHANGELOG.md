@@ -4,6 +4,19 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Removed
+- `need_to_productize/research-to-skill.skill`. `meta/learn-it`'s own
+  `SKILL.md` already stated it "absorbs and supersedes the draft approach" in
+  this archive; the archive itself was just never deleted. Verified line by
+  line before deleting rather than trusting that claim: every element
+  (facts-vs-patterns, the qualify gate, target-finding, the five extraction
+  categories, description-quality rules, confirm-before-write) is present in
+  `learn-it`, each more rigorous there — vendored/zip-archive handling in
+  step 2 that this draft never had, a PR-gated write instead of a bare
+  filesystem write to a hardcoded `/mnt/skills/user/` path. Nothing unique
+  survived. `need_to_productize/` is now empty and absent from the tree —
+  git doesn't track empty directories — until something new is staged there.
+
 ### Added
 - Three skills productized out of `need_to_productize/` into `dev_practices/`,
   each at v1.0.0:
