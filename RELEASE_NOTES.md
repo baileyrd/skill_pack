@@ -5,6 +5,25 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## issue-loop learns its own gh-less path
+**2026-08-19** — [#82](https://github.com/baileyrd/skill_pack/pull/82)
+
+Applied from `issue-loop`'s step-5 wrap-up retro on the run against
+`rusty_naner` that shipped `naner suggest`
+([rusty_naner#108](https://github.com/baileyrd/rusty_naner/pull/108)) — a
+Claude Code web session with no `gh` binary, where every scripted step needed
+a substitute and the instructions named only "the MCP tools." Five findings,
+applied as one user-approved batch (issue-loop v1.6.1 → v1.7.0): the
+preflight now names the working substitute per script (reuse search =
+attach-read-only + shallow clone + `rg`; CI-wait = `subscribe_pr_activity` +
+a `send_later` check-in, merging on `head_sha`-matched green checks), the
+repo-config prerequisite gets a governance-file-inspection fallback for its
+own `gh`-dependent `audit.sh`, step 3.4's branch naming yields to a
+harness-designated branch, and unset-harness-mode ambiguity degrades to the
+`needs-human` label instead of a question nobody will answer.
+
+---
+
 ## repo-config's currency check stops having a blind spot
 **2026-08-16** — [#39](https://github.com/baileyrd/skill_pack/pull/39)
 

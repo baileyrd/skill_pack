@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.6.1
+version: 1.7.0
 ---
 
 # issue-loop
@@ -47,11 +47,22 @@ doesn't file them. `references/` describes the loop's supporting data
      instead (`bash scripts/next_issue.sh`): it doesn't need the bit.
   2. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
      without it installed — **none of this skill's scripts can run**, since all
-     three shell out to it. The GitHub MCP tools are the substitute: use them
-     for step 1's issue list, step 2's reuse search, and step 3.9's
-     CI-wait-and-merge. Say so in the wrap-up report, so the run's mechanics
-     are legible rather than looking like the scripts ran. Do **not** silently
-     skip the reuse check just because its script is unavailable.
+     three shell out to it. The substitutes, each proven in a live gh-less run:
+     - Step 1's issue list → the GitHub MCP issue tools, directly.
+     - Step 2's reuse search → **not** the MCP search tools: session repo
+       scoping blocks searches against repos not attached to the session,
+       which is exactly what the platform repos are. Instead, attach each
+       candidate read-only (`add_repo`), shallow-clone it, and `rg` the
+       checkout with the same keywords the script would have used.
+     - Step 3.9's CI-wait-and-merge → the MCP tools have no wait primitive;
+       the working pattern is `subscribe_pr_activity` on the new PR plus a
+       scheduled self check-in (`send_later`, ~10–15 min out) as the wait.
+       On wake, read the PR's check runs, match them to the PR by `head_sha`
+       (bullet 4 below), and merge with a **merge commit** via the MCP merge
+       tool. Never poll with sleep loops.
+     Say so in the wrap-up report, so the run's mechanics are legible rather
+     than looking like the scripts ran. Do **not** silently skip the reuse
+     check just because its script is unavailable.
   3. One cheap read against the API (list issues, page size 1). A rate limit or
      an auth failure discovered here costs nothing; discovered at issue 12 of
      20 it strands work in flight. See "Stop conditions" for what to do when it
@@ -72,7 +83,12 @@ doesn't file them. `references/` describes the loop's supporting data
   actionable issue is worked, not before triage even runs. Bootstrapping a
   repo's full governance-file set ahead of a triage pass that turns up
   zero open issues is pure waste. Skip the bootstrap entirely if a prior
-  step in the same session already confirmed it's present.
+  step in the same session already confirmed it's present. `audit.sh`
+  shells out to `gh` too: where the preflight found `gh` absent, a direct
+  inspection of the checkout for the governance file set (PR/issue
+  templates, CONTRIBUTING, CHANGELOG, RELEASE_NOTES and friends) satisfies
+  this check — the point is confirming the PR mechanics exist, not running
+  that particular script.
 - **Harness mode**: check the `LOOP_HARNESS_MODE` environment variable
   (`auto` or unset/anything else = `interactive`) — see "Harness mode"
   below for what it changes here.
@@ -122,6 +138,11 @@ stop condition below fires, or the user says stop:
    automatically, in either harness mode. Stop, explain what the fix would
    touch or what dependency it needs, and ask.
 4. Branch off the latest default branch: `issue/<issue-number>-<slug>`.
+   Exception: where the execution harness designates a working branch for
+   the session (Claude Code web sessions arrive with a fixed `claude/...`
+   branch and a rule against pushing any other), develop and open the PR
+   from the designated branch instead — the PR/CI/merge-commit mechanics
+   are this skill's contract; the branch name is not.
 5. Check step 2's reuse-check result for this issue. A match → port that
    implementation in, adapted to this repo's conventions (`Result` + `?`,
    no `unwrap()`/`expect()` outside tests, doc-comments, tests), noting the
@@ -175,7 +196,12 @@ issues already proceed to PR/merge unattended in both modes, same as
 - If step 0 or step 1 needs a judgment call only a human can make (an
   issue whose actionability is genuinely ambiguous) and no one's available,
   auto mode logs it as `needs-human` and moves on rather than blocking the
-  whole loop; interactive mode asks.
+  whole loop; interactive mode asks. Interactive mode with nobody actually
+  reachable — a scheduled or autonomous session that never set
+  `LOOP_HARNESS_MODE`, which is the common case for web/remote runs —
+  degrades to the same label-and-move-on path: a question nobody will
+  answer is a blocked loop, and the `needs-human` label *is* that question,
+  durably filed where the repo owner will see it.
 - breaking-change and needs-new-dependency issues **always** stop and wait,
   in both modes — auto mode is not a bypass for those.
 

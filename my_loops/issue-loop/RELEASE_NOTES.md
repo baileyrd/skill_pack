@@ -10,6 +10,40 @@ still open.
 
 ---
 
+## v1.7.0 — The gh-less path, spelled out end to end
+**2026-08-19**
+
+Applied from the step-5 wrap-up retro on the `issue-loop` run against
+`rusty_naner` that shipped its `naner suggest` command
+([rusty_naner#108](https://github.com/baileyrd/rusty_naner/pull/108)) — a
+Claude Code web session with no `gh` binary at all, which exercised every
+substitution path at once. All five findings applied as one approved batch.
+
+- **Added:** step 0's preflight now names the *working* substitute per
+  script, not just "use the MCP tools." The reuse search can't go through
+  the MCP search tools at all — session repo scoping blocks unattached
+  repos, which the platform repos always are — so the documented path is
+  attach-read-only, shallow-clone, `rg`. CI-wait-and-merge gets its actual
+  wait mechanism written down: `subscribe_pr_activity` plus a `send_later`
+  check-in, check runs matched by `head_sha`, merge commit via the MCP
+  merge tool. On the run that prompted this, both were rediscovered from
+  scratch mid-loop.
+- **Added:** the repo-config prerequisite acknowledges its own `audit.sh`
+  is `gh`-dependent — the same preflight that just found `gh` absent was
+  being told to run a script that needs it. A direct governance-file
+  inspection of the checkout now explicitly satisfies the check.
+- **Added:** step 3.4's branch-naming rule gets a harness exception: a
+  session that arrives with a designated `claude/...` branch and a
+  never-push-elsewhere rule uses that branch for the PR. The run had to
+  choose between violating the skill and violating the harness; now the
+  precedence is written down.
+- **Added:** interactive harness mode with nobody actually reachable (the
+  common case for web/remote runs, where `LOOP_HARNESS_MODE` is simply
+  unset) now explicitly degrades to auto mode's label-and-move-on for
+  ambiguity, instead of implying a question that would block forever.
+
+---
+
 ## v1.6.1 — Fix this log's own stale "no PR workflow yet" header
 **2026-08-17**
 

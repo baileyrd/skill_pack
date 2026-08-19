@@ -5,6 +5,18 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Changed
+- `my_loops/issue-loop` (v1.6.1 → v1.7.0) — five findings from the skill's
+  own step-5 retro on a live gh-less run (Claude Code web, against
+  `rusty_naner`), applied as an approved batch: the preflight's MCP
+  substitutions now name the working path per script (reuse search via
+  attach-read-only + shallow clone + `rg`, since repo scoping blocks MCP
+  search on unattached repos; CI-wait via `subscribe_pr_activity` + a
+  `send_later` check-in, merging on `head_sha`-matched green checks); the
+  repo-config prerequisite gains a governance-file-inspection fallback for
+  its gh-dependent `audit.sh`; step 3.4 gains a harness-designated-branch
+  exception to the `issue/<n>-<slug>` naming; and interactive harness mode
+  with nobody reachable now explicitly degrades to auto mode's
+  `needs-human` label-and-move-on.
 - `yt_research_for_cc/video-teardown` (v1.0.0 → v1.1.0) — added a `Wrap-up
   retro` step, wired to `meta/skill-retro`, matched to this skill's own
   five-step workflow: did the transcript-first ordering save the frame budget
