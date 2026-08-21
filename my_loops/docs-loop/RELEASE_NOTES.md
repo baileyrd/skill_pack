@@ -9,6 +9,49 @@ open.
 
 ---
 
+## v1.5.0 — Five gaps a skill-retro pass surfaced on a real single-branch run
+**2026-08-21**
+
+Findings from a `meta/skill-retro` pass run after a real docs-loop audit of
+`baileyrd/Library` (whole-repo, no doc-comment audit, 2 stale rows fixed, 9
+accurate rows confirmed, 1 unverifiable). All five findings approved and
+applied in this run.
+
+- **Added (step 4):** a fallback for when the executing session is
+  restricted to one pre-designated branch and can't push elsewhere — batch
+  all approved rows into a single PR instead of one-per-doc-file, and say so
+  explicitly. The run this surfaced from had exactly this constraint and
+  batched 3 rows across 2 doc files plus one out-of-scope YAML comment into
+  one PR, with no prior guidance covering the situation.
+- **Added (Stop conditions):** check whether the target's base branch has
+  the same CI failure on its own last run *before* treating a red check as
+  the row's fault. The run this surfaced from hit a docs-only PR inheriting
+  a pre-existing `cargo fmt` failure on `main` that had nothing to do with
+  the docs diff — nothing in Stop conditions prompted checking the base
+  branch first; that check came from outside this skill entirely.
+- **Added (step 0, Doc surface):** a factual prose claim inside a non-`.md`
+  config/workflow file's own comments (e.g. a CI YAML step's comment) is out
+  of default scope like doc-comments, but should be named in the report as
+  an out-of-scope finding if found incidentally, not silently fixed or
+  silently dropped. The run this surfaced from found exactly such a claim in
+  a `ci-rust.yml` Clippy-step comment and had to reason its way to this
+  handling from repo precedent rather than from this file.
+- **Reworded (`references/ground-truth-sources.md`):** "What
+  flags/subcommands exist" now states the actual-run preference more
+  forcefully — prefer running `--help` whenever the toolchain can run it,
+  falling back to reading the parser source only when running genuinely
+  isn't possible. The prior wording read as a soft preference; the run this
+  surfaced from read a `clap` derive struct instead of running the CLI, even
+  though running was possible.
+- **Added (step 5):** re-run `check_references.py` again if the branch
+  absorbs further changes (e.g. a base-branch merge) before its own PR
+  merges — the verify pass should cover the branch as it will actually
+  merge, not just as it stood right after step 4's edits. The run this
+  surfaced from self-initiated this second pass without the step prompting
+  it.
+
+---
+
 ## v1.4.0 — Don't depend on an executable bit the sync drops
 **2026-08-17**
 

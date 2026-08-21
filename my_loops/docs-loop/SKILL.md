@@ -1,7 +1,7 @@
 ---
 name: docs-loop
 description: Reviews a repo's documentation against what the code actually does right now, then updates it — builds ground truth from the manifest, entry points, CLI help, scripts, CI workflows, and the real directory tree FIRST, then audits every checkable claim in README/ARCHITECTURE/CONTRIBUTING/docs/ADRs, classifying each as accurate, stale, missing, orphaned, aspirational, or unverifiable in a `docs-audit.md` checkpoint before a single edit lands. Use whenever the user asks for a documentation review, wants docs updated to match the current state of the repo, wants drift/rot checked after a batch of merged work, wants README or ARCHITECTURE brought up to date, wants broken doc links and dead file paths found, asks "are the docs still right", or names it (docs-loop, doc review loop, docs drift loop). Counterpart to repo-config's presence check. Per-finding sign-off by default; verifiable stale-fact and broken-reference rows proceed unattended under `LOOP_HARNESS_MODE=auto`.
-version: 1.4.0
+version: 1.5.0
 ---
 
 # docs-loop
@@ -48,7 +48,11 @@ two.
   the exact kind of nearly-true claim this skill exists to catch. If they're
   requested, say in the report which languages were covered and how. Generated
   API reference output (rustdoc HTML, Sphinx builds) is out of scope either
-  way — review the source comments it's generated from, not the artifact.
+  way — review the source comments it's generated from, not the artifact. A
+  factual prose claim inside a non-`.md` config/workflow file's own comments
+  (e.g. a CI YAML step's comment) is out of default scope the same way, but
+  if found incidentally, name it in the report as an out-of-scope finding
+  rather than silently fixing or silently ignoring it.
 - **Review depth** — default is the full current state, not a diff since
   some marker. If the user scopes it to "since the last release" or "the
   docs touched by these 6 merged PRs", honor that, and say in the report
@@ -113,7 +117,12 @@ sync. Same mechanics as `parity-loop` step 3, with three docs-specific
 constraints:
 - **One PR per doc file or per coherent theme** — a twelve-file
   simultaneous rewrite is an unreviewable diff, which defeats the point of
-  routing this through PR review at all.
+  routing this through PR review at all. **If the session is restricted to a
+  single pre-designated branch and can't push elsewhere**, batch all
+  approved rows into one PR on that branch instead of one-per-doc-file, and
+  say so explicitly in the PR body and to the user — a small combined diff
+  is still reviewable; silently dropping rows to preserve the split is not
+  the fallback.
 - **Every claim you write must be checkable against something in the tree.**
   If you can't point at the manifest line, the script, or the code path that
   makes a sentence true, don't write the sentence.
@@ -140,8 +149,11 @@ them. A documented command that errors is the most common single defect
 this loop finds, and it is the one nobody catches by reading. Never run a
 documented command that writes, deploys, publishes, or spends money to
 "verify" it — mark those `unverified-by-design` in the report and say so.
-Then re-audit: report before/after counts by classification, and what's
-still open.
+If the branch absorbs any further changes (e.g. merging the base branch in)
+before its own PR merges, re-run `check_references.py` once more against
+that new state — the verify pass covers the branch as it will actually
+merge, not just as it stood right after step 4's edits. Then re-audit:
+report before/after counts by classification, and what's still open.
 
 **6. Wrap-up retro** — fires once, when the last approved row is merged and
 no rows remain picked, or when the user stops the loop. **Not after every
@@ -191,6 +203,12 @@ regardless of harness setting:
   the repo root, checked each iteration — honored in both harness modes.
 - A PR's CI stays red after one fix-up attempt → pause on that row, leave
   the PR open, report it; never force a merge or skip ahead silently.
+- **Before treating a red check as this row's problem**, check whether the
+  target's base branch has the same failure on its own last CI run. If so,
+  it's a pre-existing repo-health issue, not something the docs fix caused
+  or can fix — report it (optionally file a tracking issue per the
+  code-bug Rule below), and don't block step 4 on it; merge once the base
+  recovers.
 - A doc/code contradiction where the code is the suspect party → stop that
   row, report it, keep going on the rest. Don't block the whole run on one.
 - **Interactive mode**: a row not explicitly approved stays in the report,
