@@ -14,7 +14,7 @@ or parse beats an artifact you have to believe.*
 | What commands exist for developers | `scripts/`, `Makefile`/`justfile` targets, manifest script sections, and `.github/workflows/*` — CI is the honest answer to "how do you test this", since it's the version that has to keep working |
 | What CI actually enforces | `.github/workflows/*.yml` job steps, plus which checks are required in branch protection |
 | What the entry points are | Manifest `[[bin]]`/`[project.scripts]`/`"bin"`, `main.rs`/`__main__.py`/`index.ts` |
-| What flags/subcommands exist | `--help` output from an actual run; the arg-parser definition if running isn't possible |
+| What flags/subcommands exist | `--help` output from an actual run — always prefer this over reading the parser definition when the toolchain can run it; fall back to reading the arg-parser source only when running genuinely isn't possible (missing runtime, needs live credentials, etc.) |
 | What env vars are read | A grep for the env-reading call (`std::env::var`, `os.environ`, `process.env`) — env vars are chronically under-documented and this catches the whole set |
 | What decisions were made and why | `docs/adr/` — authoritative for *decisions*, see the caveat below |
 | What changed recently | `git log` since the doc's last change, merged PR titles, `CHANGELOG.md`/`RELEASE_NOTES.md` newest entries |
