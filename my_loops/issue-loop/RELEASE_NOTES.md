@@ -10,6 +10,43 @@ still open.
 
 ---
 
+## v1.8.0 — Bound the CI-baseline-fix, and keep every log current
+**2026-08-25**
+
+Applied from the step-5 wrap-up retro on the `issue-loop` run against
+`baileyrd/rusty_gpu` ([rusty_gpu#4](https://github.com/baileyrd/rusty_gpu/pull/4)),
+which closed rusty_gpu#2. Six findings were reported; three (F1's reuse-search
+substitute, F3's harness branch exception) turned out to already be fixed by
+v1.7.0's own retro-driven changes, discovered only by re-reading this file
+fresh before applying anything — the two below are the ones still open.
+F4 and F6 (verifying a cross-repo blocking claim in triage; no keyword-search
+mechanism for the development-standards check) were reported and **not**
+applied — real but single-run, logged here per `skill-retro`'s Limitations
+rather than acted on immediately.
+
+- **Added (F2, `costly-guess`/`could-have-caused-real-damage`):** the
+  repo-config prerequisite now bounds what "establish a green CI baseline"
+  covers. On the run that prompted this, `repo-config`'s new `ci-rust.yml`
+  immediately failed against rusty_gpu's *pre-existing* code (unformatted
+  source, one unused-variable lint) — unrelated to the issue actually being
+  worked. Both were trivial, so fixing them inline in the same prerequisite
+  commit was a reasonable call, but nothing said so: a repo whose pre-existing
+  failures were substantial instead of two lines could have pulled a
+  same-commit "baseline fix" into real, unreviewed scope creep bundled onto an
+  unrelated PR. Now: trivial/mechanical fixes stay inline, anything larger
+  gets filed as its own issue.
+- **Added (F5, `costly-guess`):** step 3.7 and the matching Rules bullet
+  named only `RELEASE_NOTES.md`, even though `repo-config` — this skill's own
+  stated prerequisite — seeds both `RELEASE_NOTES.md` and `CHANGELOG.md`, and
+  `repo-config`'s own text calls updating only one of them "the common
+  failure, not rare." This run updated both by generalizing from
+  `repo-config`'s convention; a run treating this file as self-sufficient
+  (which is the point of it being self-contained) would plausibly have missed
+  `CHANGELOG.md`. Both now say to keep every log the repo has current, not
+  just one.
+
+---
+
 ## v1.7.0 — The gh-less path, spelled out end to end
 **2026-08-19**
 
