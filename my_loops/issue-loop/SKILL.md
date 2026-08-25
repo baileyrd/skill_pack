@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.8.0
+version: 1.9.0
 ---
 
 # issue-loop
@@ -60,6 +60,13 @@ doesn't file them. `references/` describes the loop's supporting data
        On wake, read the PR's check runs, match them to the PR by `head_sha`
        (bullet 4 below), and merge with a **merge commit** via the MCP merge
        tool. Never poll with sleep loops.
+     - Steps 3.8/3.10 and step 1's `needs-human` labeling → the obvious MCP
+       equivalents (`create_pull_request`; the same issue-list tool from
+       above, re-run, for step 3.10's re-check; an issue-update tool for the
+       label plus a comment tool for the explanatory note). Less subtle than
+       the two above — nothing session-scoped or timing-dependent blocks
+       them — but still worth naming so a run doesn't have to rediscover
+       which tool covers which `gh` invocation.
      Say so in the wrap-up report, so the run's mechanics are legible rather
      than looking like the scripts ran. Do **not** silently skip the reuse
      check just because its script is unavailable.
@@ -95,7 +102,13 @@ doesn't file them. `references/` describes the loop's supporting data
   trivial and mechanical (formatting, an unused-variable lint); anything
   larger (a real bug, a substantial refactor) gets filed as its own issue
   instead of folded into the governance-setup commit — say which happened
-  in the wrap-up.
+  in the wrap-up. Separately: if the target ships platform-conditional code
+  (`#[cfg(windows)]`, `#[cfg(target_os = ...)]`, or the equivalent in
+  another ecosystem), check whether the CI workflow actually compiles all
+  of it — a single-OS runner silently never even compiles code gated to a
+  different OS, so platform-specific work can merge with zero CI coverage
+  of its own logic unless the workflow's OS matrix is expanded to match
+  what the crate actually ships.
 - **Harness mode**: check the `LOOP_HARNESS_MODE` environment variable
   (`auto` or unset/anything else = `interactive`) — see "Harness mode"
   below for what it changes here.
@@ -123,9 +136,14 @@ each:
 
 Judgment call, same caveat as the sibling skills' classification steps: read
 the issue (and the relevant code, if the description is thin) rather than
-trusting the title or existing labels alone. Report the triage table before
-step 2 runs — number, title, classification, one-line reasoning — it's the
-checkpoint to catch a wrong call before 20 issues get worked.
+trusting the title or existing labels alone. **Before step 2 runs, post the
+triage table as its own standalone message** — number, title, classification,
+one-line reasoning — **and treat it as a hard gate: don't let step 2/3 start
+in the same breath, and don't fold it into a later message where it reads as
+an aside.** It's the mechanism that catches a wrong call before 20 issues get
+worked, not a recommendation, and it doesn't work retroactively — a run that
+classifies silently and only surfaces the reasoning later (e.g. inside a
+stop-and-ask about one flagged issue) has already skipped the checkpoint.
 
 **2. Reuse check, per actionable issue** — before implementing, check
 `references/platform-directory.md` (both `baileyrd/rusty_*` and
@@ -158,7 +176,11 @@ stop condition below fires, or the user says stop:
    stop-and-ask, same as any new dependency. No match → check
    `references/development-standards.md` for an applicable requirement from
    either standards repo before falling back to this repo's own
-   conventions; implement fresh either way.
+   conventions; implement fresh either way. **State explicitly, per issue,
+   which happened** — cite the requirement (`ATLAS-###` ID or the akb doc
+   section) or say plainly that neither standards repo spoke to this area —
+   rather than silently landing on this repo's own conventions with nothing
+   showing the check actually ran.
 6. Local gate before pushing (fail fast): the target's own test/lint/build
    commands — `cargo build && cargo test && cargo clippy -- -D warnings &&
    cargo fmt --check` for Rust, the ecosystem equivalent otherwise (see
