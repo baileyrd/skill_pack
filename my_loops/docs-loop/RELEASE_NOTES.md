@@ -9,6 +9,43 @@ open.
 
 ---
 
+## v1.6.0 — Four gaps a skill-retro pass surfaced on a whole-repo run (`rusty_fclone`)
+**2026-08-25**
+
+Findings from a `meta/skill-retro` pass run after a real docs-loop audit of
+`baileyrd/rusty_fclone` (whole-repo, 31 docs, 13 rows, 12 approved and fixed
+across 4 PRs, step 5 verify clean — 2 broken references down to 0). All four
+findings approved and applied in this run.
+
+- **Added (step 0, Review depth):** a complaint naming one specific gap
+  (e.g. "README doesn't mention X") is the run's *trigger*, not an implicit
+  scope limit — default to full current-state scope unless the user's
+  phrasing explicitly narrows it. The run this surfaced from was invoked
+  over one README complaint, defaulted to whole-repo by judgment rather
+  than instruction, and that judgment call happened to surface 8 more real
+  findings a narrow reading would have missed.
+- **Added (step 4):** an approved row's `Fix` text is the contract for
+  *content*, not just for which file gets touched — writing more than the
+  approved `Fix` (extra justification, an unapproved persuasive aside) is
+  scope creep inside the same row and gets the same stop-and-re-report
+  treatment as reaching an unnamed file. The run this surfaced from had a
+  README PR initially add a sentence beyond the approved row's `Fix` text,
+  caught only by self-review before commit, not by any stated rule.
+- **Added (step 5):** if `docs-audit.md` was committed in step 3, update it
+  in step 5 to record resolution (which PR fixed which row, after-counts)
+  through the loop's standard PR-and-merge-commit mechanics. The run this
+  surfaced from inferred this and opened a 5th PR solely to keep
+  `docs-audit.md` honest about what's fixed — reasonable, but nothing in
+  step 5 said to do it or that it needed its own PR.
+- **Added (Scripts):** a caveat that `watch_and_merge.sh` depends on the
+  `gh` binary, with a manual fallback (poll checks, merge via the available
+  tool) for MCP-only GitHub access. The run this surfaced from never
+  invoked the script at all — its execution environment had no `gh` CLI —
+  and replicated its merge-commit-on-green behavior by hand across all 5
+  PRs this run produced.
+
+---
+
 ## v1.5.0 — Five gaps a skill-retro pass surfaced on a real single-branch run
 **2026-08-21**
 
