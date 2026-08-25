@@ -1,7 +1,7 @@
 ---
 name: issue-loop
 description: Runs an autonomous "clear the open issue backlog" loop against a target repo's existing GitHub issues — any label, not skill-generated ones like parity-loop's gaps. Triages each issue (actionable, breaking-change, needs-new-dependency, or not actionable), checks the platform-repo directory for something to port before hand-rolling, implements per the two development-standards repos where applicable, then works each actionable issue end-to-end (branch, implement, test, PR, green CI, merge commit, sync) — looping until none remain or told to stop. Use whenever the user asks to clear/work through open issues on a repo automatically, wants a repeatable issue-to-merged-PR loop not scoped to a specific label, or references this by name (issue-loop, backlog loop). Fourth companion to parity-loop/sovereignty-loop/dedupe-loop (same PR/CI/merge mechanics) — checks repo-config has been applied to the target before starting, same as its siblings.
-version: 1.7.0
+version: 1.8.0
 ---
 
 # issue-loop
@@ -88,7 +88,14 @@ doesn't file them. `references/` describes the loop's supporting data
   inspection of the checkout for the governance file set (PR/issue
   templates, CONTRIBUTING, CHANGELOG, RELEASE_NOTES and friends) satisfies
   this check — the point is confirming the PR mechanics exist, not running
-  that particular script.
+  that particular script. If invoking `repo-config` adds a CI workflow that
+  immediately fails against the target's *pre-existing* code (a lint/format
+  violation, a broken build — unrelated to any issue this loop is working),
+  fix it inline as part of the same prerequisite commit only when it's
+  trivial and mechanical (formatting, an unused-variable lint); anything
+  larger (a real bug, a substantial refactor) gets filed as its own issue
+  instead of folded into the governance-setup commit — say which happened
+  in the wrap-up.
 - **Harness mode**: check the `LOOP_HARNESS_MODE` environment variable
   (`auto` or unset/anything else = `interactive`) — see "Harness mode"
   below for what it changes here.
@@ -156,7 +163,10 @@ stop condition below fires, or the user says stop:
    commands — `cargo build && cargo test && cargo clippy -- -D warnings &&
    cargo fmt --check` for Rust, the ecosystem equivalent otherwise (see
    `parity-loop`'s "Adapting to other stacks" for the general pattern).
-7. If the repo has `RELEASE_NOTES.md`, add the dated entry now.
+7. If the repo has `RELEASE_NOTES.md` and/or `CHANGELOG.md` (`repo-config`
+   seeds both), add a dated entry to *every* log the repo has, not just
+   one — a repo with both and a change logged in only one is
+   `repo-config`'s own documented common failure, not a rare one.
 8. Commit, push, `gh pr create` against the default branch — use
    repo-config's PR template. **One `Closes` keyword per issue**:
    `Closes #52, Closes #53, Closes #54`. GitHub only honours the keyword when
@@ -238,8 +248,9 @@ issues already proceed to PR/merge unattended in both modes, same as
   source.
 - Check `references/development-standards.md` for an applicable requirement
   before falling back to generic conventions.
-- If the repo has `RELEASE_NOTES.md`, keep it current — one entry per merged
-  PR from this loop.
+- If the repo has `RELEASE_NOTES.md` and/or `CHANGELOG.md`, keep *both*
+  current — one entry per merged PR from this loop in each log the repo
+  has, not just one.
 - Never force a merge on red CI, and never abandon an issue silently — a
   stuck issue gets reported, not dropped.
 - A `not actionable` issue gets labeled `needs-human` and reported, not
