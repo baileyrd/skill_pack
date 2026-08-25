@@ -1,7 +1,7 @@
 ---
 name: docs-loop
 description: Reviews a repo's documentation against what the code actually does right now, then updates it — builds ground truth from the manifest, entry points, CLI help, scripts, CI workflows, and the real directory tree FIRST, then audits every checkable claim in README/ARCHITECTURE/CONTRIBUTING/docs/ADRs, classifying each as accurate, stale, missing, orphaned, aspirational, or unverifiable in a `docs-audit.md` checkpoint before a single edit lands. Use whenever the user asks for a documentation review, wants docs updated to match the current state of the repo, wants drift/rot checked after a batch of merged work, wants README or ARCHITECTURE brought up to date, wants broken doc links and dead file paths found, asks "are the docs still right", or names it (docs-loop, doc review loop, docs drift loop). Counterpart to repo-config's presence check. Per-finding sign-off by default; verifiable stale-fact and broken-reference rows proceed unattended under `LOOP_HARNESS_MODE=auto`.
-version: 1.5.0
+version: 1.6.0
 ---
 
 # docs-loop
@@ -56,7 +56,12 @@ two.
 - **Review depth** — default is the full current state, not a diff since
   some marker. If the user scopes it to "since the last release" or "the
   docs touched by these 6 merged PRs", honor that, and say in the report
-  that the audit was scoped rather than whole-repo.
+  that the audit was scoped rather than whole-repo. A complaint naming one
+  specific gap (e.g. "README doesn't mention X") is the trigger for the
+  run, not an implicit scope limit — default to full current-state scope
+  per this bullet's opening sentence unless the user's phrasing explicitly
+  narrows it ("only check README", "just fix the UI line"). State the
+  scope actually used in the report's Scope line either way.
 
 **1. Ground truth** — build it from the repo, before opening any prose doc.
 `references/ground-truth-sources.md` lists, per stack, exactly which
@@ -134,6 +139,11 @@ constraints:
   This is the failure mode the checkpoint exists to prevent, and it's
   invisible from inside the fix: the work feels like finishing the approved
   row right up until it isn't.
+- **An approved row's `Fix` text is the contract for content, not just for
+  which file gets touched.** Writing more than what the row's `Fix` column
+  describes — extra justification, additional claims, a persuasive aside —
+  is scope creep inside the same row and gets the same stop-and-re-report
+  treatment as reaching an unnamed file.
 - File one tracking issue per audit run (`assets/templates/issue-body.md`,
   labeled `docs-drift`) **when auditing and fixing are split** — different
   people, or different sessions. One per run, never one per row: a docs run
@@ -153,7 +163,12 @@ If the branch absorbs any further changes (e.g. merging the base branch in)
 before its own PR merges, re-run `check_references.py` once more against
 that new state — the verify pass covers the branch as it will actually
 merge, not just as it stood right after step 4's edits. Then re-audit:
-report before/after counts by classification, and what's still open.
+report before/after counts by classification, and what's still open. If
+`docs-audit.md` was committed to the repo in step 3, update it now to
+record the resolution — which PR fixed which row, and the after-counts —
+through the same PR-and-merge-commit mechanics as any other change in this
+loop. The Persistence rule in `docs-audit-format.md` only holds if the
+persisted rows say what's fixed, not just what was found.
 
 **6. Wrap-up retro** — fires once, when the last approved row is merged and
 no rows remain picked, or when the user stops the loop. **Not after every
@@ -302,3 +317,10 @@ directory is read-only and `chmod` can't take, name the interpreter instead
 All three use `git`/`gh` and the Python standard library only — no extra
 dependencies. They resolve paths relative to their own location, so they run
 whether this skill is installed or just checked out locally.
+
+`watch_and_merge.sh` specifically depends on the `gh` binary being on
+`PATH`. In a session where GitHub access is MCP-only (no `gh` CLI — check
+before relying on the script), replicate its behavior by hand instead: poll
+the PR's check-run status via the available PR/checks tool, and merge via
+the available merge tool once green, preserving "merge commit only, retry
+once on a transient watch failure."

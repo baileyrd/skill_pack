@@ -13,7 +13,7 @@ description: >-
   task that leaned on another skill in this repo, when the user asks to
   retro/review/critique/post-mortem a skill that was just used, or references this by name
   (skill-retro, meta-review).
-version: 1.2.1
+version: 1.2.2
 ---
 
 # skill-retro
@@ -90,9 +90,13 @@ for every row:
   correct in some contexts** — the fix for the second kind is a condition,
   not a deletion, so don't let the category's name push you toward cutting a
   step that's right half the time) / `tooling-bug` (a script/template that's
-  actually broken) / `description-triggering` (B's frontmatter `description`
-  didn't actually match how/when it got invoked) / `scope-drift` (B's
-  instructions and what it was actually asked to do have quietly diverged).
+  actually broken, **or one whose documented dependency — a CLI binary, a
+  network path, a file — doesn't hold in the actual execution environment**;
+  the fix for that second shape is a caveat and a manual fallback, not a
+  claim the script is internally wrong) / `description-triggering` (B's
+  frontmatter `description` didn't actually match how/when it got invoked)
+  / `scope-drift` (B's instructions and what it was actually asked to do
+  have quietly diverged).
 - **Severity**: `cosmetic` (wording, would've worked out either way) /
   `costly-guess` (produced a workable but not-obviously-right result) /
   `could-have-caused-real-damage` (a guardrail gap that, on a different run,

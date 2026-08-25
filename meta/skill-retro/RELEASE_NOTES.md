@@ -9,6 +9,24 @@ still open.
 
 ---
 
+## v1.2.2 — `tooling-bug` covers an environment-precondition mismatch, not just a code bug
+**2026-08-25**
+
+- **Reworded (step 3, `tooling-bug` category):** now explicitly covers a
+  script whose documented dependency (a CLI binary, a network path, a file)
+  doesn't hold in the actual execution environment, alongside the original
+  "script/template that's actually broken" case — the fix for the new shape
+  is a caveat plus a manual fallback, not a claim the script is internally
+  wrong.
+- **Why:** surfaced by this skill's own step-6 self-retro during a
+  `docs-loop` retro on `baileyrd/rusty_fclone`. That run's F4 finding — a
+  loop script (`watch_and_merge.sh`) assuming a `gh` CLI absent from an
+  MCP-only GitHub session — didn't cleanly fit any of the 7 categories;
+  `tooling-bug` was the nearest fit but its definition described an
+  internal code defect, not an environment mismatch.
+
+---
+
 ## v1.2.1 — YAML-safe description
 **2026-08-16**
 
