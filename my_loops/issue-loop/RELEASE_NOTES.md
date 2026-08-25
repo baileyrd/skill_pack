@@ -10,6 +10,54 @@ still open.
 
 ---
 
+## v1.9.0 — Name the obvious gh substitutes too, gate the triage table for real, require a standards-check acknowledgment
+**2026-08-25**
+
+Applied from the step-5 wrap-up retro on the `issue-loop` run against
+`baileyrd/rusty_gui` ([#5](https://github.com/baileyrd/rusty_gui/pull/5),
+[#6](https://github.com/baileyrd/rusty_gui/pull/6),
+[#7](https://github.com/baileyrd/rusty_gui/pull/7)), which closed rusty_gui#2
+and #4 (a Windows event-pump feature and a from-scratch Linux/X11 backend)
+and left #3 (macOS) deferred with a `needs-human` label. Six findings were
+reported; one (the reuse-search substitute) turned out to already be fixed by
+v1.7.0, discovered only by re-reading this file fresh before applying
+anything — same as the v1.8.0 entry below found for its own F1/F3. One
+(the cosmetic finding on step 3.3's needs-new-dependency ask needing two
+rounds when multiple issues land in the bucket at once) was explicitly
+declined by the user as not worth an edit. The four below are what's left.
+
+- **Added (missing-guardrail, `costly-guess`):** step 0's gh-absent
+  substitute list named issue-list, reuse-search, and CI-wait-and-merge, but
+  not PR creation (step 3.8), closure re-confirmation (step 3.10), or
+  `needs-human` labeling/commenting (step 1) — this run had to infer
+  `create_pull_request`/`issue_write`/`add_issue_comment` as the right tools
+  on its own. Now named, flagged explicitly as less subtle than the other
+  two substitutes (nothing session-scoped or timing-dependent blocks them).
+- **Added (missing-guardrail, `could-have-caused-real-damage`):** the
+  repo-config prerequisite already bounds a *pre-existing-code* CI failure
+  (v1.8.0, below) but said nothing about a target that ships
+  platform-conditional code. `rusty_gui`'s CI was single-OS (`ubuntu-latest`)
+  while the crate had real `#[cfg(windows)]` code — a Windows-only feature
+  could have merged with **zero CI coverage of its own logic**, silently,
+  since the runner never even compiles code gated to a different OS. Now:
+  check whether the workflow's OS matrix actually matches what the crate
+  ships.
+- **Added (missing-guardrail, `costly-guess`):** step 1's "report the triage
+  table" line was true but easy to silently skip in a busy autonomous run —
+  this run classified all three issues correctly but never posted the table
+  as its own message before starting step 2/3; the first user-facing
+  artifact was already a stop-and-ask about one of the flagged issues.
+  Reworded as an explicit hard gate rather than a narrative aside.
+- **Added (missing-guardrail, `costly-guess`):** step 3.5's
+  development-standards check ("check `references/development-standards.md`
+  ... before falling back to this repo's own conventions") had no
+  requirement to say which happened. This run fell back to the target
+  repo's own conventions for both issues with no record the standards repos
+  were ever actually checked. Now requires a one-line acknowledgment per
+  issue — a cited requirement, or an explicit "neither applied."
+
+---
+
 ## v1.8.0 — Bound the CI-baseline-fix, and keep every log current
 **2026-08-25**
 
