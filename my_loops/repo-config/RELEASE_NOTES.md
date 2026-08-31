@@ -10,6 +10,40 @@ what's still open.
 
 ---
 
+## v1.7.0 — Findings from a real non-greenfield run (baileyrd/meshed)
+**2026-08-31**
+
+- **Fixed:** `audit.sh`'s per-item presence check used `-f` (exists) rather than
+  `-s` (exists and non-empty), so a 0-byte `README.md` — present before
+  `apply.sh` ever touched it — scored `[x]` and `apply.sh`'s non-destructive
+  skip then left it blank indefinitely with nothing flagging it. This is the
+  same general principle v1.4.0 already applied to the CI-workflow row
+  specifically ("a presence check that accepts an empty file produces false
+  passes for every row") — that fix wasn't carried to the other ten rows at
+  the time; it is now.
+- **Added:** a "Where to start the check" note in
+  `references/development-standards.md` — the architecture-standards check in
+  step 2 had no guidance on search depth or entry point, which cost a full
+  clone of both standards repos and a browse of ~170 ADR filenames before
+  landing on the actually-applicable requirement (reachable in one read of
+  `ATLAS-001-foundation.md` Part IV, since the numbered volume that looked
+  relevant first was `Seed`-status and deferred back to it).
+- **Added:** a concrete citation-link template in
+  `references/development-standards.md` — "cite the requirement ID or doc
+  section" didn't say link-to-what, and produced inconsistent citations (some
+  to the exact file, one to the bare repo root) in the same generated
+  `ARCHITECTURE.md`.
+- **Added:** a "backfill on first creation" bullet in the Ongoing Maintenance
+  section — `apply.sh` seeds `RELEASE_NOTES.md`/`CHANGELOG.md` with a single
+  placeholder entry, which is fine greenfield but misleading on a
+  non-greenfield target that already has real merged-PR history: the log's
+  first entry reads as if repo history started at whichever PR happened to
+  add the log. Nothing previously said to backfill real prior history in
+  that case.
+- Source: a `skill-retro` pass on this exact run, requested by the repo
+  owner and grounded in it — see
+  [meta/skill-retro](../../meta/skill-retro)'s own findings-report format.
+
 ## v1.6.1 — Fix this log's own stale "no PR workflow yet" header
 **2026-08-17**
 
