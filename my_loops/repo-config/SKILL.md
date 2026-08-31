@@ -12,7 +12,7 @@ description: >-
   even if they only name one file, since this applies the whole set together. Also use on an
   ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md
   or CHANGELOG.md, add an entry to each before ending the turn.
-version: 1.6.1
+version: 1.7.0
 ---
 
 # repo-config
@@ -180,6 +180,16 @@ current — `RELEASE_NOTES.md` and `CHANGELOG.md` alike, each in its own format:
   the turn. Don't wait to be asked. This applies whether or not repo-config was
   what put the file there in the first place; any repo with one of these files
   qualifies.
+- **Backfill on first creation, if there's real history to backfill.**
+  `apply.sh` seeds these logs with a single placeholder entry — fine for a
+  genuinely greenfield repo, but a non-greenfield target can already have
+  real merged-PR history predating this run. Leaving the scaffold as-is in
+  that case makes the log's first real entry read as if repo history started
+  at whichever PR happened to add the log, which is misleading about
+  everything that actually shipped before it. When these files are new in
+  this run and `git log`/the PR history shows prior merged work, backfill at
+  least the most recent or most significant prior entries (real links, since
+  those PRs are already merged) rather than starting the log's memory at zero.
 - **Update every log the repo has, not whichever one you touched first.** They
   have separate conventions and separate audiences, so an entry in one is not an
   entry in the other. A repo with both and a change logged in only one is the

@@ -32,3 +32,11 @@ inline-path	yt_research_for_cc/README.md	scripts/select_videos.py
 # refers to it from scripts/, so it exists only after a test run.
 inline-path	diagrams/fireworks-tech-graph/scripts/README.md	../test-output/
 shell-path	diagrams/fireworks-tech-graph/scripts/README.md	../test-output/
+
+# Paths inside baileyrd/Atlas_Engineering_Standards_Library and
+# Rusty-Mill/rusty_foundation_akb — the two external standards repos this
+# file points repo-config at (see "When to consult them"). Real paths in
+# those repos, not this one; this repo's checker has no way to resolve them.
+inline-path	my_loops/repo-config/references/development-standards.md	docs/volumes/ATLAS-001-foundation.md
+inline-path	my_loops/repo-config/references/development-standards.md	docs/00-foundation/principles.md
+inline-path	my_loops/repo-config/references/development-standards.md	docs/01-architecture/architecture-model.md

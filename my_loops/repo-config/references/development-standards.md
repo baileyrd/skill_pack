@@ -30,6 +30,20 @@ ARCHITECTURE.md's content and the greenfield architecture defaults.
   capability-model constraint). A specific standard wins over the generic
   default; the generic default is the fallback when neither repo speaks to
   the situation.
+
+  **Where to start the check, not just what to look for**: begin at each
+  repo's foundation document — `Atlas_Engineering_Standards_Library`'s
+  `docs/volumes/ATLAS-001-foundation.md` Part IV (Architectural Principles)
+  and `rusty_foundation_akb`'s `docs/00-foundation/principles.md` +
+  `docs/01-architecture/architecture-model.md` — before browsing the
+  numbered ADR/volume directories. A `Seed`-status numbered volume (e.g.
+  `ATLAS-100-architecture.md`) commonly states in its own text that the
+  foundation document's general principles already govern until a concrete
+  trigger exists for that volume, so the fast path to "does a standard
+  already cover this" is usually the foundation doc's table of contents,
+  not a scan of every ADR filename. A shallow clone (`git clone --depth 1`)
+  is sufficient for this — there's no need for full history to read a
+  handful of markdown files.
 - **ARCHITECTURE.md generation** — the boundary-table guidance
   (`references/examples.md`) should note the governing `ATLAS-###`
   requirement ID(s) or `rusty_foundation_akb` doc section where one applies,
@@ -48,7 +62,13 @@ ARCHITECTURE.md's content and the greenfield architecture defaults.
   treated as a confirmed standard.
 - Don't quote large blocks of either repo verbatim into a generated file —
   cite the requirement ID or doc section and summarize in this repo's own
-  words, same as any other external source.
+  words, same as any other external source. Cite it as a link to the exact
+  file (and section anchor where one exists), not the bare repo root — a
+  reader following the citation should land on the requirement itself, not
+  have to go find it:
+  `` [ATLAS-XXX-NNNN](https://github.com/baileyrd/Atlas_Engineering_Standards_Library/blob/main/docs/volumes/<file>.md#<anchor>) — <one-line paraphrase> ``,
+  and correspondingly a `docs/<path>/<file>.md` link (with a `#`-anchor to
+  the relevant heading, where useful) for a `rusty_foundation_akb` citation.
 - Neither repo governs process (branching, PR/merge mechanics, issue
   templates) — that's this skill's own domain, untouched by either.
 - **The Rust standard library (`std`, `core`, `alloc`) is never a

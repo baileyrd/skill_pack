@@ -33,6 +33,12 @@ total=${#items[@]}
 echo "repo-config audit: $TARGET"
 echo
 
+# A present-but-empty file is not covered content — this bit a real run: a
+# target's README.md was 0 bytes (present before apply.sh ever touched it),
+# scored [x], and apply.sh's non-destructive skip then left it blank
+# indefinitely because the audit never flagged it. -s (non-empty) is checked
+# before -f (exists) for exactly this reason, same principle the CI-workflow
+# check below already applies for the same failure shape.
 for entry in "${items[@]}"; do
   path="${entry%%|*}"
   label="${entry##*|}"
@@ -45,9 +51,11 @@ for entry in "${items[@]}"; do
     else
       echo "[ ] $label  (dir exists but empty — $path)"
     fi
-  elif [[ -f "$full" ]]; then
+  elif [[ -s "$full" ]]; then
     echo "[x] $label"
     score=$((score + 1))
+  elif [[ -f "$full" ]]; then
+    echo "[ ] $label  (present but empty — $path)"
   else
     echo "[ ] $label  (missing — $path)"
   fi
