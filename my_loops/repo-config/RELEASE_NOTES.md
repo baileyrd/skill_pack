@@ -43,6 +43,7 @@ what's still open.
 - Source: a `skill-retro` pass on this exact run, requested by the repo
   owner and grounded in it — see
   [meta/skill-retro](../../meta/skill-retro)'s own findings-report format.
+  Shipped in [PR #87](https://github.com/baileyrd/skill_pack/pull/87).
 
 ## v1.6.1 — Fix this log's own stale "no PR workflow yet" header
 **2026-08-17**

@@ -5,6 +5,16 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Changed
+- `my_loops/repo-config` (v1.6.1 → v1.7.0) — findings from a `skill-retro`
+  pass on a real run against `baileyrd/meshed`: `audit.sh`'s per-item
+  presence check now requires non-empty (`-s`, not just `-f`), extending
+  v1.4.0's CI-row-only `-size +0` fix to all eleven rows, since a 0-byte
+  `README.md` had been scoring `[x]` and staying blank indefinitely;
+  `references/development-standards.md` gains a "where to start the check"
+  entry point and a concrete citation-link template for the two external
+  standards repos; and `SKILL.md`'s Ongoing Maintenance section gains a
+  backfill-on-first-creation guardrail for `RELEASE_NOTES.md`/`CHANGELOG.md`
+  on a non-greenfield target with real prior merged-PR history.
 - `my_loops/issue-loop` (v1.6.1 → v1.7.0) — five findings from the skill's
   own step-5 retro on a live gh-less run (Claude Code web, against
   `rusty_naner`), applied as an approved batch: the preflight's MCP

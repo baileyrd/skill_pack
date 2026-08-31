@@ -5,6 +5,30 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## repo-config's audit stops false-passing an empty file
+**2026-08-31** — [#87](https://github.com/baileyrd/skill_pack/pull/87)
+
+Applied from a `skill-retro` pass on a real repo-config run against
+`baileyrd/meshed`, requested by the repo owner directly after the run
+(`my_loops/repo-config` v1.6.1 → v1.7.0):
+
+- **Fixed — `audit.sh`'s per-item presence check accepted a 0-byte file as
+  present.** A target's `README.md` was empty before `apply.sh` ever ran,
+  scored `[x]`, and stayed blank indefinitely with nothing flagging it. The
+  CI-workflow row already required `-size +0` for exactly this reason
+  (v1.4.0) — now every row does.
+- **Added** — a "Where to start the check" note for the architecture-standards
+  lookup in `references/development-standards.md`, after this run cost a full
+  clone of both external standards repos and a browse of ~170 ADR filenames
+  to find a requirement reachable in one read of the foundation document.
+- **Added** — a concrete citation-link template in the same file, after this
+  run produced inconsistent citations (exact file vs. bare repo root) in the
+  same generated `ARCHITECTURE.md`.
+- **Added** — a guardrail: when `RELEASE_NOTES.md`/`CHANGELOG.md` are newly
+  created by a repo-config run on a non-greenfield target that already has
+  real merged-PR history, backfill it rather than letting the log's first
+  entry read as if repo history started there.
+
 ## issue-loop learns its own gh-less path
 **2026-08-19** — [#82](https://github.com/baileyrd/skill_pack/pull/82)
 
