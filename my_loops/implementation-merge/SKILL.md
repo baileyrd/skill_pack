@@ -1,7 +1,7 @@
 ---
 name: implementation-merge
 description: Merges 2+ candidate implementations of the same capability into one, combining the best of each rather than picking a winner — invoked after dedupe-loop/repo-inspector flags a convergent-but-diverged cluster where a straight pick-one isn't right. Determines mergeability first (reads each candidate, builds an item-by-item coverage matrix, classifies mergeable-complementary / mergeable-conflicting / not-mergeable — genuinely different-purpose tools stay separate). Dry-run only — produces a MERGE-PROPOSAL.md plus the proposed merged source at a scratch location, verified against each candidate's own test suite; nothing lands in either candidate's real path, no PR, no merge. Never silently drops an item from a losing candidate — every coverage-matrix item must resolve to kept, merged, or explicitly dropped with a reason. Trigger on requests to merge duplicate implementations, combine the best of two versions, or reconcile a dedupe-loop/repo-inspector convergent-but-diverged finding.
-version: 1.0.1
+version: 1.1.0
 ---
 
 # implementation-merge
@@ -19,8 +19,8 @@ crates, repos, modules, files — implementing overlapping capability) as
 input, rather than scanning a target itself the way the loop skills do.
 The candidates normally arrive as a `convergent-but-diverged` row from a
 `dedupe-loop`/`repo-inspector` report, but the user can also just name two
-implementations directly ("merge `rusty_oauth`'s and `rusty_rdp`'s HMAC
-implementations").
+implementations directly ("merge `rusty_oauth`'s and `rusty_rdp`'s
+`BigUint` implementations").
 
 **v1 is dry-run only**, same posture as `repo-inspector`: no code lands in
 either candidate's real location, no branch, no PR, no merge. The run ends
@@ -29,10 +29,17 @@ scratch location — for human review. Acting on it (actually landing the
 merge somewhere real) is a separate, explicitly-approved follow-up.
 
 Worked example throughout this file: `rusty_oauth`'s and `rusty_rdp`'s
-independently hand-rolled HMAC-SHA256/RSA/`BigUint` crypto primitives (a
-real `repo-inspector` finding against `Rusty-Mill/rusty_mill`) — a genuine
-mergeable-complementary cluster confirmed while building this skill (see
-RELEASE_NOTES.md).
+independently hand-rolled `BigUint` (arbitrary-precision unsigned integer)
+implementations, run end-to-end (not just described) while building this
+skill — a real `repo-inspector` finding against `Rusty-Mill/rusty_mill`,
+confirmed `mergeable — complementary` and verified 13/13 against both
+crates' own test suites (see RELEASE_NOTES.md). `repo-inspector`'s original
+report bundled this cluster together with "HMAC-SHA256" and "RSA public
+key" under one row; re-reading the actual source for this run found the
+HMAC-SHA256 part of that claim was wrong — `rusty_rdp`'s `hmac.rs`
+implements `hmac_md5`/`hmac_sha1` only, no SHA-256 at all — one instance of
+the more general point step 0 makes below about not trusting a bundled
+cluster row at face value.
 
 ## Run (when invoked)
 
@@ -46,9 +53,16 @@ RELEASE_NOTES.md).
 - **`CANDIDATES`** — 2 or more `<label>=<path>` pairs naming what's being
   merged. If the caller hands in a `dedupe-loop`/`repo-inspector` cluster
   row, its "candidate crates/repos" column plus each one's local
-  name/module is exactly this. If a candidate's repo isn't checked out
-  locally yet, clone it (or `add_repo`) before this step — this skill, like
-  `repo-inspector`, has no clone step of its own.
+  name/module is exactly this — **but check by reading, not by row count,
+  whether that row actually names one capability or several bundled
+  together.** A cluster row can cover more than one distinct capability at
+  once (confirmed in practice: a `repo-inspector` row labeled "hand-rolled
+  crypto primitives" turned out to bundle three separate things — HMAC,
+  RSA, `BigUint` — only one of which was actually mergeable-complementary
+  on a close read). Run this skill once per genuinely separate capability
+  rather than assuming one row means one `CANDIDATES` set. If a candidate's
+  repo isn't checked out locally yet, clone it (or `add_repo`) before this
+  step — this skill, like `repo-inspector`, has no clone step of its own.
 - **Not every cluster handed to this skill turns out to be genuinely
   mergeable** — step 2 makes that call fresh, even if the caller already
   called it `convergent-but-diverged`. Don't skip step 2's read on the
@@ -79,9 +93,14 @@ cluster as one of:
 - **mergeable — complementary**: the core capability is functionally
   equivalent, and the differences are additive — one candidate does
   something the other doesn't, without contradicting what the other does.
-  The `rusty_oauth`/`rusty_rdp` HMAC-SHA256 case is this: same algorithm,
-  `rusty_oauth` additionally has `constant_time_eq` for MAC comparison,
-  `rusty_rdp` doesn't — no conflict, just an item to carry forward.
+  The `rusty_oauth`/`rusty_rdp` `BigUint` case is this: identical
+  representation and core algorithms, but each has gaps the other fills —
+  `rusty_rdp` has little-endian serialization (`from_bytes_le`/
+  `to_bytes_le`, matching RDP's own wire format) and a zero-modulus guard
+  in `modpow` that `rusty_oauth` lacks; `rusty_oauth` has `bit_length`/
+  `compare` as public general-purpose ops that `rusty_rdp` only had
+  private, differently-named equivalents of. No conflict — every
+  difference is an item to carry forward, not a contradiction to resolve.
 - **mergeable — conflicting**: same capability, but a genuine behavioral
   conflict exists (different error-handling contracts, incompatible
   assumptions, one panics where the other returns `Result`) — still worth
@@ -98,29 +117,47 @@ cluster as one of:
 **3. For mergeable clusters, write the proposal** — format:
 `references/merge-proposal-format.md`. Write the actual proposed merged
 source to a scratch location (never into either candidate's real path —
-e.g. `<scratch-dir>/<cluster-name>-merge-proposal/`), using whichever
-candidate's structure is the more solid base where that's a reasonable
-call, but explicitly pulling in the other candidate's additional behavior
-rather than just copying the "winner" wholesale. The coverage table is
+e.g. `<scratch-dir>/<cluster-name>-merge-proposal/`). Don't assume a single
+candidate becomes "the base" with the other's behavior patched in —
+often there isn't a clean winner to build on top of. Synthesize per item
+instead: for each row the coverage matrix produced, decide independently
+which candidate's version to keep, whether to merge the two, or (rarer)
+whether one item's implementation is simply better and should be adopted
+even where the other candidate's overall structure is otherwise the
+stronger base. A single candidate's structure *can* be the right starting
+point when it clearly is — just don't default to it. The coverage table is
 mandatory and exhaustive: **every row `coverage_matrix.py` produced for
 this cluster must appear in the table with a resolution** — kept from one
 candidate, merged from both, or dropped with a stated reason. A "wasn't
 needed" reason without saying *why* it wasn't needed isn't a reason — see
 Rules.
 
-**4. Verify** — re-run `scripts/extract_public_surface.sh` +
-`coverage_matrix.py` over `[the candidates + the proposed merge's own
-source]` and confirm every item that had a "kept"/"merged" resolution in
-step 3's table is actually present in the proposal — this is the
-mechanical half of "never silently drop," catching a table that says
-"merged" for something the actual written code forgot. Then, where a
-candidate has a reachable test suite, run it against the proposed merge
-(point the test file's imports at the proposal, run `cargo test`/whatever
-the candidate's own test command is) and report pass/fail per candidate.
-A failure means the proposal doesn't yet honor that candidate's tested
-behavior — fix the proposal, or write the regression into
-`MERGE-PROPOSAL.md`'s Verification section as a stated, accepted tradeoff.
-Never silent either way.
+**4. Verify** — two required sub-steps, in order. Both are part of "done,"
+not one required and one optional: the first run of this skill completed
+step 4b (test-suite verification) and reported it as if step 4 were fully
+done, having quietly skipped 4a — caught only in the wrap-up retro that
+run's own step 6 required, when re-running 4a after the fact turned out
+clean (no drop had actually happened), which was luck, not something 4b
+established. Don't repeat that: 4a is not a formality bundled alongside
+4b, it's the actual mechanism "never silently drop" depends on, and step 5
+cannot be reported done without it.
+
+**4a. Mechanical check (required, do this first).** Re-run
+`scripts/extract_public_surface.sh` + `coverage_matrix.py` over `[the
+candidates + the proposed merge's own source]` and confirm every item that
+had a "kept"/"merged" resolution in step 3's table is actually present in
+the proposal. This is the actual enforcement of "never silently drop" —
+step 3's table is a claim; this is what checks the claim against the code
+that was actually written, catching a table that says "merged" for
+something the written code forgot.
+
+**4b. Behavioral verification.** Where a candidate has a reachable test
+suite, run it against the proposed merge (point the test file's imports at
+the proposal, run `cargo test`/whatever the candidate's own test command
+is) and report pass/fail per candidate. A failure means the proposal
+doesn't yet honor that candidate's tested behavior — fix the proposal, or
+write the regression into `MERGE-PROPOSAL.md`'s Verification section as a
+stated, accepted tradeoff. Never silent either way.
 
 **5. Report** — `MERGE-PROPOSAL.md` plus the scratch merged source are the
 whole deliverable. **No code lands in either candidate's real location, no
