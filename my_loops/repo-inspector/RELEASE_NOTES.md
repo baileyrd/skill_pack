@@ -9,6 +9,37 @@ still open.
 
 ---
 
+## v1.2.0 — Findings from a downstream consumer (implementation-merge) actually using this report
+**2026-09-01**
+
+A `skill-retro` pass grounded not in a fresh run of this skill, but in what
+happened when `implementation-merge` (a real downstream consumer) consumed
+this skill's own already-delivered `repo-inspector-report.md` as input.
+
+- **Added (`references/repo-inspector-report-format.md`):** the Cluster
+  column now says explicitly not to fold multiple mechanically-distinct
+  `find_clusters.py` clusters into one narrative row just because they're
+  thematically related. **Why:** a real report combined three unrelated
+  clusters (an HMAC construction, an RSA key type, a `BigUint` type) into
+  one row labeled "hand-rolled crypto primitives" — `implementation-merge`
+  had to split it back into three separate merge candidates itself before
+  it could act on any of them.
+- **Added (`SKILL.md` step 2):** a mechanical spot-check — `grep -c 'fn
+  <name>\|struct <name>\|...'` — required before any `exact/near-duplicate`
+  row naming a specific shared symbol ships in the final report. **Why:** a
+  real report claimed a specific hashing function (`hmac_sha256`) existed
+  in a crate that never actually defined it — the crate only had
+  `hmac_md5`/`hmac_sha1`, grouped in by `find_clusters.py`'s filename/RFC-
+  citation similarity to a genuinely different crate's file. Step 2 already
+  said "read the actual source, don't just skim the doc preview" — that
+  instruction existed and was still shortcut on a 507-cluster report;
+  caught only by luck, when a different skill's own read of the same file
+  happened later. The grep is a cheap mechanical backstop for exactly the
+  volume where a full manual read gets shortcut somewhere.
+- Both findings came from the same real report row (the crypto-primitives
+  cluster) — see `my_loops/implementation-merge/RELEASE_NOTES.md` v1.0.0/
+  v1.1.0 for the downstream side of the same incident.
+
 ## v1.1.0 — Check prior duplication/sovereignty history before classifying
 **2026-09-01**
 
