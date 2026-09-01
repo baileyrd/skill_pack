@@ -1,7 +1,7 @@
 ---
 name: repo-inspector
 description: Dry-run inspector for the RustyMill Cargo-workspace monorepo — ports dedupe-loop's clustering/classification (exact-duplicate / near-duplicate / diverged) and sovereignty-loop's external-dependency detection, adapted to work across crates in one workspace instead of across separate repos. Produces one repo-inspector-report.md, a duplication-clusters section (candidate crates, classification, completeness, recommended crate to extract) plus a sovereignty-findings section (external deps, internal RustyMill/baileyrd equivalent if any, a note to run parity-loop when none exists). v1 is report-only — no issues, no PRs, no code changes, no auto-merge — every row is left for human review. Trigger on requests to audit the RustyMill monorepo for duplicated crates, find crates worth hoisting into a shared dependency, or check the monorepo's external dependencies against the platform ecosystem. Checks repo-config has been applied first, same as the sibling loop skills.
-version: 1.0.0
+version: 1.0.1
 ---
 
 # repo-inspector
@@ -205,6 +205,15 @@ level of actionable? Read-only, safe to run unattended; applying anything
   expected, high-volume shape of that noise on a workspace this size —
   triage them as `coincidental-similarity` rather than reading each one as
   a real signal.
+- `index_workspace_capabilities.sh` prunes nested workspace members (a
+  crate whose own directory tree contains another member's, e.g.
+  `crates/rusty_term/l13`, `crates/rusty_json/rusty_json-derive`) so their
+  files aren't walked twice and double-tagged under both crate names —
+  fixed in v1.0.1 after a real run against `Rusty-Mill/rusty_mill`
+  fabricated a cross-crate "duplicate" out of `rusty_term_l13`'s own public
+  items appearing to also exist in `rusty_term`, which was really the same
+  file read under two crate tags. Confirm this still holds on a workspace
+  with a different nesting shape before trusting step 2's output blind.
 - No clone path, and deliberately none needed: unlike `sovereignty-loop`'s
   `scan_platform_repos.sh`, `scan_workspace_sovereignty.sh` never shells out
   to `gh repo clone` — every sibling crate is already local under

@@ -9,6 +9,30 @@ still open.
 
 ---
 
+## v1.0.1 — Prune nested workspace members before indexing
+**2026-09-01**
+
+- **Fixed:** `index_workspace_capabilities.sh` walked a crate's entire
+  directory tree with no boundary at another workspace member nested
+  inside it. `Rusty-Mill/rusty_mill` has several such cases
+  (`crates/rusty_term/l13`, `crates/rusty_json/rusty_json-derive`,
+  `crates/rusty_tokio/rusty_tokio-macros`, `crates/rusty_err/derive`) —
+  the nested crate's files got indexed once under its own name (correct)
+  and again under its parent's (wrong), fabricating a cross-crate
+  "duplicate" for every public item in the nested crate. Confirmed live: a
+  first real run against `rusty_mill` reported `rusty_term_l13`'s
+  `notify_command_finished`/`notify_resource_changed` as also present in
+  `rusty_term` — it was the same file, read under two crate tags. Now
+  prunes any other workspace member's directory before walking (`find
+  ... -path <other-member-dir> -prune -o ...`), verified against this
+  exact workspace: the false pair is gone, 19 spurious rows removed
+  (~8,082 → 8,063), 10 clusters that existed only because of the bug no
+  longer appear (517 → 507).
+- Found while actually running `repo-inspector` against
+  `Rusty-Mill/rusty_mill` for the first time, not by inspection — this v1
+  had not been used against a real target with nested workspace members
+  before this run.
+
 ## v1.0.0 — Initial release
 **2026-09-01**
 

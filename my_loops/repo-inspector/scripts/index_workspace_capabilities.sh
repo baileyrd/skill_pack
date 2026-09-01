@@ -53,10 +53,29 @@ for pkg in data["packages"]:
         print(pkg["name"] + "\t" + manifest_dir)
 ')"
 
+all_dirs="$(cut -f2 <<< "$members")"
+
 while IFS=$'\t' read -r CRATE CRATE_DIR; do
   [[ -z "$CRATE" ]] && continue
 
-  find "$CRATE_DIR" -type f -name '*.rs' -not -path '*/target/*' | while read -r f; do
+  # Prune other workspace members nested inside this crate's own directory
+  # tree (e.g. crates/rusty_term/l13, crates/rusty_json/rusty_json-derive,
+  # crates/rustils_async/crates/*). Without this, a nested member's files
+  # get walked twice — once correctly under its own name, once again under
+  # its parent's — which manufactures a false "duplicate" for every public
+  # item in the nested crate (confirmed against this exact workspace:
+  # rusty_term_l13's notify_command_finished/notify_resource_changed
+  # appeared to also exist verbatim in rusty_term before this fix, because
+  # crates/rusty_term/l13 is inside crates/rusty_term's own tree).
+  prune_args=()
+  while IFS= read -r other_dir; do
+    [[ -z "$other_dir" || "$other_dir" == "$CRATE_DIR" ]] && continue
+    case "$other_dir" in
+      "$CRATE_DIR"/*) prune_args+=(-path "$other_dir" -prune -o) ;;
+    esac
+  done <<< "$all_dirs"
+
+  find "$CRATE_DIR" "${prune_args[@]}" -type f -name '*.rs' -not -path '*/target/*' -print | while read -r f; do
     rel="${f#"$CRATE_DIR"/}"
 
     # Module-level doc: leading //! lines at the top of the file, joined.
