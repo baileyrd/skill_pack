@@ -23,6 +23,17 @@ One row per candidate cluster that survived clustering + classification
 Columns:
 - **Cluster** — a short label for what the cluster does, not a symbol name
   (symbol names differ per crate by definition; see step 2's clustering).
+  **One row per mechanically-distinct cluster — don't fold several of
+  `find_clusters.py`'s separate clusters (different normalized item names)
+  into one narrative row just because they're thematically related.**
+  Confirmed costly in practice: a report once combined three unrelated
+  clusters — an HMAC construction, an RSA key type, and a `BigUint`
+  type — under one row labeled "hand-rolled crypto primitives" for
+  readability. `implementation-merge`, a real downstream consumer of this
+  report, had to split that row back into three separate merge candidates
+  itself before it could act on any of them. Group related rows under a
+  shared prose theme in the surrounding write-up if useful, but keep the
+  *rows* 1:1 with actually-distinct capabilities.
 - **Candidate crates** — every workspace crate in the cluster, with the
   module/item local to each, so a later extraction decision (a separate,
   explicitly-approved follow-up — see SKILL.md Rules) knows what it would be

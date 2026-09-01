@@ -1,7 +1,7 @@
 ---
 name: repo-inspector
 description: Dry-run inspector for the RustyMill Cargo-workspace monorepo — ports dedupe-loop's clustering/classification (exact-duplicate / near-duplicate / diverged) and sovereignty-loop's external-dependency detection, adapted to work across crates in one workspace instead of across separate repos. Produces one repo-inspector-report.md, a duplication-clusters section (candidate crates, classification, completeness, recommended crate to extract) plus a sovereignty-findings section (external deps, internal RustyMill/baileyrd equivalent if any, a note to run parity-loop when none exists). v1 is report-only — no issues, no PRs, no code changes, no auto-merge — every row is left for human review. Trigger on requests to audit the RustyMill monorepo for duplicated crates, find crates worth hoisting into a shared dependency, or check the monorepo's external dependencies against the platform ecosystem. Checks repo-config has been applied first, same as the sibling loop skills.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # repo-inspector
@@ -126,6 +126,19 @@ is — tested, handles edge cases, vs. a stub or subset. That's the evidence
 the "recommended crate to extract" column needs, and skimming
 `find_clusters.py`'s 80-character doc preview isn't enough to write it —
 read the actual source.
+
+**Before any `exact/near-duplicate` row naming a specific shared symbol
+goes into the final report, spot-check it mechanically**: `grep -c 'fn
+<name>\|struct <name>\|trait <name>\|enum <name>' <candidate-file>` for
+every candidate the row claims has it. Zero hits means the claim is wrong
+— fix it before it ships, don't rely on having read carefully enough. This
+exists because "read the actual source" alone still let a wrong claim
+through on a real run: a report once asserted a specific hashing function
+existed in a crate purely because a same-named, same-RFC-citing sibling
+file got grouped by `find_clusters.py`'s filename/keyword clustering — the
+candidate crate never actually defined it. A 507-cluster report is exactly
+the volume where a full manual read gets shortcut somewhere; this grep is
+cheap enough to run on every specific-symbol claim regardless.
 
 **3. Sovereignty pass** — `scripts/scan_workspace_sovereignty.sh
 <workspace-root> [--crate <name>]` runs `cargo metadata --no-deps` to
