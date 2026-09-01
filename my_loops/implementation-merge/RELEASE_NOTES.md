@@ -9,6 +9,43 @@ still open.
 
 ---
 
+## v1.1.0 — skill-retro findings from the first real run (F1–F4)
+**2026-09-01**
+
+Applied all four findings from a `skill-retro` pass grounded in the first
+real end-to-end run of this skill (`rusty_oauth`'s/`rusty_rdp`'s `BigUint`
+merge, 13/13 tests passing).
+
+- **F1 (fixed a factual error):** the worked example throughout `SKILL.md`
+  (description, intro, step 2) claimed `rusty_oauth`/`rusty_rdp` share an
+  "HMAC-SHA256" case — wrong, inherited uncorrected from `repo-inspector`'s
+  own report. Re-reading the actual source for the real run found
+  `rusty_rdp`'s `hmac.rs` has no `hmac_sha256` at all (only
+  `hmac_md5`/`hmac_sha1`, for NTLM/Kerberos). Replaced the worked example
+  throughout with `BigUint` — the case actually run and verified — and
+  noted the correction as an instance of F2's own point.
+- **F2 (new guidance, step 0):** a `dedupe-loop`/`repo-inspector` cluster
+  row can bundle more than one distinct capability under one row — the
+  real row this skill's worked example came from bundled HMAC, RSA, and
+  `BigUint` together, only one of which turned out mergeable-complementary
+  on a close read. Step 0 now says to check by reading, not row count, and
+  run this skill once per genuinely separate capability.
+- **F3 (new guardrail, step 4 split into 4a/4b):** the first real run
+  skipped the mechanical coverage re-run ("confirm every kept/merged item
+  is actually present in the proposal") — the stated enforcement mechanism
+  for this skill's one core rule — relying only on the test-suite check.
+  It turned out clean when re-run for the retro, but that was luck, not
+  something the test suite established. Step 4 is now two explicit,
+  ordered sub-steps: 4a (the mechanical check, required first) and 4b
+  (test-suite verification) — both required for step 5, not one required
+  and one bundled-in-as-an-aside.
+- **F4 (reframed, step 3):** "using whichever candidate's structure is the
+  more solid base" undersold what actually worked best in the real run —
+  per-item synthesis with no single base file. Step 3 now says so
+  explicitly, while still allowing a single candidate as the base when
+  that's genuinely the right call.
+- Not applied: none — all four findings from the retro were approved.
+
 ## v1.0.1 — Match `pub(crate)`/`pub(super)`, not just bare `pub`
 **2026-09-01**
 
