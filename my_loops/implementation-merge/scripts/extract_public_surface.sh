@@ -10,6 +10,13 @@
 # this skill operates on one already-identified cluster (handed in by
 # repo-inspector/dedupe-loop, or named directly), not a scan target.
 #
+# Matches `pub`, `pub(crate)`, `pub(super)`, and `pub(in some::path)` alike
+# -- not just bare `pub`. A real merge candidate's shared internals are
+# routinely `pub(crate)` (visible within the crate, not exported outside
+# it), and the narrower bare-`pub` pattern silently missed them entirely,
+# confirmed against a real cluster (rusty_oauth's/rusty_rdp's BigUint,
+# where add/sub/mul are pub(crate)) while first using this skill for real.
+#
 # Output (TSV, no header): label<TAB>file<TAB>item_kind<TAB>item_name<TAB>doc
 # `file` is relative to the candidate's own path if a directory, or just the
 # basename if a single file.
@@ -66,9 +73,9 @@ extract_one() {
     }
     /^[[:space:]]*#\[/ { next }
     /^[[:space:]]*$/ { next }
-    /^[[:space:]]*pub[[:space:]]+(fn|struct|trait|enum)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*/ {
+    /^[[:space:]]*pub(\([a-zA-Z_: ]*\))?[[:space:]]+(fn|struct|trait|enum)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*/ {
       s=$0
-      match(s, /pub[[:space:]]+(fn|struct|trait|enum)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*/)
+      match(s, /pub(\([a-zA-Z_: ]*\))?[[:space:]]+(fn|struct|trait|enum)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*/)
       tok=substr(s, RSTART, RLENGTH)
       n=split(tok, parts, /[[:space:]]+/)
       kind=parts[2]
