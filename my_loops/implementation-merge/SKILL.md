@@ -1,7 +1,7 @@
 ---
 name: implementation-merge
 description: Merges 2+ candidate implementations of the same capability into one, combining the best of each rather than picking a winner — invoked after dedupe-loop/repo-inspector flags a convergent-but-diverged cluster where a straight pick-one isn't right. Determines mergeability first (reads each candidate, builds an item-by-item coverage matrix, classifies mergeable-complementary / mergeable-conflicting / not-mergeable — genuinely different-purpose tools stay separate). Dry-run only — produces a MERGE-PROPOSAL.md plus the proposed merged source at a scratch location, verified against each candidate's own test suite; nothing lands in either candidate's real path, no PR, no merge. Never silently drops an item from a losing candidate — every coverage-matrix item must resolve to kept, merged, or explicitly dropped with a reason. Trigger on requests to merge duplicate implementations, combine the best of two versions, or reconcile a dedupe-loop/repo-inspector convergent-but-diverged finding.
-version: 1.0.0
+version: 1.0.1
 ---
 
 # implementation-merge
@@ -177,11 +177,23 @@ this step needs a deliberate self-check at the end of step 5 — the repo's
   writing a good merged implementation. Treat the coverage table as a
   checklist this skill enforces, not evidence the merge itself is well
   designed.
-- `extract_public_surface.sh` is Rust-specific (same `pub fn`/`pub
-  struct`/`pub trait`/`pub enum` + doc-comment extraction as
+- `extract_public_surface.sh` is Rust-specific (same `pub`/`pub(crate)`/
+  `pub(super)` + `fn`/`struct`/`trait`/`enum` + doc-comment extraction as
   `repo-inspector`'s scripts) — a non-Rust cluster needs the comparison
   done by hand; the classification and proposal-writing steps themselves
   don't depend on the language.
+- `coverage_matrix.py` only ever sees what `extract_public_surface.sh`
+  extracted, which by design excludes fully **private** items (no `pub`
+  qualifier at all) — they're invisible to any caller, so they're
+  correctly out of scope for a *coverage* comparison. But a private
+  helper can still represent a real design choice worth recording in
+  `MERGE-PROPOSAL.md` even though no tool will ever flag it: confirmed in
+  practice merging `rusty_oauth`'s/`rusty_rdp`'s `BigUint`, where dropping
+  a private `divmod` helper (never public, but the subject of one of
+  `rusty_oauth`'s own unit tests) needed a step 3 write-up and a step 4
+  adapted-test note that no amount of running the coverage-matrix tooling
+  would have produced on its own — step 1's "read the actual source"
+  requirement is what catches this, not the scripts.
 - Step 4's test verification is only as good as each candidate's own test
   suite — a behavior neither candidate tests can regress in the proposal
   without either script or the test run catching it.
