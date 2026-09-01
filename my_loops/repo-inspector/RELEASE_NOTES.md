@@ -9,6 +9,33 @@ still open.
 
 ---
 
+## v1.1.0 — Check prior duplication/sovereignty history before classifying
+**2026-09-01**
+
+- **Added:** step 0 now instructs checking the target's prior PR/issue
+  history (`git log --oneline --merges` or the GitHub PR list, for merges
+  mentioning duplication/dedupe/sovereignty/hoist) before step 2's
+  clustering starts — a workspace this size can already have had a
+  duplication sweep run against it by hand, and re-flagging its already-
+  fixed, already-kept, or already-deferred findings as new wastes the
+  reviewer's time.
+- **Added:** step 3 now instructs checking a sovereignty candidate crate's
+  own README/module docs for an explicit statement of intent before writing
+  `covered` off a name/purpose match alone — a name match is a heuristic,
+  not proof of intent to serve as a replacement.
+- **Why:** both came directly out of the first real run against
+  `Rusty-Mill/rusty_mill`. Checking merge history first surfaced two prior
+  duplication sweeps (8 fixed findings, 2 kept deliberately, 3 deferred as
+  coincidental) that the resulting report correctly didn't re-present as
+  new. Separately, `rusty_tokio` looked like an obvious `covered` candidate
+  for the `tokio` dependency by name and purpose alone — its own README
+  states directly "it exists to actually understand how an async runtime
+  works, not to replace tokio," which would have been missed without
+  reading it, and `covered` there would have proposed relitigating an
+  already-decided non-goal.
+- Neither change touches the scripts — this is guidance only, in step 0 and
+  step 3 of the `Run` section.
+
 ## v1.0.1 — Prune nested workspace members before indexing
 **2026-09-01**
 

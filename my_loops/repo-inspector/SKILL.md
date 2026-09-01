@@ -1,7 +1,7 @@
 ---
 name: repo-inspector
 description: Dry-run inspector for the RustyMill Cargo-workspace monorepo — ports dedupe-loop's clustering/classification (exact-duplicate / near-duplicate / diverged) and sovereignty-loop's external-dependency detection, adapted to work across crates in one workspace instead of across separate repos. Produces one repo-inspector-report.md, a duplication-clusters section (candidate crates, classification, completeness, recommended crate to extract) plus a sovereignty-findings section (external deps, internal RustyMill/baileyrd equivalent if any, a note to run parity-loop when none exists). v1 is report-only — no issues, no PRs, no code changes, no auto-merge — every row is left for human review. Trigger on requests to audit the RustyMill monorepo for duplicated crates, find crates worth hoisting into a shared dependency, or check the monorepo's external dependencies against the platform ecosystem. Checks repo-config has been applied first, same as the sibling loop skills.
-version: 1.0.1
+version: 1.1.0
 ---
 
 # repo-inspector
@@ -79,6 +79,19 @@ step here to gate.
   equivalent) so this run doesn't propose re-doing an already-decided
   extraction or re-litigate an already-decided floor dependency — it's
   looking for *new*, not-yet-addressed findings.
+- **Check the target's prior PR/issue history for earlier duplication or
+  sovereignty work** before generating new candidates — `git log --oneline
+  --merges` (or the GitHub PR list) for merges whose titles mention
+  duplication/dedupe/sovereignty/hoist, and read any that match. A
+  workspace this size can already have had an ad hoc or `dedupe-loop`-
+  shaped pass run against it by hand, with real findings fixed, kept
+  deliberately, or investigated and deferred — re-flagging any of those as
+  new in step 2's or step 3's report wastes the reviewer's time and reads
+  as not having looked. Confirmed valuable in practice: a real run against
+  `Rusty-Mill/rusty_mill` found two prior duplication sweeps this way (8
+  fixed findings, 2 kept deliberately, 3 deferred as coincidental) before
+  clustering even started, and none of that got re-presented as new in the
+  resulting report.
 
 **1. Build a per-crate capability index** — `scripts/index_workspace_capabilities.sh
 <workspace-root>` runs `cargo metadata --no-deps` to enumerate workspace
@@ -144,7 +157,15 @@ The `rusty_<thing>` naming pattern (`rusty_json` ~ `serde_json`, `rusty_tls`
 ~ `rustls`, and so on — `references/platform-directory.md` has the current
 snapshot) is a useful first filter for `covered`/`partial`, same caveat
 `sovereignty-loop` states: it's a heuristic, not proof. Confirm by reading
-the source before writing `covered`.
+the source before writing `covered` — and specifically check the candidate
+crate's own README/module docs for an explicit statement of what it is and
+isn't for, since a name or description match doesn't guarantee the crate
+actually intends to serve as a replacement. Confirmed load-bearing in
+practice: `rusty_tokio` (a hand-rolled async runtime, an obvious `tokio`
+name/purpose match) states directly in its own README "it exists to
+actually understand how an async runtime works, not to replace tokio" —
+writing `covered` for `tokio` off the name/purpose match alone would have
+proposed relitigating an already-decided non-goal.
 
 **4. Report** — write `repo-inspector-report.md` at `WORKSPACE_ROOT`'s root
 (format: `references/repo-inspector-report-format.md`), both sections
