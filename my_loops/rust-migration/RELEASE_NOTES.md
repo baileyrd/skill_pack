@@ -9,6 +9,46 @@ still open.
 
 ---
 
+## v1.4.0 — Harness overrides, pipe-safe manifest cells, and the issue-close rate limit
+**2026-09-02**
+
+Applied from a `skill-retro` pass on the `rusty_meshed` → `Rusty-Mill/rusty_mill`
+migration run (`baileyrd/meshed`, `capability-manifest.md` finished at
+436/436 `DONE`), requested by the repo owner directly after the run:
+
+- **Added (Rules):** an explicit exception for a harness/session that
+  designates a fixed development branch and instructs direct pushes to it —
+  that supersedes step 3's branch-per-issue/PR/merge-commit flow for the
+  run, and the override belongs in the wrap-up report rather than being a
+  silent deviation. The run this came from pushed every capability straight
+  to one pre-designated branch under explicit session-level instructions;
+  the skill's Rules stated the PR workflow as unconditional with no
+  acknowledgment that an external directive can supersede it.
+- **Added (step 0 preflight, item 5):** closing an issue (`gh issue close`
+  or the MCP `issue_write` update-state call) can hit the same rate limit
+  as `search_issues`, even though closing isn't obviously a search — some
+  implementations resolve the issue's ID via an internal search-based
+  lookup first. The run hit "API rate limit already exceeded" on every
+  `issue_write` close attempt for over an hour while `add_issue_comment`
+  and `issue_read` on the same issues kept working — treat this as the
+  existing GitHub-rate-limited stop condition (work is done, only the state
+  transition is blocked), not as something broken; comment the outcome as a
+  durable record and retry the close later.
+- **Added (`references/capability-manifest-format.md`):** a line warning
+  against literal `|` characters in manifest cells. `check_manifest_coverage.sh`
+  splits naively on every `|`, so a source type union (`str | None`) or an
+  enum spelled `table\|json` shifted columns and made 5 already-`DONE`
+  rows read as malformed on this run — reworded (`Optional[str]`,
+  `table/json`) rather than fixing the parser, since the false failure is
+  avoidable at the point the row is written.
+
+**Evidence, stated honestly:** all three are single-run findings from one
+migration. The first two are documentation/guardrail additions with low
+cost if never triggered again; the manifest-format note is the same. None
+required a script change.
+
+---
+
 ## v1.3.0 — Don't depend on an executable bit the sync drops
 **2026-08-17**
 
