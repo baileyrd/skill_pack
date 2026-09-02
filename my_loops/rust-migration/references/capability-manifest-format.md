@@ -59,3 +59,10 @@ row must be `DONE` (Evidence non-empty) or `OUT-OF-SCOPE` (Reason
 non-empty) for the check to pass. A `REQUIRED` row, or a `DONE`/`OUT-OF-SCOPE`
 row missing its required column, fails the check and is printed by name —
 this is what step 4 runs before the migration can be reported finished.
+
+**Avoid literal `|` characters in any cell.** The coverage script splits
+naively on every `|` in a row, including one inside backticks or escaped
+with `\|` — a source type union (`str | None`) or an enum spelled out as
+`table\|json` shifts every column after it and makes an otherwise-`DONE`
+row read as malformed. Write `Optional[str]` or `str or None`, and
+`table/json`, instead — same meaning, no false coverage failure.

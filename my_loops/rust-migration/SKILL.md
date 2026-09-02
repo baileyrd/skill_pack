@@ -1,7 +1,7 @@
 ---
 name: rust-migration
 description: Runs an autonomous "migrate this repo/application to Rust" loop built to prevent the recurring failure mode where a migration quietly treats an existing capability as optional and drops or downgrades it. Before any Rust is written, inventories every observable capability of the source (public APIs, CLI flags, HTTP routes, config/env, jobs, file formats, error/exit behavior, existing tests) into a manifest where every row defaults to REQUIRED — a row moves to OUT-OF-SCOPE only by explicit, written, user-attributed sign-off, never inferred by Claude. Files one issue per capability, checks platform siblings (Rusty-Mill/baileyrd rusty_* repos) for something to port before hand-rolling, verifies behavioral parity before closing, and won't report the migration done while any REQUIRED row is undone. Use whenever the user asks to migrate/port/rewrite a repo or application to Rust, wants a repeatable migration-to-merged-PR loop, or references this by name (rust-migration, migration loop).
-version: 1.3.0
+version: 1.4.0
 ---
 
 # rust-migration
@@ -86,6 +86,16 @@ Concretely, this means:
      `head_sha`, never by branch: runs are associated to PRs by branch name, so
      a stale run from an earlier PR on a reused branch can appear attached to
      the current one and read as a pass for code it never ran against.
+  5. Note that **closing an issue** (`gh issue close` or the MCP `issue_write`
+     update-state call) can hit the same rate limit as `search_issues`/`gh
+     issue list --search`, even though closing isn't obviously a search —
+     some tool implementations resolve the issue's ID via an internal
+     search-based lookup first. If closes start failing with a rate-limit
+     error while comments/reads on the same issues still succeed, treat it
+     as the GitHub-API-rate-limited stop condition (the work itself is not
+     failing, only the state transition) rather than assuming something
+     broke — comment the outcome on each issue as a durable record and retry
+     the close once the limit clears.
 - `SOURCE_REPO` (what's being migrated, any language) and `TARGET_REPO` (the
   Rust repo/crate the migration lands in — may be the same repo migrated in
   place, a new repo, or an existing `rusty_*` repo being extended).
@@ -314,6 +324,12 @@ Check these every iteration, not just at start:
   against the default branch, never a direct push; on green CI, merge with
   a **merge commit**, never squash/rebase-merge; full history preserved
   deliberately. Don't re-ask this per run.
+- If the invoking harness/session explicitly designates a fixed development
+  branch and instructs direct pushes to it, that supersedes this step's
+  branch-per-issue/PR flow for the run — note the override in the wrap-up
+  report rather than silently deviating from the PR workflow with no
+  explanation. This is a harness-mandated exception, not license to skip PRs
+  on Claude's own judgment.
 - A capability's issue does not close without a parity test demonstrating
   the Rust implementation matches the source's behavior for that
   capability — "it compiles" is not evidence.
