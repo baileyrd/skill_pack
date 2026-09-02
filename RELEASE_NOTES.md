@@ -5,6 +5,31 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## rust-migration learns harness overrides, pipe-safe manifest cells, and the issue-close rate limit
+**2026-09-02** — [#95](https://github.com/baileyrd/skill_pack/pull/95)
+
+Applied from a `skill-retro` pass on a real `rust-migration` run against
+`baileyrd/meshed` → `Rusty-Mill/rusty_mill` (`capability-manifest.md`
+finished at 436/436 `DONE`), requested by the repo owner directly after the
+run (`my_loops/rust-migration` v1.3.0 → v1.4.0):
+
+- **Added** — a Rules exception: a harness/session that mandates direct
+  pushes to a fixed development branch supersedes step 3's
+  branch-per-issue/PR/merge-commit flow for that run, with the override
+  noted in the wrap-up report instead of silently deviating.
+- **Added** — a step 0 preflight item: closing an issue can hit the same
+  rate limit as `search_issues` via an internal ID lookup, even though
+  closing isn't obviously a search call. The run hit "API rate limit
+  already exceeded" on every close attempt for over an hour while comments
+  and reads on the same issues kept working.
+- **Added** — a warning in `references/capability-manifest-format.md`
+  against literal `|` characters in manifest cells:
+  `check_manifest_coverage.sh` splits naively on every `|`, and a source
+  type union (`str | None`) or an enum spelled `table\|json` misread 5
+  already-`DONE` rows as malformed on this run.
+
+---
+
 ## repo-config's audit stops false-passing an empty file
 **2026-08-31** — [#87](https://github.com/baileyrd/skill_pack/pull/87)
 
