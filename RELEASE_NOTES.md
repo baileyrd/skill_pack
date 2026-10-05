@@ -6,7 +6,7 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 ---
 
 ## Skills brought in line with Anthropic's current authoring guidance
-**2026-10-05** — branch `claude/modest-albattani-7a47bz` (PR to follow)
+**2026-10-05** — [#96](https://github.com/baileyrd/skill_pack/pull/96)
 
 A repo-wide pass against the published skill-authoring best practices and
 the Agent Skills spec. Twenty skills touched; the two that mattered most:
