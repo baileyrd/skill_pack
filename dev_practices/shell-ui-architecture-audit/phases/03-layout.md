@@ -6,6 +6,16 @@ content is composed into the frame.
 
 ---
 
+## Contents
+
+- [What we evaluate](#what-we-evaluate)
+- [Static probes](#static-probes)
+- [Runtime probes](#runtime-probes)
+- [Verdict rubric](#verdict-rubric)
+- [Severity examples for this dimension](#severity-examples-for-this-dimension)
+- [Findings entry schema](#findings-entry-schema)
+- [Checkpoint](#checkpoint)
+
 ## What we evaluate
 
 | Concern              | Question to answer                                      |

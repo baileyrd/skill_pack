@@ -5,6 +5,28 @@ one entry per merged PR, reverse chronological, each linking to its PR.
 
 ---
 
+## Skills brought in line with Anthropic's current authoring guidance
+**2026-10-05** — branch `claude/modest-albattani-7a47bz` (PR to follow)
+
+A repo-wide pass against the published skill-authoring best practices and
+the Agent Skills spec. Twenty skills touched; the two that mattered most:
+
+- **`webapp-reverse-engineer` v1.1.0 → v1.2.0** — body cut from 1273 lines to
+  ~225 by moving Phases 1–5 and the report template into `references/`, with
+  a phase table and a copyable progress checklist in their place.
+- **`my-skill-creator` v1.3.0 → v1.4.0** — body cut from 720 to ~490 the same
+  way; its Skill Writing Guide now states the current guidance instead of a
+  2025 snapshot of it, and defers to `learn-it`'s conventions file as the
+  full checklist.
+- **Repo-wide** — `## Contents` lists on all 40 reference files over 100
+  lines; `compatibility:` on the 14 skills with real environment
+  requirements; `check_repo.py` fails a body over 500 lines from now on.
+
+Details in `CHANGELOG.md`'s Unreleased section and each skill's own
+`RELEASE_NOTES.md`.
+
+---
+
 ## rust-migration learns harness overrides, pipe-safe manifest cells, and the issue-close rate limit
 **2026-09-02** — [#95](https://github.com/baileyrd/skill_pack/pull/95)
 

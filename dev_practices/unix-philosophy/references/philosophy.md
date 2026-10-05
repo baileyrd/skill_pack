@@ -10,6 +10,14 @@ recommendation needs to be justified to someone who hasn't bought in yet.
 > interface."
 > — Doug McIlroy
 
+## Contents
+
+- [Core Tenet](#core-tenet)
+- [Foundational Principles](#foundational-principles)
+- [Raymond's Rules (The Art of Unix Programming, distilled)](#raymonds-rules-the-art-of-unix-programming-distilled)
+- [Why It Endures](#why-it-endures)
+- [The rule that governs the other sixteen](#the-rule-that-governs-the-other-sixteen)
+
 ## Core Tenet
 
 **Do one thing and do it well.** A tool should have a single, focused purpose and

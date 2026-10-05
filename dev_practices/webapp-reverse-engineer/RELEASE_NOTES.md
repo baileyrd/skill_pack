@@ -7,6 +7,24 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.2.0 — Split to fit the 500-line body guide
+**2026-10-05**
+
+- **Changed:** `SKILL.md` went from 1273 lines to ~225. Phases 1–5 now live in
+  `references/phase-1-surface-scan.md` … `phase-5-infrastructure.md` and the
+  report template in `references/report-template.md`, each linked from a phase
+  table with what it covers; read one when you reach it. Phase 0, Scope,
+  Philosophy, Prerequisites, Reminders, Limitations and the retro stay in the
+  body.
+- **Added:** a copyable progress checklist for Phases 0–6 with an explicit go-
+  back-and-recheck rule when a later phase contradicts an earlier finding.
+- **Changed:** Workflow Summary no longer repeats the phase list the checklist
+  now carries.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.1.0 — Add wrap-up retro
 **2026-08-17**
 

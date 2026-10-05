@@ -10,6 +10,16 @@ If the audit is static-only, skip this phase and write
 
 ---
 
+## Contents
+
+- [Step 1 — Load the probe pack](#step-1--load-the-probe-pack)
+- [Step 2 — Reachability check](#step-2--reachability-check)
+- [Step 3 — Auth state check (web/desktop only)](#step-3--auth-state-check-webdesktop-only)
+- [Step 4 — Take baseline artifacts](#step-4--take-baseline-artifacts)
+- [Step 5 — Write to findings.json](#step-5--write-to-findingsjson)
+- [Step 6 — Checkpoint](#step-6--checkpoint)
+- [Output of this phase](#output-of-this-phase)
+
 ## Step 1 — Load the probe pack
 
 Open the right reference based on `findings.shellType`:

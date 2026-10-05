@@ -9,6 +9,28 @@ still open.
 
 ---
 
+## v1.3.0 — Conventions reference carries Anthropic's authoring checklist
+**2026-10-05**
+
+- **Added:** an "Anthropic's authoring guidance, as applied here" section in
+  `references/skill-authoring-conventions.md` — structure, frontmatter,
+  content and testing rules from the published best practices, plus the three
+  places this repo deliberately departs (top-level `version`, noun-phrase
+  names, the wrap-up retro).
+- **Changed:** frontmatter guidance now covers `compatibility` and warns off
+  Claude Code-only keys; description guidance now says third person; file-
+  layout guidance now states the one-level-deep and Contents-list rules.
+- **Fixed:** the category list said five categories "as of 2026-08-16" and
+  named `need_to_productize/`; it now lists all six without a date and only
+  `trying/`.
+- **Added:** a `## Contents` list at the top of every reference file over 100
+  lines, per Anthropic's authoring guidance — a partial read (`head`) still
+  shows the file's full scope.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.2.0 — Four findings from the run that produced PR #44
 **2026-08-16**
 

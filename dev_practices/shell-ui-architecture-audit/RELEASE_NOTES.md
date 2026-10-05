@@ -7,6 +7,17 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.1.1 — Contents lists in the phase and reference files
+**2026-10-05**
+
+- **Added:** a `## Contents` list at the top of every reference file over 100
+  lines, per Anthropic's authoring guidance — a partial read (`head`) still
+  shows the file's full scope.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.1.0 — Add wrap-up retro
 **2026-08-17**
 

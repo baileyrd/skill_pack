@@ -1,5 +1,12 @@
 # Scan signals, Q&A, and greenfield defaults
 
+## Contents
+
+- [Scan signals → what they answer](#scan-signals--what-they-answer)
+- [Greenfield check](#greenfield-check)
+- [Non-greenfield: what to actually ask](#non-greenfield-what-to-actually-ask)
+- [Multi-product repos](#multi-product-repos)
+
 ## Scan signals → what they answer
 
 | Signal | Source | Answers |

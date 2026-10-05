@@ -10,6 +10,20 @@ what's still open.
 
 ---
 
+## v1.7.1 — Contents list and a compatibility field
+**2026-10-05**
+
+- **Added:** a `## Contents` list at the top of every reference file over 100
+  lines, per Anthropic's authoring guidance — a partial read (`head`) still
+  shows the file's full scope.
+- **Added:** a `compatibility` frontmatter field naming the binaries and
+  access this skill actually needs (Agent Skills spec, ≤500 chars), so the
+  requirement is visible before the body loads.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.7.0 — Findings from a real non-greenfield run (baileyrd/meshed)
 **2026-08-31**
 

@@ -1,7 +1,8 @@
 ---
 name: repo-inspector
 description: Dry-run inspector for the RustyMill Cargo-workspace monorepo — ports dedupe-loop's clustering/classification (exact-duplicate / near-duplicate / diverged) and sovereignty-loop's external-dependency detection, adapted to work across crates in one workspace instead of across separate repos. Produces one repo-inspector-report.md, a duplication-clusters section (candidate crates, classification, completeness, recommended crate to extract) plus a sovereignty-findings section (external deps, internal RustyMill/baileyrd equivalent if any, a note to run parity-loop when none exists). v1 is report-only — no issues, no PRs, no code changes, no auto-merge — every row is left for human review. Trigger on requests to audit the RustyMill monorepo for duplicated crates, find crates worth hoisting into a shared dependency, or check the monorepo's external dependencies against the platform ecosystem. Checks repo-config has been applied first, same as the sibling loop skills.
-version: 1.2.0
+version: 1.2.1
+compatibility: Requires cargo (a Cargo workspace is the target), Python 3 (stdlib), and git; ripgrep optional. No gh dependency.
 ---
 
 # repo-inspector

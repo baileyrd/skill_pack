@@ -2,6 +2,16 @@
 
 Frosted glass cards on dark gradient. Designed for product sites, keynotes, and hero sections.
 
+## Contents
+
+- [Colors](#colors)
+- [Background](#background)
+- [Glass Card Effect](#glass-card-effect)
+- [Typography](#typography)
+- [Gradient Text (for hero labels)](#gradient-text-for-hero-labels)
+- [Arrows](#arrows)
+- [SVG Template](#svg-template)
+
 ## Colors
 
 ```

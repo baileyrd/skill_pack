@@ -170,6 +170,52 @@ class TestReadDescription(unittest.TestCase):
         self.assertEqual(over, [], f"descriptions over {chk.MAX_DESCRIPTION}: {over}")
 
 
+class TestBodyLineCount(unittest.TestCase):
+    """Anthropic's authoring guide caps the SKILL.md body at 500 lines so the
+    skill loads cheaply and detail stays in on-demand reference files. Two
+    skills here were over it (webapp-reverse-engineer at 1273 lines,
+    my-skill-creator at 720) and nothing measured it; a miscount in either
+    direction makes the manifests check wrong on a real skill."""
+
+    def setUp(self):
+        self.paths = []
+
+    def tearDown(self):
+        for p in self.paths:
+            p.unlink(missing_ok=True)
+
+    def count(self, text):
+        path = write(text)
+        self.paths.append(path)
+        return chk.body_line_count(path)
+
+    def test_counts_only_lines_after_the_closing_fence(self):
+        self.assertEqual(self.count("---\nname: demo\nversion: 1.0.0\n---\n# T\n\nbody\n"), 3)
+
+    def test_frontmatter_only_is_zero(self):
+        self.assertEqual(self.count("---\nname: demo\n---\n"), 0)
+
+    def test_horizontal_rule_in_body_is_not_a_second_fence(self):
+        """Bodies here use `---` as a section divider; the first fence after
+        the opener ends the frontmatter and later ones are content."""
+        self.assertEqual(self.count("---\nname: demo\n---\na\n---\nb\n"), 3)
+
+    def test_no_frontmatter_returns_zero(self):
+        self.assertEqual(self.count("# Just a heading\n\nbody\n"), 0)
+
+    def test_every_skill_in_repo_is_within_the_limit(self):
+        over = []
+        for path in sorted(chk.REPO_ROOT.rglob("SKILL.md")):
+            if ".git" in path.parts or "zip" in path.parts:
+                continue
+            if path.parent.relative_to(chk.REPO_ROOT).as_posix() in chk.VENDORED:
+                continue
+            n = chk.body_line_count(path)
+            if n > chk.MAX_BODY_LINES:
+                over.append(f"{path.parent.name}: {n}")
+        self.assertEqual(over, [], f"bodies over {chk.MAX_BODY_LINES} lines: {over}")
+
+
 class TestSemver(unittest.TestCase):
     def test_accepts_plain_semver(self):
         for v in ("1.0.0", "0.1.2", "12.34.56"):

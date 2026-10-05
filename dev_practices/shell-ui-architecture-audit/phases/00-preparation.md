@@ -5,6 +5,16 @@ This phase is fast — no probes, just intake.
 
 ---
 
+## Contents
+
+- [What this phase does](#what-this-phase-does)
+- [Step 1 — Confirm inputs](#step-1--confirm-inputs)
+- [Step 2 — Classify shell type](#step-2--classify-shell-type)
+- [Step 3 — Multi-window applicability](#step-3--multi-window-applicability)
+- [Step 4 — Initialize findings.json](#step-4--initialize-findingsjson)
+- [Step 5 — Scope confirmation checkpoint](#step-5--scope-confirmation-checkpoint)
+- [Output of this phase](#output-of-this-phase)
+
 ## What this phase does
 
 1. Confirm what's being audited and how (code, running app, or both).

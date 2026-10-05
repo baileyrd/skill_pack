@@ -16,13 +16,17 @@ it.
               (issues #16/#17). Runs against a baseline so only NEW breakage
               fails — see docs-refs-baseline.tsv.
   manifests   Every skill needs `name` matching its directory, a semver
-              `version`, a RELEASE_NOTES.md, and a `description` within the
-              1024-character limit claude.ai enforces on upload. repo-config's
-              own notes record a real fix shipping with no entry, caught only
-              because the repo owner noticed; five skills shipped with
-              over-length descriptions and were rejected only at upload time,
-              after install_skills.py and build_skill_zips.py had both passed
-              them (neither validates frontmatter).
+              `version`, a RELEASE_NOTES.md, a `description` within the
+              1024-character limit claude.ai enforces on upload, and a
+              SKILL.md body within the 500 lines Anthropic's authoring guide
+              sets for progressive disclosure. repo-config's own notes record
+              a real fix shipping with no entry, caught only because the repo
+              owner noticed; five skills shipped with over-length descriptions
+              and were rejected only at upload time, after install_skills.py
+              and build_skill_zips.py had both passed them (neither validates
+              frontmatter); webapp-reverse-engineer shipped a 1273-line body
+              and my-skill-creator a 720-line one, both found only by a
+              hand audit against the published guidance.
   packaging   build_skill_zips.py runs clean — a smoke test that the tooling
               still works before anyone relies on its output.
 
@@ -53,6 +57,10 @@ SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 # and it's the only install path for claude.ai/Desktop -- so an over-length
 # description is a hard ship blocker there while Claude Code loads it fine.
 MAX_DESCRIPTION = 1024
+# Anthropic's skill-authoring guide: keep the SKILL.md body under 500 lines
+# and push detail into reference files Claude loads on demand. The body is
+# everything after the closing frontmatter fence.
+MAX_BODY_LINES = 500
 BINARY_SUFFIXES = {".skill", ".zip", ".png", ".jpg", ".jpeg", ".gif", ".pdf", ".ico"}
 
 
@@ -180,6 +188,20 @@ def read_description(path: Path) -> str:
     return ""
 
 
+def body_line_count(path: Path) -> int:
+    """Lines after the frontmatter's closing `---`; 0 if there is none."""
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return 0
+    if not lines or lines[0].strip() != "---":
+        return 0
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            return len(lines) - i - 1
+    return 0
+
+
 def check_manifests() -> list[str]:
     failures = []
     for path in sorted(REPO_ROOT.rglob("SKILL.md")):
@@ -201,6 +223,12 @@ def check_manifests() -> list[str]:
                 f"{rel_dir}/SKILL.md: description is {len(description)} chars, "
                 f"over claude.ai's {MAX_DESCRIPTION} limit (trim "
                 f"{len(description) - MAX_DESCRIPTION})"
+            )
+        body = body_line_count(path)
+        if body > MAX_BODY_LINES:
+            failures.append(
+                f"{rel_dir}/SKILL.md: body is {body} lines, over the "
+                f"{MAX_BODY_LINES}-line guide (move detail into references/)"
             )
     return failures
 

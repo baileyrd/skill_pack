@@ -12,7 +12,7 @@ description: >-
   conversation, when the user says "turn this into a skill", "save this as a skill", "capture what
   we just learned", "update the X skill with this", or references this by name (learn-it). Never
   write one for a one-off fact or fix specific to this task; qualify first.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # learn-it

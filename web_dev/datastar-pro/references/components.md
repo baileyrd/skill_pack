@@ -1,5 +1,14 @@
 # Datastar Pro - Complete Component Reference
 
+## Contents
+
+- [Core Attributes (17)](#core-attributes-17)
+- [Pro Attributes (10)](#pro-attributes-10)
+- [Core Actions (4 + 5 HTTP methods)](#core-actions-4--5-http-methods)
+- [Pro Actions (2)](#pro-actions-2)
+- [Watchers (2)](#watchers-2)
+- [Codecs (Pro - Type System for Props)](#codecs-pro---type-system-for-props)
+
 ## Core Attributes (17)
 
 ### Data Binding & State

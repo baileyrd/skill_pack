@@ -10,6 +10,13 @@ Severity ranks individual issues in the prioritized backlog.
 
 ---
 
+## Contents
+
+- [Dimension Verdicts](#dimension-verdicts)
+- [Finding Severity](#finding-severity)
+- [Severity Decision Heuristics](#severity-decision-heuristics)
+- [Mapping Verdicts to Backlog](#mapping-verdicts-to-backlog)
+
 ## Dimension Verdicts
 
 ### Pass

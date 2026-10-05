@@ -1,7 +1,8 @@
 ---
 name: yt-pipeline
 description: End-to-end automated YouTube research pipeline for a topic — searches YouTube (via the yt-search skill), auto-selects the 5-8 best videos by relevance/engagement/recency/diversity, loads them into a new NotebookLM notebook (via the notebooklm skill), runs a trends/outliers/gaps analysis, presents key takeaways, and optionally generates a podcast, slide deck, or report. Runs fully unattended once given a topic — no confirmation pauses. Use when the user asks to "research X on YouTube", "run the YouTube pipeline on X", or wants a NotebookLM notebook built from YouTube sources on a topic.
-version: 1.2.0
+version: 1.2.1
+compatibility: Requires the yt-search and notebooklm skills installed, yt-dlp, Python 3, and a logged-in notebooklm CLI (Google account); network access to YouTube and NotebookLM.
 ---
 
 # YouTube Research Pipeline

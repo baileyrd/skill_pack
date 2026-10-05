@@ -1,5 +1,14 @@
 # Icon Reference
 
+## Contents
+
+- [Rules for rsvg-convert Compatibility](#rules-for-rsvg-convert-compatibility)
+- [Generic Semantic Shapes (No product — use these first)](#generic-semantic-shapes-no-product--use-these-first)
+- [Product Icons (Brand Colors + Inline SVG)](#product-icons-brand-colors--inline-svg)
+- [Azure Service Icons](#azure-service-icons)
+- [Icon Sizing Guide](#icon-sizing-guide)
+- [Arrow Marker Templates](#arrow-marker-templates)
+
 ## Rules for rsvg-convert Compatibility
 
 **Never use** `@import url()` for icon fonts — rsvg-convert does not fetch external resources.

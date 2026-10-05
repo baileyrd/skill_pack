@@ -10,6 +10,20 @@ still open.
 
 ---
 
+## v1.9.1 — Contents list and a compatibility field
+**2026-10-05**
+
+- **Added:** a `## Contents` list at the top of every reference file over 100
+  lines, per Anthropic's authoring guidance — a partial read (`head`) still
+  shows the file's full scope.
+- **Added:** a `compatibility` frontmatter field naming the binaries and
+  access this skill actually needs (Agent Skills spec, ≤500 chars), so the
+  requirement is visible before the body loads.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.9.0 — Name the obvious gh substitutes too, gate the triage table for real, require a standards-check acknowledgment
 **2026-08-25**
 

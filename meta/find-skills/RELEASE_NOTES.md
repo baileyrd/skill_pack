@@ -7,6 +7,17 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.0.1 — Compatibility field
+**2026-10-05**
+
+- **Added:** a `compatibility` frontmatter field naming the binaries and
+  access this skill actually needs (Agent Skills spec, ≤500 chars), so the
+  requirement is visible before the body loads.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.0.0 — Imported into skill_pack
 **2026-08-17**
 

@@ -9,6 +9,17 @@ still open.
 
 ---
 
+## v1.4.1 — Compatibility field
+**2026-10-05**
+
+- **Added:** a `compatibility` frontmatter field naming the binaries and
+  access this skill actually needs (Agent Skills spec, ≤500 chars), so the
+  requirement is visible before the body loads.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.4.0 — Harness overrides, pipe-safe manifest cells, and the issue-close rate limit
 **2026-09-02**
 
