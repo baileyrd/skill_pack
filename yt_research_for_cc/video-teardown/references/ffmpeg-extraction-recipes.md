@@ -3,6 +3,14 @@
 Detail pulled out of `SKILL.md` to keep it lean. Everything here was run for
 real against a 12:05 / 3840×2160 / 60fps / AV1 `.webm`, 449 MB.
 
+## Contents
+
+- [1. Transcript from native captions](#1-transcript-from-native-captions)
+- [2. Uniform frame sampling](#2-uniform-frame-sampling)
+- [3. Scene-change extraction](#3-scene-change-extraction)
+- [4. Luma triage](#4-luma-triage)
+- [5. Verification pass](#5-verification-pass)
+
 ## 1. Transcript from native captions
 
 ```bash

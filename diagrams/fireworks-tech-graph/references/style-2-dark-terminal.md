@@ -2,6 +2,16 @@
 
 Neon-on-dark hacker aesthetic. Matches CLAUDE.md standard tech diagram style.
 
+## Contents
+
+- [Colors](#colors)
+- [Background Gradient](#background-gradient)
+- [Typography](#typography)
+- [Box Styles](#box-styles)
+- [Glow Effect (optional, for key nodes)](#glow-effect-optional-for-key-nodes)
+- [Arrows](#arrows)
+- [SVG Template](#svg-template)
+
 ## Colors
 
 ```

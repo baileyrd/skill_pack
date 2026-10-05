@@ -8,6 +8,18 @@ This phase is read-only static analysis. No runtime, no probes.
 
 ---
 
+## Contents
+
+- [What this phase does](#what-this-phase-does)
+- [Step 1 — Top-level walk](#step-1--top-level-walk)
+- [Step 2 — Locate the shell layer](#step-2--locate-the-shell-layer)
+- [Step 3 — Inventory the build pipeline](#step-3--inventory-the-build-pipeline)
+- [Step 4 — Inventory the design system](#step-4--inventory-the-design-system)
+- [Step 5 — Inventory the provider / context stack](#step-5--inventory-the-provider--context-stack)
+- [Step 6 — Detect plugin / extension scaffolding](#step-6--detect-plugin--extension-scaffolding)
+- [Step 7 — Write to findings.json](#step-7--write-to-findingsjson)
+- [Output of this phase](#output-of-this-phase)
+
 ## What this phase does
 
 1. Walk the repository tree (one level deep, then targeted deeper reads).

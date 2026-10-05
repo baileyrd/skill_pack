@@ -9,6 +9,26 @@ still open.
 
 ---
 
+## v1.4.0 — Under 500 lines, and a writing guide that matches the published guidance
+**2026-10-05**
+
+- **Changed:** `SKILL.md` went from 720 lines to ~490. The test-run sequence
+  moved to `references/eval-workflow.md`, description optimization to
+  `references/description-optimization.md`, and the claude.ai/Cowork
+  adaptations to `references/environment-notes.md`; each section in the body
+  is now a short pointer saying when to read the file.
+- **Changed:** the Skill Writing Guide now carries Anthropic's current
+  guidance — third-person descriptions, `compatibility` for real requirements
+  only, references one level deep with a Contents list past 100 lines, degrees
+  of freedom matched to fragility, checklists with a loop-back verification
+  step, explicit dependencies, fully qualified MCP tool names, no time-
+  sensitive wording, test on every model — and points at `meta/learn-
+  it/references/skill-authoring-conventions.md` as the full checklist.
+- **Why:** a pass over Anthropic's current skill-authoring best practices and
+  the Agent Skills spec, applied repo-wide; see root `CHANGELOG.md`.
+
+---
+
 ## v1.3.0 — Don't depend on an executable bit the sync drops
 **2026-08-17**
 

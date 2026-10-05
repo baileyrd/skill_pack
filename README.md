@@ -85,6 +85,8 @@ producing an artifact.
 
 Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver, bumped by hand on meaningful changes), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.
 
+Skills with real environment requirements (a binary such as `yt-dlp` or `cargo`, the `gh` CLI, network access) also declare them in a `compatibility:` field, per the Agent Skills spec; a skill with nothing to declare omits it. The authoring checklist every skill here is held to — Anthropic's published best practices plus this repo's own conventions — is [`meta/learn-it/references/skill-authoring-conventions.md`](meta/learn-it/references/skill-authoring-conventions.md).
+
 ## Repo tooling
 
 Five standalone scripts under `scripts/`, each usable on its own or chained — `install_skills.py` and `build_skill_zips.py` both call `restore_exec_bits.py` automatically, so a plain `git add -A && python scripts/install_skills.py` (or `build_skill_zips.py`) is enough day to day.
@@ -121,7 +123,7 @@ Narrow on purpose: silent for skills with no retro step, silent for `skill-retro
 
 ### `scripts/check_repo.py`
 
-The five checks CI runs, runnable locally with `python3 scripts/check_repo.py` (or `--only <name>` for one). Each exists because the thing it checks for actually broke here and cost a PR to fix — exec bits (18 scripts shipped non-executable), line endings, doc references, skill manifests (including the 1024-character `description` limit claude.ai enforces on upload — five skills shipped over it and were rejected one at a time at upload, since no local tool reads frontmatter), packaging. The script's own docstring names the failure behind each one.
+The five checks CI runs, runnable locally with `python3 scripts/check_repo.py` (or `--only <name>` for one). Each exists because the thing it checks for actually broke here and cost a PR to fix — exec bits (18 scripts shipped non-executable), line endings, doc references, skill manifests (including the 1024-character `description` limit claude.ai enforces on upload — five skills shipped over it and were rejected one at a time at upload, since no local tool reads frontmatter — and the 500-line `SKILL.md` body ceiling from Anthropic's authoring guide, which two skills were over by 2–3× before anything measured it), packaging. The script's own docstring names the failure behind each one.
 
 `doc-refs` runs `my_loops/docs-loop`'s `check_references.py` against `docs-refs-baseline.tsv`, so it fails on *new* broken references only. The baseline exists because this repo has a permanent structural false-positive class — most docs here describe *other* repos — and a check that's red on day one gets ignored. Every baseline entry carries a written reason; entries that stop matching are reported as stale.
 

@@ -1,7 +1,8 @@
 ---
 name: yt-search
 description: Searches YouTube by query using yt-dlp and returns structured, human-readable video results — title, channel, subscriber count, view count, duration, upload date, URL, and a views-to-subscribers engagement ratio. Defaults to the top 20 results from the last 6 months. Use this skill whenever the user asks to search YouTube, find videos on a topic, research YouTube content, pull video stats/metadata, or wants to see which videos on a topic are overperforming (engagement ratio).
-version: 1.2.0
+version: 1.2.1
+compatibility: Requires yt-dlp (binary on PATH or importable) and Python 3; network access to YouTube.
 ---
 
 # YouTube Search

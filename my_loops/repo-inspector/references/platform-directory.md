@@ -3,6 +3,20 @@
 Repos worth checking for an existing implementation before hand-rolling.
 Refreshed 2026-08-15 against the live namespaces.
 
+## Contents
+
+- [Read this before using the table](#read-this-before-using-the-table)
+- [Rusty-Mill org (all four)](#rusty-mill-org-all-four)
+- [baileyrd — platform / stdlib layer](#baileyrd--platform--stdlib-layer)
+- [baileyrd — data / encoding](#baileyrd--data--encoding)
+- [baileyrd — network / protocol](#baileyrd--network--protocol)
+- [baileyrd — storage / data stores](#baileyrd--storage--data-stores)
+- [baileyrd — terminal / UI / graphics](#baileyrd--terminal--ui--graphics)
+- [baileyrd — AI / agent tooling](#baileyrd--ai--agent-tooling)
+- [baileyrd — tooling / meta](#baileyrd--tooling--meta)
+- [Known transitive-dependency note](#known-transitive-dependency-note)
+- [Resolving a bare repo name](#resolving-a-bare-repo-name)
+
 ## Read this before using the table
 
 **Almost everything lives under `baileyrd`, not `Rusty-Mill`.** The previous

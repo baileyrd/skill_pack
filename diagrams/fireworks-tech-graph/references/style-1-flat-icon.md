@@ -2,6 +2,15 @@
 
 Inspired by draw.io defaults and Apple documentation style.
 
+## Contents
+
+- [Colors](#colors)
+- [Typography](#typography)
+- [Box Shapes](#box-shapes)
+- [Arrows](#arrows)
+- [Legend](#legend)
+- [SVG Template](#svg-template)
+
 ## Colors
 
 ```

@@ -2,6 +2,16 @@
 
 Engineering blueprint aesthetic with grid background and technical annotation style.
 
+## Contents
+
+- [Colors](#colors)
+- [Background with Grid](#background-with-grid)
+- [Typography](#typography)
+- [Box Styles](#box-styles)
+- [Arrows & Annotations](#arrows--annotations)
+- [Title Block (bottom-right)](#title-block-bottom-right)
+- [SVG Template](#svg-template)
+
 ## Colors
 
 ```

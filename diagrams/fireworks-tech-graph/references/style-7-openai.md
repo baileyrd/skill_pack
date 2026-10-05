@@ -2,6 +2,20 @@
 
 Clean, modern aesthetic matching OpenAI's documentation and research diagrams — minimal but precise.
 
+## Contents
+
+- [Color Palette](#color-palette)
+- [Typography](#typography)
+- [Node Boxes](#node-boxes)
+- [Arrows](#arrows)
+- [Arrow Labels](#arrow-labels)
+- [Database Shapes](#database-shapes)
+- [Grouping Containers](#grouping-containers)
+- [Node Content](#node-content)
+- [Layout Principles](#layout-principles)
+- [SVG Template](#svg-template)
+- [Design Philosophy](#design-philosophy)
+
 ## Color Palette
 
 ```

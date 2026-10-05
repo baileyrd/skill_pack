@@ -12,7 +12,7 @@ The real, checkable contract is between each skill directory and the harnesses t
 
 | Port | Adapter(s) | Notes |
 | ---- | ---------- | ----- |
-| Skill manifest (`SKILL.md` frontmatter: `name`, `description`, `version`) | Claude Code discovery, OMP's `claude` provider (priority 80), claude.ai/Desktop Skill ZIP upload | One manifest format serves three independent consumers — see `scripts/install_skills.py` and `scripts/build_skill_zips.py` for how each target is produced |
+| Skill manifest (`SKILL.md` frontmatter: `name`, `description`, `version`; `compatibility` where a skill has environment requirements) | Claude Code discovery, OMP's `claude` provider (priority 80), claude.ai/Desktop Skill ZIP upload | One manifest format serves three independent consumers — see `scripts/install_skills.py` and `scripts/build_skill_zips.py` for how each target is produced |
 | Skill implementation (`scripts/`, `references/`, `assets/`) | Whatever that skill needs — shell/Python scripts, markdown references, template payloads | No shared runtime; a skill's own `scripts/` never imports from a sibling skill |
 
 ## Structure

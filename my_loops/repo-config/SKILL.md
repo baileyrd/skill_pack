@@ -12,7 +12,8 @@ description: >-
   even if they only name one file, since this applies the whole set together. Also use on an
   ongoing basis: whenever a meaningful change lands in a repo that already has a RELEASE_NOTES.md
   or CHANGELOG.md, add an entry to each before ending the turn.
-version: 1.7.0
+version: 1.7.1
+compatibility: Requires git and bash; gh CLI or GitHub MCP tools for the PR step and for audit.sh's CI/PR checks.
 ---
 
 # repo-config

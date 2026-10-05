@@ -10,7 +10,8 @@ description: >-
   ER, network topology, and the UML set (class, use case, state machine), across
   seven named visual styles. Needs `rsvg-convert` for PNG export; SVG generation
   and validation work without it.
-version: 1.0.0
+version: 1.0.1
+compatibility: Python 3 for the helper scripts. rsvg-convert (librsvg) is needed only for PNG export; SVG generation and validation work without it.
 ---
 
 # Fireworks Tech Graph

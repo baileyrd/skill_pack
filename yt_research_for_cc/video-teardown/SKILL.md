@@ -1,7 +1,8 @@
 ---
 name: video-teardown
 description: Turns a video into a verified, structured deliverable — build guide, runbook, parts list, checklist — not just an answer about it. Reads video without video/audio input by pairing a cheap yt-dlp captions pass with targeted ffmpeg extraction, triaging frames by scene-change detection and mean-luma sorting so only the few carrying information get read. The second half is the point - any menu path, flag, field name or version reconstructed from narration is verified against official docs before shipping, and every claim is marked shown-on-screen with a timestamp or reconstructed. Use when someone wants a video turned into instructions, documentation, a parts list or checklist - "turn this video into a guide", "write up what they did", "document this tutorial", "what hardware and software did they use", "make a checklist from this" - or hands over a local video file wanting more than a summary. Companion to the vendored trying/watch skill, the better pick for one-off "what happens in this video" questions.
-version: 1.1.0
+version: 1.1.1
+compatibility: Requires yt-dlp and ffmpeg/ffprobe (recipes use ffmpeg 9 syntax; see Version notes for older builds); network access for captions and documentation checks.
 ---
 
 # video-teardown

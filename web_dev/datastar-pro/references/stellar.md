@@ -8,6 +8,17 @@ it runs entirely in the browser.
 > site but not yet released as a downloadable Pro feature. The API below reflects what is
 > publicly known; expect changes before the stable release.
 
+## Contents
+
+- [What Stellar CSS Is](#what-stellar-css-is)
+- [Why Use Stellar CSS with Datastar](#why-use-stellar-css-with-datastar)
+- [Current Usage Pattern](#current-usage-pattern)
+- [Design Token Categories (Expected)](#design-token-categories-expected)
+- [Integration with Datastar Attributes](#integration-with-datastar-attributes)
+- [When to Recommend Stellar CSS](#when-to-recommend-stellar-css)
+- [Key Points](#key-points)
+- [Sources](#sources)
+
 ## What Stellar CSS Is
 
 - A lightweight, browser-only CSS framework based on CSS custom properties

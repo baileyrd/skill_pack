@@ -10,6 +10,16 @@ and recovery from crashes that affect a subset of windows.
 
 ---
 
+## Contents
+
+- [What we evaluate](#what-we-evaluate)
+- [Static probes](#static-probes)
+- [Runtime probes](#runtime-probes)
+- [Verdict rubric](#verdict-rubric)
+- [Severity examples](#severity-examples)
+- [Findings entry schema](#findings-entry-schema)
+- [Checkpoint](#checkpoint)
+
 ## What we evaluate
 
 | Concern               | Question                                          |

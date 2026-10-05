@@ -10,7 +10,8 @@ description: >-
   reputation before recommending anything — a search hit is a candidate, not an endorsement.
   Distinct from this repo's own authoring skills: `my-skill-creator` writes a skill, `learn-it`
   distills one from a session, and this one finds a skill someone else already wrote.
-version: 1.0.0
+version: 1.0.1
+compatibility: Requires Node.js with npx (runs the skills CLI) and network access to skills.sh and GitHub.
 ---
 
 # Find Skills

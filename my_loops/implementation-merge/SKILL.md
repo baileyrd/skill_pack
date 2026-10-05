@@ -1,7 +1,8 @@
 ---
 name: implementation-merge
 description: Merges 2+ candidate implementations of the same capability into one, combining the best of each rather than picking a winner — invoked after dedupe-loop/repo-inspector flags a convergent-but-diverged cluster where a straight pick-one isn't right. Determines mergeability first (reads each candidate, builds an item-by-item coverage matrix, classifies mergeable-complementary / mergeable-conflicting / not-mergeable — genuinely different-purpose tools stay separate). Dry-run only — produces a MERGE-PROPOSAL.md plus the proposed merged source at a scratch location, verified against each candidate's own test suite; nothing lands in either candidate's real path, no PR, no merge. Never silently drops an item from a losing candidate — every coverage-matrix item must resolve to kept, merged, or explicitly dropped with a reason. Trigger on requests to merge duplicate implementations, combine the best of two versions, or reconcile a dedupe-loop/repo-inspector convergent-but-diverged finding.
-version: 1.1.0
+version: 1.1.1
+compatibility: Requires Python 3 (stdlib), bash with awk/find, git, and each candidate's own toolchain (cargo for Rust) to run its test suite. No gh dependency.
 ---
 
 # implementation-merge

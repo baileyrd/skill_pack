@@ -4,7 +4,40 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Added
+- `scripts/check_repo.py`'s `manifests` check now also fails a `SKILL.md`
+  whose body exceeds 500 lines — Anthropic's authoring-guide ceiling for the
+  part of a skill that loads on every trigger. Admitted under ADR-0002 on a
+  real failure: `webapp-reverse-engineer` was at 1273 lines and
+  `my-skill-creator` at 720, found only by a hand audit. `tests/test_check_repo.py`
+  covers the line counter and the repo-wide assertion.
+- `compatibility:` frontmatter on the 14 skills with real environment
+  requirements (`yt-dlp`, `ffmpeg`, `cargo`, `gh`/GitHub MCP, `jq`,
+  `rsvg-convert`, `npx`), per the Agent Skills spec.
+- `meta/learn-it/references/skill-authoring-conventions.md` gains an
+  "Anthropic's authoring guidance, as applied here" section — the review
+  checklist for any draft — and names the three places this repo deliberately
+  departs from it (top-level `version`, noun-phrase names, the wrap-up retro).
 ### Changed
+- Repo-wide pass against Anthropic's current skill-authoring best practices
+  and the Agent Skills spec. `dev_practices/webapp-reverse-engineer`
+  (v1.1.0 → v1.2.0) and `meta/my-skill-creator` (v1.3.0 → v1.4.0) were split
+  so their bodies fit the 500-line guide, with phases / the eval workflow /
+  description optimization / environment notes moved into `references/` and
+  linked one level deep; `webapp-reverse-engineer` also gains a copyable phase
+  checklist with a loop-back rule. `my-skill-creator`'s Skill Writing Guide
+  was rewritten to the current guidance (third-person descriptions,
+  `compatibility`, Contents lists past 100 lines, degrees of freedom,
+  verification loops, explicit dependencies, qualified MCP names, test on every
+  model). Every reference file over 100 lines across 11 skills now opens with a
+  `## Contents` list (40 files). `meta/learn-it` (v1.2.0 → v1.3.0) conventions
+  updated as above, with the stale five-category/`need_to_productize/` text
+  fixed. Patch bumps on the other 17 touched skills record the Contents lists
+  and `compatibility` fields; each skill's `RELEASE_NOTES.md` has the entry.
+  Not changed, deliberately: skill names stay noun phrases rather than the
+  suggested gerunds (they're installed under those names), and `version` stays
+  a top-level key rather than `metadata.version` (both local tools read it
+  there; claude.ai has accepted it on every upload so far).
 - `my_loops/repo-config` (v1.6.1 → v1.7.0) — findings from a `skill-retro`
   pass on a real run against `baileyrd/meshed`: `audit.sh`'s per-item
   presence check now requires non-empty (`-s`, not just `-f`), extending

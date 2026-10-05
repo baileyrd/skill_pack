@@ -8,6 +8,16 @@ that earlier phases recorded into two markdown deliverables.
 
 ---
 
+## Contents
+
+- [Inputs](#inputs)
+- [Step 1 — Sanity check findings.json](#step-1--sanity-check-findingsjson)
+- [Step 2 — Generate `audit-report.md`](#step-2--generate-audit-reportmd)
+- [Step 3 — Generate `audit-backlog.md`](#step-3--generate-audit-backlogmd)
+- [Step 4 — Present the deliverables](#step-4--present-the-deliverables)
+- [Step 5 — Wrap up](#step-5--wrap-up)
+- [Output of this phase](#output-of-this-phase)
+
 ## Inputs
 
 - `findings.json` — the audit's accumulated state.

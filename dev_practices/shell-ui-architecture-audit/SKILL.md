@@ -15,7 +15,7 @@ description: >
   theming system'. Trigger even if the user doesn't say 'shell' — 'chrome
   around the pages' or 'parts of the app that aren't feature screens'
   qualify.
-version: 1.1.0
+version: 1.1.1
 ---
 
 # Shell UI Architecture Audit

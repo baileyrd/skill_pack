@@ -2,6 +2,21 @@
 
 Not all styles work equally well for every diagram type. Use this guide to pick the best style.
 
+## Contents
+
+- [Architecture Diagram](#architecture-diagram)
+- [Class Diagram / ER Diagram](#class-diagram--er-diagram)
+- [Sequence Diagram](#sequence-diagram)
+- [Flowchart / Process Flow](#flowchart--process-flow)
+- [Mind Map / Concept Map](#mind-map--concept-map)
+- [Data Flow Diagram](#data-flow-diagram)
+- [Use Case Diagram](#use-case-diagram)
+- [State Machine Diagram](#state-machine-diagram)
+- [Network Topology](#network-topology)
+- [Comparison / Feature Matrix](#comparison--feature-matrix)
+- [Timeline / Gantt](#timeline--gantt)
+- [Agent / Memory Architecture](#agent--memory-architecture)
+
 ## Architecture Diagram
 | Style | Suitability | Notes |
 |-------|----------|
