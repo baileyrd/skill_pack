@@ -242,7 +242,9 @@ def slug(s: str) -> str:
 
 
 def output_path(root: Path, data: dict) -> Path:
-    name = f"{slug(data.get('slug') or data.get('title', 'visual'))}-{data.get('kind', 'explore')}.html"
+    kind = data.get("kind", "explore")
+    base = slug(data.get("slug") or data.get("title", "visual"))
+    name = f"{base}.html" if base.endswith(f"-{kind}") else f"{base}-{kind}.html"
     tmp = root / "_tmp"
     # A repo with a gitignored _tmp/ keeps disposable output there.
     if subprocess.run(["git", "check-ignore", "-q", "_tmp/visual.html"], cwd=root,
@@ -290,6 +292,8 @@ def cmd_render(a) -> None:
     data["meta"].setdefault("project", root.name)
     abs_root = Path(data.pop("_root", None) or root)
     out = Path(a.out) if a.out else output_path(root, data)
+    if out.is_dir():  # --out DIR: keep the generated name, drop the page inside
+        out = out / output_path(root, data).name
     if getattr(a, "source_base", None):
         link_sources(data, abs_root, Path(a.source_root).resolve() if a.source_root else abs_root, a.source_base)
     # repo root relative to the page, so source links resolve wherever the repo is checked out
@@ -316,7 +320,10 @@ def cmd_render(a) -> None:
     print(json.dumps(result, indent=2))
     if not a.no_open:
         opener = "open" if sys.platform == "darwin" else "xdg-open"
-        subprocess.run([opener, str(out)], capture_output=True)
+        try:
+            subprocess.run([opener, str(out)], capture_output=True)
+        except FileNotFoundError:  # headless box: the page is already written
+            pass
     if result.get("check", {}).get("overlaps"):
         sys.exit(2)
 

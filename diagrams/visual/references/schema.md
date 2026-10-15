@@ -87,7 +87,7 @@ The drill-down map takes its own file: shared nodes and edges, plus views that e
 {
   "title": "example-pack skill map",
   "root": "overview",                      // optional; default = the view with no parent
-  "sourcesBase": "skills/",   // optional prefix for node `source` paths (from the repo root)
+  "sourcesBase": "skills/",   // optional prefix prepended to node `source` paths; omit when sources are already repo-relative
   // publishing the page away from the checkout (GitHub Pages)? `render --map map.json --source-base
   // https://github.com/OWNER/REPO/blob/main/ [--source-root <pack dir>]` links each source under the
   // source root to that URL (`:12-20` → `#L12-L20`); sources outside it show as text, no link

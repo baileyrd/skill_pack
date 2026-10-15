@@ -25,6 +25,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   checklist for any draft — and names the three places this repo deliberately
   departs from it (top-level `version`, noun-phrase names, the wrap-up retro).
 ### Changed
+- `diagrams/visual` (v1.0.0 → v1.0.1) — fixes from a first my-skill-creator eval
+  pass: `--out DIR`, headless `xdg-open` crash, Google Fonts link removed from
+  the template, doubled slug suffix. See the skill's `RELEASE_NOTES.md`.
 - Repo-wide pass against Anthropic's current skill-authoring best practices
   and the Agent Skills spec. `dev_practices/webapp-reverse-engineer`
   (v1.1.0 → v1.2.0) and `meta/my-skill-creator` (v1.3.0 → v1.4.0) were split

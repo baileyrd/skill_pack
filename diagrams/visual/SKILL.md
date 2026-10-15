@@ -8,7 +8,7 @@ description: >-
   or architecture), and map (a zoomable drill-down map of a skill pack or system). Use when the user runs /visual
   or asks to visualise, picture, diagram or visually recap a branch, PR, diff, plan or codebase area, or to map a
   skill pack's lanes, scripts and hooks. Sibling to fireworks-tech-graph, which draws one standalone diagram.
-version: 1.0.0
+version: 1.0.1
 compatibility: Needs git and Python 3 (stdlib only). The self-check screenshots need headless Chrome; pass --no-check without it.
 ---
 
@@ -33,7 +33,7 @@ Say the chosen mode and its source in one line, then keep going.
 
 1. **Gather.** Recap: `python3 scripts/visual.py facts [--base REF]`, then read `git diff <mergeBase>` once, in order, taking notes; scope is the whole work unit of this conversation. Plan: read the plan and the real files it names. Explore: read the target; hand wide sweeps to a sub-agent.
 2. **Write `data.json`** in the scratchpad, following `references/schema.md` and the section bar in `references/sections.md`.
-3. **Render:** `python3 scripts/visual.py render data.json`. It prints `{"out", "bytes", "missingHunks", "check"}` and opens the page. Fix each missing hunk (wrong path or `contains`) and re-render.
+3. **Render:** `python3 scripts/visual.py render data.json`. It prints `{"out", "bytes", "missingHunks", "check"}` and opens the page (`--no-open` on a headless box). `--out` takes a file or a directory. Without Chrome, `check` reports `skipped` and exits 0: say in the reply that the audit did not run. Fix each missing hunk (wrong path or `contains`) and re-render.
 4. **Check.** `render` runs `visual.py check` in headless Chrome: light and dark screenshots (plus one drilled-in view for a map), and an audit of every diagram or view: edge crossings, edges sharing a line, labels lying on a line or a node, and text overflowing its box (`check.counts`). Exit 2 means a problem: move nodes (`col`/`row`, or a view `layout`), cut edges a view does not need, shorten labels, and re-render. Read the PNGs it lists; a broken diagram or empty section means fix and re-render. `--no-check` skips it; `--shots DIR` picks where the PNGs go.
 5. **Reply** with the path, the mode, and a 1–3 line gist. Offer to publish it as an Artifact (the page is fully inline); publish only on a yes.
 
@@ -57,7 +57,7 @@ For a skill pack or any system with nested levels. The page is a clean flowchart
 ## References
 
 - `references/schema.md` — the `data.json` contract, diagram layout, and the map model; open before writing data.
-- `references/sections.md` — per-mode section list and quality bar; open before writing data.
+- `references/sections.md` — per-mode section list and quality bar for recap, plan and explore; open before writing data. Map mode needs only `schema.md`.
 - `THIRD_PARTY_NOTICES.md` — attribution: adapted from BuilderIO/skills (MIT); diagram style and viewer UX from tt-a1i/archify (MIT). Read only to answer a licence question.
 
 ## Wrap-up retro
