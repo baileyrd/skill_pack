@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """PostToolUse hook: remind that a skill carries a wrap-up skill-retro step.
 
-Twelve skills in this repo end with "run a `meta/skill-retro` pass on
+Thirteen skills in this repo end with "run a `meta/skill-retro` pass on
 yourself." Measured across this repo's own use, that step fired **zero** times
 out of two opportunities — the reader (me) simply forgot, twice, and the user
 had to ask both times. Instructions that reliably don't happen are the

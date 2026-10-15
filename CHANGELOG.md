@@ -5,6 +5,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `diagrams/visual` (v1.0.0) — `/visual` renders recap / plan / explore / map
+  modes into one self-contained HTML page with inline SVG diagrams and a
+  headless-Chrome self-check. Adapted from BuilderIO/skills and tt-a1i/archify
+  (MIT). Brought to repo conventions on import: `>-` description, `version`,
+  `compatibility`, `RELEASE_NOTES.md`, Contents list, wrap-up retro; skill-level
+  README dropped.
 - `scripts/check_repo.py`'s `manifests` check now also fails a `SKILL.md`
   whose body exceeds 500 lines — Anthropic's authoring-guide ceiling for the
   part of a skill that loads on every trigger. Admitted under ADR-0002 on a
@@ -19,6 +25,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   checklist for any draft — and names the three places this repo deliberately
   departs from it (top-level `version`, noun-phrase names, the wrap-up retro).
 ### Changed
+- `diagrams/visual` (v1.0.0 → v1.0.1) — fixes from a first my-skill-creator eval
+  pass: `--out DIR`, headless `xdg-open` crash, Google Fonts link removed from
+  the template, doubled slug suffix. See the skill's `RELEASE_NOTES.md`.
 - Repo-wide pass against Anthropic's current skill-authoring best practices
   and the Agent Skills spec. `dev_practices/webapp-reverse-engineer`
   (v1.1.0 → v1.2.0) and `meta/my-skill-creator` (v1.3.0 → v1.4.0) were split

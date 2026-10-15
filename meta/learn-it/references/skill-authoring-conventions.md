@@ -155,7 +155,7 @@ Six category folders exist (verify with `ls -d */`):
 - `dev_practices/` — software design and coding discipline
   (`unix-philosophy`, the three architecture audits). Defined by *subject*
   rather than by target: invoked against whatever the user is building.
-- `diagrams/` — the picture is the deliverable (`fireworks-tech-graph`).
+- `diagrams/` — the picture is the deliverable (`fireworks-tech-graph`, `visual`).
   Defined by *output*: `dev_practices/` reasons about software without
   emitting an artifact, this one emits the artifact.
 
