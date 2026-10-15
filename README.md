@@ -80,6 +80,7 @@ producing an artifact.
 | Skill | Does |
 |---|---|
 | [`fireworks-tech-graph/`](diagrams/fireworks-tech-graph) | Generates technical diagrams as SVG (PNG via `rsvg-convert`) across 15 types — architecture, data flow, flowchart, sequence, agent/memory, comparison matrix, timeline, mind map, ER, network topology, and the UML set — in seven named visual styles, with per-type layout rules and a structural validator. Imported from `yizhiyanhua-ai/fireworks-tech-graph` (MIT). |
+| [`visual/`](diagrams/visual) | Turns the current work into one self-contained HTML page with inline SVG diagrams — a branch recap (hunks pulled from git), a read-only plan, an explored folder/architecture, or a zoomable drill-down map of a skill pack — then audits its own output in headless Chrome for edge crossings and label overlap. Adapted from BuilderIO/skills and tt-a1i/archify (MIT). |
 
 ## Versioning
 
@@ -115,7 +116,7 @@ python scripts/build_skill_zips.py
 
 ### `scripts/retro_reminder.py`
 
-A `PostToolUse` hook on the `Skill` tool, wired in [`.claude/settings.json`](.claude/settings.json). Twelve skills here end with "run a `meta/skill-retro` pass on yourself"; measured across this repo's own use that step fired **zero times out of two opportunities** — forgotten twice, and the user had to ask both times. Instructions that reliably don't happen are the same problem as a doc claiming something untrue, so this wires the reminder rather than restating it.
+A `PostToolUse` hook on the `Skill` tool, wired in [`.claude/settings.json`](.claude/settings.json). Thirteen skills here end with "run a `meta/skill-retro` pass on yourself"; measured across this repo's own use that step fired **zero times out of two opportunities** — forgotten twice, and the user had to ask both times. Instructions that reliably don't happen are the same problem as a doc claiming something untrue, so this wires the reminder rather than restating it.
 
 Narrow on purpose: silent for skills with no retro step, silent for `skill-retro` itself (its own step 6 handles that, and reminding it would be the recursion its guard exists to stop), and it says the retro fires when the *run* ends rather than after every invocation. Exits 0 and prints nothing on any error — a broken reminder must never break a skill call.
 

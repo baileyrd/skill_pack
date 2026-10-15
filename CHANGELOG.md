@@ -5,6 +5,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `diagrams/visual` (v1.0.0) — `/visual` renders recap / plan / explore / map
+  modes into one self-contained HTML page with inline SVG diagrams and a
+  headless-Chrome self-check. Adapted from BuilderIO/skills and tt-a1i/archify
+  (MIT). Brought to repo conventions on import: `>-` description, `version`,
+  `compatibility`, `RELEASE_NOTES.md`, Contents list, wrap-up retro; skill-level
+  README dropped.
 - `scripts/check_repo.py`'s `manifests` check now also fails a `SKILL.md`
   whose body exceeds 500 lines — Anthropic's authoring-guide ceiling for the
   part of a skill that loads on every trigger. Admitted under ADR-0002 on a
