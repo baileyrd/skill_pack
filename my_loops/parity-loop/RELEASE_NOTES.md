@@ -10,6 +10,17 @@ still open.
 
 ---
 
+## v1.5.2 — Body under the 20 KB ceiling
+**2026-10-30**
+
+- **Changed:** Step 0 preflight checks 2 onward moved to `references/preflight.md`, Limitations to `references/limitations.md`, and step 1's three assessment paths to `references/assessment-paths.md`. Body 24.2 KB → under 20 KB.
+- **Why:** `scripts/check_repo.py` now fails a body over 20,000 bytes (~5,000
+  tokens, the Agent Skills budget and what Claude Code keeps after
+  compaction). No instruction was dropped; each moved block is linked from the
+  step that needs it.
+
+---
+
 ## v1.5.1 — Contents list and a compatibility field
 **2026-10-05**
 

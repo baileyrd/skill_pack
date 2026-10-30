@@ -36,6 +36,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   checklist for any draft — and names the three places this repo deliberately
   departs from it (top-level `version`, noun-phrase names, the wrap-up retro).
 ### Changed
+- `rust-migration` v1.4.2, `parity-loop` v1.5.2, `sovereignty-loop` v1.4.2 and
+  `fireworks-tech-graph` v1.0.2 trimmed under the 20,000-byte body ceiling by
+  moving detail into `references/`; `BODY_BYTES_BASELINE` is now empty.
 - `my-skill-creator` v1.6.0: body under 20 KB; repo conventions moved to a
   reference. `learn-it` v1.3.2 documents the byte ceiling.
 - Skill versions move from a top-level `version` to `metadata.version` (quoted

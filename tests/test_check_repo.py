@@ -16,6 +16,7 @@ import importlib.util
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -293,13 +294,14 @@ class TestBodyBytes(unittest.TestCase):
         self.assertIsNone(chk.body_size_failure("meta/new", chk.MAX_BODY_BYTES))
 
     def test_baselined_skill_may_not_grow(self):
-        rel, ceiling = next(iter(chk.BODY_BYTES_BASELINE.items()))
-        self.assertIsNone(chk.body_size_failure(rel, ceiling))
-        self.assertIsNotNone(chk.body_size_failure(rel, ceiling + 1))
+        ceiling = chk.MAX_BODY_BYTES + 500
+        with mock.patch.dict(chk.BODY_BYTES_BASELINE, {"meta/big": ceiling}):
+            self.assertIsNone(chk.body_size_failure("meta/big", ceiling))
+            self.assertIsNotNone(chk.body_size_failure("meta/big", ceiling + 1))
 
     def test_baseline_entry_that_fits_is_stale(self):
-        rel = next(iter(chk.BODY_BYTES_BASELINE))
-        message = chk.body_size_failure(rel, chk.MAX_BODY_BYTES)
+        with mock.patch.dict(chk.BODY_BYTES_BASELINE, {"meta/big": chk.MAX_BODY_BYTES + 500}):
+            message = chk.body_size_failure("meta/big", chk.MAX_BODY_BYTES)
         self.assertIn("remove it from BODY_BYTES_BASELINE", message)
 
     def test_every_skill_in_repo_is_within_its_ceiling(self):

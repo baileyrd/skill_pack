@@ -8,6 +8,37 @@ source stack, not a substitute for reading the code — every language
 section ends the same way on purpose: grep/tool output is a candidate list,
 confirm by reading.
 
+## Contents
+
+- [The five angles, in any language](#the-five-angles-in-any-language)
+- [Python](#python)
+- [Node/TypeScript](#nodetypescript)
+- [Go](#go)
+- [JVM (Java/Kotlin)](#jvm-javakotlin)
+- [Ruby](#ruby)
+- [Anything not listed here](#anything-not-listed-here)
+- [Cross-cutting, regardless of source language](#cross-cutting-regardless-of-source-language)
+
+## The five angles, in any language
+
+- **Public interface**: exported functions/classes/modules, CLI
+  commands/subcommands/flags (including ones only reachable via `--help` or
+  argument-parser source, not just the README), HTTP/RPC routes and their
+  request/response shapes, library entry points.
+- **Configuration surface**: config file keys, environment variables,
+  CLI-flag defaults, feature flags — including ones with no visible
+  default, which usually means "required at deploy time," itself a
+  capability to preserve.
+- **Behavioral surface**: background jobs/schedulers/retries, file formats
+  read or written, protocols spoken, side effects (logging shape,
+  telemetry/metrics emitted, signal handling), error/exit-code contracts.
+- **Tests as spec**: read the source repo's existing test suite as a
+  behavior specification, not just as QA — a passing test encodes a
+  capability whether or not it's mentioned anywhere else. This is usually
+  the single richest source of "the thing nobody wrote down."
+- **Docs as spec**: README, docs/, inline comments describing intent,
+  CHANGELOG entries describing behavior that shipped.
+
 ## Python
 - **Interface**: `__all__` in `__init__.py` files; `click`/`argparse`/
   `typer` command/option definitions (grep for `add_argument`,

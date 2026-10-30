@@ -3,7 +3,7 @@ name: rust-migration
 description: Runs an autonomous "migrate this repo/application to Rust" loop built to prevent the recurring failure mode where a migration quietly treats an existing capability as optional and drops or downgrades it. Before any Rust is written, inventories every observable capability of the source (public APIs, CLI flags, HTTP routes, config/env, jobs, file formats, error/exit behavior, existing tests) into a manifest where every row defaults to REQUIRED — a row moves to OUT-OF-SCOPE only by explicit, written, user-attributed sign-off, never inferred by Claude. Files one issue per capability, checks platform siblings (Rusty-Mill/baileyrd rusty_* repos) for something to port before hand-rolling, verifies behavioral parity before closing, and won't report the migration done while any REQUIRED row is undone. Use whenever the user asks to migrate/port/rewrite a repo or application to Rust, wants a repeatable migration-to-merged-PR loop, or references this by name (rust-migration, migration loop).
 compatibility: Designed for Claude Code against GitHub-hosted repos. Requires git and cargo; the scripts need the gh CLI and jq (GitHub MCP tools substitute for gh when absent); ripgrep optional.
 metadata:
-  version: "1.4.1"
+  version: "1.4.2"
 ---
 
 # rust-migration
@@ -69,35 +69,11 @@ Concretely, this means:
      ([#1](https://github.com/baileyrd/skill_pack/issues/1)). Where the skill
      directory is read-only and `chmod` can't take, name the interpreter
      instead (`bash scripts/next_capability.sh`): it doesn't need the bit.
-  2. `command -v gh`. If `gh` is absent — Claude Code on the web, a container
-     without it installed — the three scripts that shell out to it **cannot
-     run**. The GitHub MCP tools are the substitute: use them for step 2's issue
-     filing, step 3's capability picking, and step 3's CI-wait-and-merge. Say so
-     in the wrap-up report, so the run's mechanics are legible rather than
-     looking like the scripts ran, and do **not** silently skip a step just
-     because its script is unavailable.
-     (`check_manifest_coverage.sh` doesn't touch `gh` and still works.)
-  3. One cheap read against the API (list issues, page size 1). A rate limit or
-     an auth failure discovered here costs nothing; discovered mid-loop it
-     strands work in flight. See "Stop conditions" for what to do when it fails
-     later.
-  4. Note which CI-status mechanism the target uses. A repo whose CI reports via
-     **Actions checks** returns `total_count: 0` from the commit-status
-     endpoint — that is *not* evidence CI is missing, and reading it that way
-     will make you think a green run never happened. Match a run to the PR by
-     `head_sha`, never by branch: runs are associated to PRs by branch name, so
-     a stale run from an earlier PR on a reused branch can appear attached to
-     the current one and read as a pass for code it never ran against.
-  5. Note that **closing an issue** (`gh issue close` or the MCP `issue_write`
-     update-state call) can hit the same rate limit as `search_issues`/`gh
-     issue list --search`, even though closing isn't obviously a search —
-     some tool implementations resolve the issue's ID via an internal
-     search-based lookup first. If closes start failing with a rate-limit
-     error while comments/reads on the same issues still succeed, treat it
-     as the GitHub-API-rate-limited stop condition (the work itself is not
-     failing, only the state transition) rather than assuming something
-     broke — comment the outcome on each issue as a durable record and retry
-     the close once the limit clears.
+  2. Run checks 2 onward in
+     [`references/preflight.md`](references/preflight.md): `gh` availability
+     and the GitHub MCP fallback, one cheap API read, how the target reports
+     CI status (match runs by `head_sha`, never by branch), and anything else
+     listed there. Don't report the loop as started until they pass.
 - `SOURCE_REPO` (what's being migrated, any language) and `TARGET_REPO` (the
   Rust repo/crate the migration lands in — may be the same repo migrated in
   place, a new repo, or an existing `rusty_*` repo being extended).
@@ -138,24 +114,10 @@ Concretely, this means:
 issues or code yet. Be exhaustive, not representative; see
 `references/source-extraction-playbook.md` for source-language-specific
 techniques (Python/Node/Go/JVM/etc. all extract differently). Pull from
-every angle:
-- **Public interface**: exported functions/classes/modules, CLI
-  commands/subcommands/flags (including ones only reachable via `--help` or
-  argument-parser source, not just the README), HTTP/RPC routes and their
-  request/response shapes, library entry points.
-- **Configuration surface**: config file keys, environment variables,
-  CLI-flag defaults, feature flags — including ones with no visible
-  default, which usually means "required at deploy time," itself a
-  capability to preserve.
-- **Behavioral surface**: background jobs/schedulers/retries, file formats
-  read or written, protocols spoken, side effects (logging shape,
-  telemetry/metrics emitted, signal handling), error/exit-code contracts.
-- **Tests as spec**: read the source repo's existing test suite as a
-  behavior specification, not just as QA — a passing test encodes a
-  capability whether or not it's mentioned anywhere else. This is usually
-  the single richest source of "the thing nobody wrote down."
-- **Docs as spec**: README, docs/, inline comments describing intent,
-  CHANGELOG entries describing behavior that shipped.
+every angle: public interface, configuration surface, behavioral surface,
+tests as spec (usually the richest source of what nobody wrote down), and
+docs as spec. The playbook's "The five angles" section lists what each
+covers.
 
 For each surviving item: name it precisely enough to write an issue and a
 parity test against, tag its source (`interface` / `config` / `behavior` /
@@ -276,9 +238,8 @@ this migration, and not blocking on it either.
 
 ## Harness mode
 
-Named here for consistency with the sibling skills, which gate their
-checkpoint on it. Step 3 already proceeds unattended on any non-blocked
-capability in both harness modes, same as `parity-loop`.
+Step 3 proceeds unattended on any non-blocked capability in both modes,
+same as `parity-loop`.
 
 What it does change: in **auto** mode, if step 0's scope questions can't be
 answered from the target's own docs and no one's available to ask, halt and
@@ -355,39 +316,14 @@ Check these every iteration, not just at start:
 
 ## Limitations
 
-- Step 1's extraction is judgment plus tooling, not a formal proof of
-  completeness — a capability with no test, no doc, and an obscure code
-  path can still be missed on a first pass. The step-1 report is the
-  checkpoint to catch that; `check_manifest_coverage.sh` only verifies that
-  *rows already in the manifest* reach a terminal state, not that the
-  manifest itself is complete. Treat a "coverage: 100%" result as "every
-  known row is resolved," not "nothing was missed."
-- The RustyMill sibling check is keyword/grep-surfaced candidates plus
-  judgment, same as the search steps in `sovereignty-loop`/`dedupe-loop` —
-  it can miss a match hiding under different naming, and
-  `references/platform-directory.md` can drift from the live org; confirm
-  rather than assume it's complete.
-- Assumes CI is configured as a required status check on the default branch;
-  the "on green CI" gate only actually gates merges if branch protection
-  requires it (same caveat as repo-config).
-- Three of the four scripts require `gh` on `PATH` and authenticated
-  (`check_manifest_coverage.sh` is the exception). Step 0's preflight checks
-  for it and routes to the GitHub MCP tools when it's missing, but that
-  fallback is a documented substitution the run has to make deliberately —
-  the scripts themselves have no MCP path.
-- Built for a single source/target pair per run. A multi-service migration
-  run one service at a time means one capability manifest per service,
-  reconciled by hand into an overall picture if the user wants one.
-- The parity test in step 3.6 checks behavioral equivalence for what the
-  test asserts — it's only as strong as the test written. Safety-relevant
-  capabilities are worth a spot-check beyond the automated gate.
+What this loop does not guarantee is in
+[`references/limitations.md`](references/limitations.md). Read it before
+calling a run complete.
 
 ## Scripts
 
-Three of these scripts shell out to `gh` — `next_capability.sh`,
-`watch_and_merge.sh`, and `scan_platform_repos.sh`. If step 0's preflight found
-`gh` absent they cannot run, and the GitHub MCP tools are the substitute; see
-step 0.
+Without `gh`, all but `check_manifest_coverage.sh` fall back to the GitHub
+MCP tools (`references/preflight.md`).
 
 | Script | Purpose | Args |
 | --- | --- | --- |
