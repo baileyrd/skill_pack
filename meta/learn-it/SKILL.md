@@ -13,7 +13,7 @@ description: >-
   we just learned", "update the X skill with this", or references this by name (learn-it). Never
   write one for a one-off fact or fix specific to this task; qualify first.
 metadata:
-  version: "1.3.1"
+  version: "1.3.2"
 ---
 
 # learn-it

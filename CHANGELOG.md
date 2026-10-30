@@ -5,6 +5,15 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `check_repo.py`'s `manifests` check fails a `SKILL.md` body over 20,000 bytes
+  (~5,000 tokens, the spec's budget and what Claude Code keeps after
+  compaction). Four skills already over it are held at their current size in
+  `BODY_BYTES_BASELINE` and may shrink but not grow. Admitted under ADR-0002:
+  `my-skill-creator` passed the 500-line check at ~7k tokens.
+- CI runs `skills-ref` (the Agent Skills reference validator, pinned 0.1.1) on
+  every skill, and installs PyYAML so `tests/test_quick_validate.py` runs
+  instead of skipping.
+- `meta/my-skill-creator/references/claude-code-options.md`.
 - `tests/test_build_skill_zips.py` covers `skill_version` reading
   `metadata.version`.
 - `diagrams/visual` (v1.0.0) — `/visual` renders recap / plan / explore / map
@@ -27,6 +36,8 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   checklist for any draft — and names the three places this repo deliberately
   departs from it (top-level `version`, noun-phrase names, the wrap-up retro).
 ### Changed
+- `my-skill-creator` v1.6.0: body under 20 KB; repo conventions moved to a
+  reference. `learn-it` v1.3.2 documents the byte ceiling.
 - Skill versions move from a top-level `version` to `metadata.version` (quoted
   semver) in all 23 authored skills. The Agent Skills spec allows six top-level
   keys and claude.ai upload, the Skills API and `package_skill.py` hard-error on

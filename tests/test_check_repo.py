@@ -261,6 +261,61 @@ class TestBodyLineCount(unittest.TestCase):
         self.assertEqual(over, [], f"bodies over {chk.MAX_BODY_LINES} lines: {over}")
 
 
+class TestBodyBytes(unittest.TestCase):
+    """my-skill-creator passed the 500-line check at 490 lines while costing
+    ~7k tokens, over the spec's 5,000-token budget. Bytes are the proxy."""
+
+    def setUp(self):
+        self.paths = []
+
+    def tearDown(self):
+        for p in self.paths:
+            p.unlink(missing_ok=True)
+
+    def size(self, text):
+        path = write(text)
+        self.paths.append(path)
+        return chk.body_bytes(path)
+
+    def test_counts_only_bytes_after_the_closing_fence(self):
+        self.assertEqual(self.size("---\nname: demo\n---\nab\n"), 3)
+
+    def test_counts_utf8_bytes_not_characters(self):
+        self.assertEqual(self.size("---\nname: demo\n---\n\u2014\n"), 4)
+
+    def test_no_frontmatter_returns_zero(self):
+        self.assertEqual(self.size("# Just a heading\n"), 0)
+
+    def test_new_skill_over_limit_fails(self):
+        self.assertIsNotNone(chk.body_size_failure("meta/new", chk.MAX_BODY_BYTES + 1))
+
+    def test_new_skill_at_limit_passes(self):
+        self.assertIsNone(chk.body_size_failure("meta/new", chk.MAX_BODY_BYTES))
+
+    def test_baselined_skill_may_not_grow(self):
+        rel, ceiling = next(iter(chk.BODY_BYTES_BASELINE.items()))
+        self.assertIsNone(chk.body_size_failure(rel, ceiling))
+        self.assertIsNotNone(chk.body_size_failure(rel, ceiling + 1))
+
+    def test_baseline_entry_that_fits_is_stale(self):
+        rel = next(iter(chk.BODY_BYTES_BASELINE))
+        message = chk.body_size_failure(rel, chk.MAX_BODY_BYTES)
+        self.assertIn("remove it from BODY_BYTES_BASELINE", message)
+
+    def test_every_skill_in_repo_is_within_its_ceiling(self):
+        failures = []
+        for path in sorted(chk.REPO_ROOT.rglob("SKILL.md")):
+            if ".git" in path.parts or "zip" in path.parts:
+                continue
+            rel = path.parent.relative_to(chk.REPO_ROOT).as_posix()
+            if rel in chk.VENDORED:
+                continue
+            failure = chk.body_size_failure(rel, chk.body_bytes(path))
+            if failure:
+                failures.append(failure)
+        self.assertEqual(failures, [])
+
+
 class TestSemver(unittest.TestCase):
     def test_accepts_plain_semver(self):
         for v in ("1.0.0", "0.1.2", "12.34.56"):

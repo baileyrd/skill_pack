@@ -31,11 +31,27 @@ jobs:
         with:
           python-version: '3.12'
 
-      # No install step: every check is Python standard library plus git,
-      # both already on the runner. If this ever needs a dependency, that's a
-      # decision to make explicitly, not to discover here.
+      # check_repo.py stays standard library plus git.
       - name: Run repo checks
         run: python3 scripts/check_repo.py
+
+      # The one install, made explicitly. skills-ref is the Agent Skills
+      # spec's reference validator: an independent check that every skill's
+      # frontmatter is what claude.ai and the Skills API accept, rather than
+      # this repo's own reading of the spec. PyYAML is quick_validate.py's
+      # dependency; without it test_quick_validate.py skips silently, so the
+      # frontmatter allowlist was never tested in CI. Pinned so a release
+      # can't change the verdict under an unrelated PR.
+      - name: Install validators
+        run: python3 -m pip install skills-ref==0.1.1 PyYAML==6.0.3
+
+      - name: Validate skills against the spec
+        run: |
+          status=0
+          for skill in $(git ls-files '*SKILL.md' | xargs -n1 dirname); do
+            agentskills validate "$skill" || status=1
+          done
+          exit $status
 
       # Deliberately a separate step, not a sixth check inside check_repo.py.
       # ADR-0002 governs repo *checks* — lint over structure, admitted only
