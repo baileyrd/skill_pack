@@ -20,7 +20,9 @@ it.
               non-spec keys), a RELEASE_NOTES.md, a `description` within the
               1024-character limit claude.ai enforces on upload, and a
               SKILL.md body within the 500 lines Anthropic's authoring guide
-              sets for progressive disclosure. repo-config's own notes record
+              sets for progressive disclosure and within 20,000 bytes
+              (~5,000 tokens, the spec's budget and what survives
+              compaction). repo-config's own notes record
               a real fix shipping with no entry, caught only because the repo
               owner noticed; five skills shipped with over-length descriptions
               and were rejected only at upload time, after install_skills.py
@@ -62,6 +64,20 @@ MAX_DESCRIPTION = 1024
 # and push detail into reference files Claude loads on demand. The body is
 # everything after the closing frontmatter fence.
 MAX_BODY_LINES = 500
+# Lines don't measure context cost: my-skill-creator was 490 lines and ~7k
+# tokens. The Agent Skills spec recommends a body under 5,000 tokens, and
+# Claude Code re-attaches only an invoked skill's first 5,000 tokens after
+# compaction. At ~4 bytes per token, 20,000 bytes is that budget.
+MAX_BODY_BYTES = 20_000
+# Skills already over MAX_BODY_BYTES when the check landed, each held at its
+# size then so it can shrink but not grow. Delete an entry once its skill
+# fits; the check fails on an entry that no longer needs to be here.
+BODY_BYTES_BASELINE = {
+    "my_loops/rust-migration": 24_478,
+    "my_loops/parity-loop": 24_235,
+    "diagrams/fireworks-tech-graph": 22_747,
+    "my_loops/sovereignty-loop": 20_264,
+}
 BINARY_SUFFIXES = {".skill", ".zip", ".png", ".jpg", ".jpeg", ".gif", ".pdf", ".ico"}
 
 
@@ -231,6 +247,34 @@ def body_line_count(path: Path) -> int:
     return 0
 
 
+def body_bytes(path: Path) -> int:
+    """UTF-8 bytes after the frontmatter's closing `---`; 0 if there is none."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return 0
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return 0
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            return len("".join(lines[i + 1 :]).encode("utf-8"))
+    return 0
+
+
+def body_size_failure(rel_dir: str, size: int) -> str | None:
+    """Failure message for a body over its byte ceiling, or a stale baseline entry."""
+    ceiling = BODY_BYTES_BASELINE.get(rel_dir, MAX_BODY_BYTES)
+    if size > ceiling:
+        return (
+            f"{rel_dir}/SKILL.md: body is {size} bytes, over its {ceiling}-byte "
+            f"ceiling (~{MAX_BODY_BYTES // 4} tokens; move detail into references/)"
+        )
+    if rel_dir in BODY_BYTES_BASELINE and size <= MAX_BODY_BYTES:
+        return f"{rel_dir}/SKILL.md: now {size} bytes; remove it from BODY_BYTES_BASELINE"
+    return None
+
+
 def check_manifests() -> list[str]:
     failures = []
     for path in sorted(REPO_ROOT.rglob("SKILL.md")):
@@ -264,6 +308,9 @@ def check_manifests() -> list[str]:
                 f"{rel_dir}/SKILL.md: body is {body} lines, over the "
                 f"{MAX_BODY_LINES}-line guide (move detail into references/)"
             )
+        size_failure = body_size_failure(rel_dir, body_bytes(path))
+        if size_failure:
+            failures.append(size_failure)
     return failures
 
 

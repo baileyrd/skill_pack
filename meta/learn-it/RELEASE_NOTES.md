@@ -9,6 +9,14 @@ still open.
 
 ---
 
+## v1.3.2 — Body byte ceiling
+**2026-10-30**
+
+- **Changed:** the conventions reference states the 20,000-byte body ceiling
+  `check_repo.py` now enforces, next to the 500-line one.
+
+---
+
 ## v1.3.1 — Version lives under `metadata`
 **2026-10-30**
 

@@ -9,6 +9,23 @@ still open.
 
 ---
 
+## v1.6.0 — Body within the 5,000-token budget
+**2026-10-30**
+
+- **Changed:** body cut from ~28.5 KB to under 20 KB (~5,000 tokens), now
+  enforced by `check_repo.py`. "This repo's own conventions" moved to
+  `references/repo-conventions.md`; "How to think about improvements",
+  "Communicating with the user", "Dependencies" and the closing recap were
+  condensed; the evals.json example points at `references/schemas.md`.
+- **Added:** `references/claude-code-options.md`: Claude Code-only frontmatter,
+  substitutions (`${CLAUDE_SKILL_DIR}`, `!` commands) and runtime behavior, with
+  when each fits. The body keeps a two-line pointer.
+- **Changed:** test cases are "at least three", matching the published guidance.
+- **Changed:** the script-path rule no longer recommends `${CLAUDE_SKILL_DIR}`
+  for portable skills; it is Claude Code-only and stays literal elsewhere.
+
+---
+
 ## v1.5.0 — Always-apply rules first, portable frontmatter, measured triggering
 **2026-10-30**
 

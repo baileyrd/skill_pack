@@ -12,7 +12,7 @@ description: >-
   this over the generic skill-creator whenever the skill lives in, or is
   headed for, skill_pack.
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
 ---
 
 # My Skill Creator
@@ -29,24 +29,18 @@ a conversation is compacted. The sections below explain each one.
   for skills that will never leave Claude Code (see "Frontmatter").
 - `description`: third person, ≤1024 characters, the main use case in the
   first sentence, written as a `>-` block scalar.
-- Body under 500 lines and roughly 5,000 tokens; the rules that must
-  survive compaction go at the top. Depth goes in `references/`, one hop
-  deep.
-- Scripts are invoked through their interpreter (`python3 scripts/x.py`),
-  with `${CLAUDE_SKILL_DIR}` for the path when the skill may be installed
-  outside the repo.
+- Body under 500 lines and 20,000 bytes (~5,000 tokens), both enforced by
+  `check_repo.py`; must-survive rules at the top, depth in `references/`.
+- Scripts run through their interpreter (`python3 scripts/x.py`), paths
+  relative to the skill folder.
 - Every authored skill gets `RELEASE_NOTES.md` and a wrap-up retro step
   ("Retro by default"); every change lands through a PR after
   `python3 scripts/check_repo.py` passes.
 - Evals before polish: a no-skill baseline, then at least three realistic
   prompts.
 
-This is skill_pack's fork of Anthropic's `skill-creator`. The interview,
-eval/benchmark loop, description optimization and packaging are upstream's
-process; this copy adds the repo conventions ("This repo's own conventions")
-and the retro step ("Retro by default").
-
-A skill for creating new skills and iteratively improving them.
+This is skill_pack's fork of Anthropic's `skill-creator`: upstream's process,
+plus the repo conventions and the retro step.
 
 At a high level, the process of creating a skill goes like this:
 
@@ -71,14 +65,9 @@ Then after the skill is done (but again, the order is flexible), you can also ru
 
 ## Communicating with the user
 
-The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven't heard (and how could you, it's only very recently that it started), there's a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google "how to install npm". On the other hand, the bulk of users are probably fairly computer-literate.
-
-So please pay attention to context cues to understand how to phrase your communication! In the default case, just to give you some idea:
-
-- "evaluation" and "benchmark" are borderline, but OK
-- for "JSON" and "assertion" you want to see serious cues from the user that they know what those things are before using them without explaining them
-
-It's OK to briefly explain terms if you're in doubt, and feel free to clarify terms with a short definition if you're unsure if the user will get it.
+Users range from first-time terminal users to engineers. Match their
+vocabulary: "evaluation" and "benchmark" are usually fine; explain "JSON" or
+"assertion" in a few words unless the user has shown they know them.
 
 ---
 
@@ -110,75 +99,14 @@ Based on the user interview, fill in these components:
 
 ### This repo's own conventions
 
-When the skill being drafted or edited is going to live in `skill_pack`
-(the common case for anyone reaching for this copy instead of the generic
-upstream one), layer these on top of the interview above — read
-`meta/learn-it/references/skill-authoring-conventions.md` for the full
-detail; summarized here:
-
-- Add `metadata:` with `version: "1.0.0"` to the frontmatter (new skill),
-  or bump it by hand — semver: patch for wording/doc-only fixes, minor for new
-  guidance/steps, major only for an actual contract change — when editing
-  an existing one. Every skill in this repo carries this field.
-- **`description` has a hard ceiling of 1024 characters** — claude.ai's limit,
-  enforced by `scripts/check_repo.py`'s `manifests` check. Write it long and
-  information-dense as the guidance above and in
-  `meta/learn-it/references/skill-authoring-conventions.md` says, then *check
-  the length before committing*. Those two instructions genuinely conflict, and
-  the limit wins; following the "be thorough" advice as written naturally
-  overshoots. When trimming, cut trigger-phrase examples before cutting the
-  statement of what the skill does and how — triggering degrades gracefully
-  with fewer example phrasings, and not at all gracefully if the reader can no
-  longer tell what the skill is for.
-- **Write the description as a YAML block scalar** (`description: >-`, wrapped
-  and indented) rather than one long plain line, unless you are certain it
-  contains no `": "`. A colon followed by a space inside an unquoted plain
-  scalar is invalid YAML — the parser reads it as a nested mapping — and a
-  description that quotes a trigger phrase (`Audit mode reviews what exists:
-  "..."`) hits this easily. `check_repo.py`'s hand-rolled parser tolerates it,
-  so the repo's own checks stay green while every real consumer rejects the
-  file. Four skills shipped this way before it was noticed.
-- Add a `RELEASE_NOTES.md` next to the new/edited `SKILL.md`:
-  reverse-chronological, one dated entry per meaningful change, explaining
-  what changed and why.
-- Place the skill directory under the right category folder (`my_loops/`,
-  `yt_research_for_cc/`, `meta/`) — or flag "this doesn't fit an existing
-  category" as its own decision to confirm rather than forcing a fit or
-  defaulting silently.
-- Keep `SKILL.md` itself lean; push depth into `references/`. Only add
-  `scripts/`/`assets/` when there's real content for them.
-- After writing or editing, update the root `README.md`'s category table
-  and the root `CHANGELOG.md`'s `Unreleased` section, and sanity-check with
-  `python3 scripts/build_skill_zips.py` — this repo's own multi-skill
-  build, distinct from this skill's own `scripts/package_skill.py` (which
-  packages a *single* skill for upload elsewhere). Run both when the skill
-  lands in this repo: `package_skill.py` only if the user also wants a
-  portable `.skill` file to hand off, `build_skill_zips.py` regardless, as
-  the repo-wide sanity check.
-- If any new file is a script (`.sh`/`.py` meant to be executed directly),
-  verify its executable bit landed as `100755` after `git add` — this repo
-  runs `core.fileMode=false`, so a brand-new script needs an explicit check
-  (`git ls-files -s <path>`), not an assumption that `chmod +x` alone
-  survives staging.
-- **The bit does not survive delivery, so don't let a skill depend on it.**
-  Whatever it is in git, the sync that hands a skill to a session drops mode
-  bits — every script arrives as `0644`, measured at 31 of 31 in a live
-  session — so a drafted step that names a script path on its own fails with
-  `permission denied`
-  ([#1](https://github.com/baileyrd/skill_pack/issues/1)). Any skill drafted
-  here that ships scripts must either name the interpreter at each invocation
-  (prefix it with `bash` or `python3`) or document the recovery
-  (`chmod +x scripts/*.sh scripts/*.py 2>/dev/null || true`).
-  `tests/test_script_invocation.py` enforces this and will fail the PR
-  otherwise.
-- Land the change through this repo's standing PR workflow (branch, PR,
-  merge with a merge commit on green CI or no CI) — same as
-  `CONTRIBUTING.md` requires for anything else here.
-
-None of this applies when the skill being drafted is explicitly meant for
-use *outside* `skill_pack` (e.g. the user wants a `.skill` file to hand to
-someone else, unrelated to this repo) — in that case, follow upstream
-`skill-creator`'s process unmodified and skip this section entirely.
+When the skill will live in `skill_pack`, read
+[`references/repo-conventions.md`](references/repo-conventions.md) before
+writing files. It covers `metadata.version` and how to bump it, the
+1024-character description ceiling and why the description is a `>-` block
+scalar, `RELEASE_NOTES.md`, which category folder to use, the README and
+CHANGELOG updates, the executable-bit rules for scripts, and landing the change
+through a PR. Skip it only for a skill explicitly meant for use outside this
+repo.
 
 ### Retro by default
 
@@ -237,17 +165,10 @@ them; most skills don't need it. `metadata` is a string-to-string map; this
 repo keeps `version` there. Nothing else goes at the top level of a skill
 meant to be portable.
 
-Claude Code-only keys, for skills that will only run there: `when_to_use`
-(extra trigger text, shares the 1,536-character listing cap with
-`description`), `disable-model-invocation` (manual `/name` only),
-`user-invocable: false` (Claude-only), `context: fork` with `agent` (run in a
-subagent; only for skills with an explicit task), `paths` (activate only for
-matching files), `hooks` (rules that must hold every time, not just when
-Claude remembers), `model`, `effort`, `arguments`. Any of them makes the skill
-fail a claude.ai upload, so `quick_validate.py` (run on every skill by the
-repo's tests) rejects them here. The skill is not re-read on later turns: phrase standing rules as
-whole-task ("run the tests after every edit"), and move must-always-hold rules
-into a hook.
+Claude Code-only keys (`when_to_use`, `disable-model-invocation`,
+`context: fork`, `hooks`, `paths`, …) block a claude.ai upload. When a skill
+will only ever run in Claude Code and one of them would help, read
+[`references/claude-code-options.md`](references/claude-code-options.md).
 
 #### Degrees of freedom
 
@@ -292,27 +213,13 @@ model it will run on — what Opus finds over-explained, Haiku may need.
 
 ### Test Cases
 
-After writing the skill draft, come up with 2-3 realistic test prompts — the kind of thing a real user would actually say. Share them with the user: [you don't have to use this exact language] "Here are a few test cases I'd like to try. Do these look right, or do you want to add more?" Then run them.
+After writing the skill draft, come up with at least three realistic test prompts — the kind of thing a real user would actually say. Share them with the user: [you don't have to use this exact language] "Here are a few test cases I'd like to try. Do these look right, or do you want to add more?" Then run them.
 
 Where the runs are backgroundable and cheap to redo, it is fine to launch them and present the prompts in the *same* turn rather than blocking on confirmation — say explicitly that you have done so, and that a changed prompt just means a rerun. Blocking a user on a confirm while nothing executes wastes their time for no gain. Do block when a run is expensive, slow, or has side effects outside the workspace.
 
-Save test cases to `evals/evals.json`. Don't write assertions yet — just the prompts. You'll draft assertions in the next step while the runs are in progress.
-
-```json
-{
-  "skill_name": "example-skill",
-  "evals": [
-    {
-      "id": 1,
-      "prompt": "User's task prompt",
-      "expected_output": "Description of expected result",
-      "files": []
-    }
-  ]
-}
-```
-
-See `references/schemas.md` for the full schema (including the `assertions` field, which you'll add later).
+Save test cases to `evals/evals.json` (`skill_name`, then `evals[]` of `id`,
+`prompt`, `expected_output`, `files`; full schema in `references/schemas.md`).
+Don't write assertions yet; draft them while the runs are in progress.
 
 ## Running and evaluating test cases
 
@@ -328,15 +235,17 @@ This is the heart of the loop. You've run the test cases, the user has reviewed 
 
 ### How to think about improvements
 
-1. **Generalize from the feedback.** The big picture thing that's happening here is that we're trying to create skills that can be used a million times (maybe literally, maybe even more who knows) across many different prompts. Here you and the user are iterating on only a few examples over and over again because it helps move faster. The user knows these examples in and out and it's quick for them to assess new outputs. But if the skill you and the user are codeveloping works only for those examples, it's useless. Rather than put in fiddly overfitty changes, or oppressively constrictive MUSTs, if there's some stubborn issue, you might try branching out and using different metaphors, or recommending different patterns of working. It's relatively cheap to try and maybe you'll land on something great.
+1. **Generalize from the feedback.** The skill will run on far more prompts
+   than the few you are iterating on. Prefer a different metaphor or working
+   pattern over fiddly, overfit fixes or rigid MUSTs.
+2. **Keep the prompt lean.** Read the transcripts, not only the outputs, and
+   cut instructions that make the model waste time.
+3. **Explain the why.** A reason generalizes better than ALWAYS/NEVER in
+   capitals; treat capitals as a yellow flag and reframe.
+4. **Bundle repeated work.** If every test run wrote the same helper script,
+   put it in `scripts/` and tell the skill to use it.
 
-2. **Keep the prompt lean.** Remove things that aren't pulling their weight. Make sure to read the transcripts, not just the final outputs — if it looks like the skill is making the model waste a bunch of time doing things that are unproductive, you can try getting rid of the parts of the skill that are making it do that and seeing what happens.
-
-3. **Explain the why.** Try hard to explain the **why** behind everything you're asking the model to do. Today's LLMs are *smart*. They have good theory of mind and when given a good harness can go beyond rote instructions and really make things happen. Even if the feedback from the user is terse or frustrated, try to actually understand the task and why the user is writing what they wrote, and what they actually wrote, and then transmit this understanding into the instructions. If you find yourself writing ALWAYS or NEVER in all caps, or using super rigid structures, that's a yellow flag — if possible, reframe and explain the reasoning so that the model understands why the thing you're asking for is important. That's a more humane, powerful, and effective approach.
-
-4. **Look for repeated work across test cases.** Read the transcripts from the test runs and notice if the subagents all independently wrote similar helper scripts or took the same multi-step approach to something. If all 3 test cases resulted in the subagent writing a `create_docx.py` or a `build_chart.py`, that's a strong signal the skill should bundle that script. Write it once, put it in `scripts/`, and tell the skill to use it. This saves every future invocation from reinventing the wheel.
-
-This task is pretty important (we are trying to create billions a year in economic value here!) and your thinking time is not the blocker; take your time and really mull things over. I'd suggest writing a draft revision and then looking at it anew and making improvements. Really do your best to get into the head of the user and understand what they want and need.
+Draft a revision, then reread it fresh before running the next iteration.
 
 ### The iteration loop
 
@@ -433,40 +342,24 @@ The references/ directory has additional documentation:
 - `references/description-optimization.md` — trigger-query design and the `run_loop.py` procedure
 - `references/environment-notes.md` — claude.ai and Cowork adaptations, updating an installed skill
 - `references/retro-by-default.md` — which wrap-up-retro shape to add, and when to exclude it
+- `references/repo-conventions.md` — skill_pack's file, versioning, placement and PR rules
+- `references/claude-code-options.md` — Claude Code-only frontmatter, substitutions, and runtime behavior
 - `references/schemas.md` — JSON structures for evals.json, grading.json, etc.
 
 ## Dependencies
 
-Everything under `scripts/` is Python-standard-library only, with one
-exception: `scripts/quick_validate.py` imports **PyYAML** (`import yaml`, an
-unguarded top-level import) to parse `SKILL.md` frontmatter. Without it that
-one script raises `ModuleNotFoundError`; the rest of the skill is unaffected.
-
-`pip install pyyaml` if validation fails on import.
-
-Across all 17 tracked `.py` files in this repo, `yaml` is the only
-third-party module that gets *imported*. External **binaries** are a separate
-question and several skills need one: `gh` and `git` throughout, `jq` for the
-`my_loops` issue-picking scripts, `ripgrep` optionally for their repo scans,
-and `yt-dlp` for `yt_research_for_cc`.
+Everything under `scripts/` is Python standard library except
+`scripts/quick_validate.py`, which imports PyYAML to parse frontmatter.
+`pip install pyyaml` if it fails on import. Invoke scripts through `python3`;
+the sync drops the executable bit (`chmod +x scripts/*.py 2>/dev/null || true`
+restores it).
 
 ---
 
-Repeating one more time the core loop here for emphasis:
-
-- Figure out what the skill is about
-- Draft or edit the skill
-- Run claude-with-access-to-the-skill on test prompts
-- With the user, evaluate the outputs:
-  - Create benchmark.json and run `eval-viewer/generate_review.py` to help the user review them
-  - Run quantitative evals
-- Repeat until you and the user are satisfied
-- If the skill lands in `skill_pack`: apply "This repo's own conventions"
-  (version, RELEASE_NOTES.md, category folder) and build in a "Retro by
-  default" wrap-up-retro step as part of the draft, not after
-- Package the final skill and return it to the user
-- Run `my-skill-creator`'s own "Wrap-up retro" against this run
-
-Please add steps to your TodoList, if you have such a thing, to make sure you don't forget. If you're in Cowork, please specifically put "Create evals JSON and run `eval-viewer/generate_review.py` so human can review test cases" in your TodoList to make sure it happens.
-
-Good luck!
+The core loop, once more: capture intent; draft or edit; run test prompts with
+and without the skill; review with the user in `eval-viewer/generate_review.py`
+plus quantitative evals; iterate; for `skill_pack`, apply the repo conventions
+and the retro step in the draft itself; package; run this skill's own wrap-up
+retro. Put these steps on your todo list if you keep one. In Cowork, add
+"Create evals JSON and run `eval-viewer/generate_review.py` so human can review
+test cases" explicitly.

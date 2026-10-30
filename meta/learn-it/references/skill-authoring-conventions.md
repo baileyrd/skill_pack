@@ -107,8 +107,9 @@ Not every skill needs `references/`/`scripts/`/`assets/` — `skill-retro` and
 reference file, because they're judgment/writing passes, not automation.
 Add a directory only when there's real content for it.
 
-Keep `SKILL.md` itself lean — under 500 lines, enforced by
-`scripts/check_repo.py`'s `manifests` check — by pushing depth (long lists,
+Keep `SKILL.md` itself lean — under 500 lines and 20,000 bytes (~5,000
+tokens), both enforced by `scripts/check_repo.py`'s `manifests` check — by
+pushing depth (long lists,
 per-stack detail, format specs) into `references/*.md` and linking to them by
 relative path from `SKILL.md`, each with a line on when to read it. Keep
 references one level deep: every reference links from `SKILL.md` directly,
@@ -183,7 +184,8 @@ Skills → best practices; the Agent Skills spec at agentskills.io) and this
 repo's conventions above. Treat it as the review checklist for any draft:
 
 **Structure**
-- Body under 500 lines; detail in `references/`, one level deep, each file
+- Body under 500 lines and 20,000 bytes, with the rules that must survive
+  compaction at the top; detail in `references/`, one level deep, each file
   linked from `SKILL.md` with a line on when to read it.
 - References over 100 lines open with a `## Contents` list.
 - Forward slashes in every path. Descriptive file names
