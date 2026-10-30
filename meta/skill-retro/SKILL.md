@@ -13,7 +13,8 @@ description: >-
   task that leaned on another skill in this repo, when the user asks to
   retro/review/critique/post-mortem a skill that was just used, or references this by name
   (skill-retro, meta-review).
-version: 1.2.2
+metadata:
+  version: "1.2.3"
 ---
 
 # skill-retro
@@ -135,7 +136,7 @@ batch:
   don't bump B's version or touch its `RELEASE_NOTES.md` — nothing about B
   changed yet. A batch that's part applied and part filed is normal; report
   which is which rather than implying the whole table landed.
-- Bump B's `version` in its `SKILL.md` frontmatter — semver, by hand, same
+- Bump B's `metadata.version` in its `SKILL.md` frontmatter — semver, by hand, same
   rule the root `README.md`'s "Versioning" section already states for every
   skill here: patch for wording/doc-only fixes, minor for a new guardrail
   or step, major only if the user says this changes B's actual contract

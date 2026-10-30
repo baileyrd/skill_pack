@@ -7,6 +7,15 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.0.2 — Document the executable-bit recovery
+**2026-10-30**
+
+- **Fixed:** `SKILL.md` now says why every call names `python3` and how to
+  restore the bit (`chmod +x scripts/*.py`). `tests/test_script_invocation.py`
+  had been failing on `main` since the import.
+
+---
+
 ## v1.0.1 — Fixes from the first eval pass
 **2026-10-15**
 

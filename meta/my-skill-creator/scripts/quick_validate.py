@@ -80,19 +80,12 @@ def validate_skill(skill_path):
     except yaml.YAMLError as e:
         return False, f"Invalid YAML in frontmatter: {e}"
 
-    # Define allowed properties.
-    #
-    # `version` is a deliberate skill_pack-local addition to the vendored
-    # upstream allowlist. This repo *requires* it on every authored skill (root
-    # README's "Versioning" section; scripts/check_repo.py's manifests check
-    # fails a skill without it; build_skill_zips.py reads it to name the
-    # archive). Upstream skill-creator has no such convention, so its allowlist
-    # correctly omits it — but without this addition the two validators in this
-    # repo contradict each other and package_skill.py cannot package any skill
-    # here. See issue #58. Re-apply this line on any future re-sync from
-    # upstream.
+    # Define allowed properties: exactly the Agent Skills spec's six. claude.ai
+    # upload and the Skills API hard-error on any other top-level key, so this
+    # repo keeps its version under `metadata.version` (issue #58 once added a
+    # top-level `version` here; that is what made skills non-portable).
     ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata',
-                          'compatibility', 'version'}
+                          'compatibility'}
 
     # Check for unexpected properties (excluding nested keys under metadata)
     unexpected_keys = set(frontmatter.keys()) - ALLOWED_PROPERTIES
@@ -143,6 +136,16 @@ def validate_skill(skill_path):
             return False, f"Compatibility must be a string, got {type(compatibility).__name__}"
         if len(compatibility) > 500:
             return False, f"Compatibility is too long ({len(compatibility)} characters). Maximum is 500 characters."
+
+    # The spec types `metadata` as a string-to-string map; an unquoted `1.0`
+    # would parse as a float.
+    metadata = frontmatter.get('metadata', {})
+    if metadata is not None:
+        if not isinstance(metadata, dict):
+            return False, f"Metadata must be a mapping, got {type(metadata).__name__}"
+        non_strings = sorted(k for k, v in metadata.items() if not isinstance(v, str))
+        if non_strings:
+            return False, f"Metadata values must be strings (quote them): {', '.join(map(str, non_strings))}"
 
     return True, "Skill is valid!"
 

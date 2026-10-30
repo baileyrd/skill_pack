@@ -9,6 +9,14 @@ still open.
 
 ---
 
+## v1.2.3 — Bump `metadata.version`
+**2026-10-30**
+
+- **Changed:** the apply step bumps B's `metadata.version`, where every skill in
+  this repo now keeps it.
+
+---
+
 ## v1.2.2 — `tooling-bug` covers an environment-precondition mismatch, not just a code bug
 **2026-08-25**
 

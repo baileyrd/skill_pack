@@ -12,7 +12,8 @@ description: >-
   conversation, when the user says "turn this into a skill", "save this as a skill", "capture what
   we just learned", "update the X skill with this", or references this by name (learn-it). Never
   write one for a one-off fact or fix specific to this task; qualify first.
-version: 1.3.0
+metadata:
+  version: "1.3.1"
 ---
 
 # learn-it
@@ -145,7 +146,7 @@ and every other read-before-write pattern in this repo — nothing gets
 written on this step.
 
 **5. On approval, write it**
-- Create/update the files. New skill → `version: 1.0.0` and a first
+- Create/update the files. New skill → `metadata.version: "1.0.0"` and a first
   `RELEASE_NOTES.md` entry. Update → bump semver by hand (patch for
   wording, minor for new guidance, major only if the user says this
   changes the skill's actual contract) and append a dated

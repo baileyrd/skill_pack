@@ -8,13 +8,14 @@ description: >-
   or architecture), and map (a zoomable drill-down map of a skill pack or system). Use when the user runs /visual
   or asks to visualise, picture, diagram or visually recap a branch, PR, diff, plan or codebase area, or to map a
   skill pack's lanes, scripts and hooks. Sibling to fireworks-tech-graph, which draws one standalone diagram.
-version: 1.0.1
 compatibility: Needs git and Python 3 (stdlib only). The self-check screenshots need headless Chrome; pass --no-check without it.
+metadata:
+  version: "1.0.2"
 ---
 
 # /visual
 
-One command, one page. You write a `data.json`; `scripts/visual.py render` injects it into `assets/template.html`, which draws everything inline (SVG diagrams, file map, diffs) with no build step and no runtime CDN. Paths below are relative to this skill's folder; run the script from inside the project being visualised.
+One command, one page. You write a `data.json`; `scripts/visual.py render` injects it into `assets/template.html`, which draws everything inline (SVG diagrams, file map, diffs) with no build step and no runtime CDN. Paths below are relative to this skill's folder; run the script from inside the project being visualised. Every call below names `python3` because the sync drops the executable bit; to run it directly, first `chmod +x scripts/*.py 2>/dev/null || true`.
 
 ## Pick the mode
 

@@ -5,6 +5,8 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `tests/test_build_skill_zips.py` covers `skill_version` reading
+  `metadata.version`.
 - `diagrams/visual` (v1.0.0) — `/visual` renders recap / plan / explore / map
   modes into one self-contained HTML page with inline SVG diagrams and a
   headless-Chrome self-check. Adapted from BuilderIO/skills and tt-a1i/archify
@@ -25,6 +27,18 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   checklist for any draft — and names the three places this repo deliberately
   departs from it (top-level `version`, noun-phrase names, the wrap-up retro).
 ### Changed
+- Skill versions move from a top-level `version` to `metadata.version` (quoted
+  semver) in all 23 authored skills. The Agent Skills spec allows six top-level
+  keys and claude.ai upload, the Skills API and `package_skill.py` hard-error on
+  any other. `check_repo.py` reads the new location and fails a top-level
+  `version`; `build_skill_zips.py` reads it for archive names (unchanged);
+  `quick_validate.py`'s allowlist is back to the spec's six and it rejects
+  non-string `metadata` values. Skills whose only change is this move keep
+  their version number. Closes the open question from #96.
+- `my-skill-creator` v1.5.0: always-apply rules at the top of the body
+  (compaction keeps only the start), use-case-first description, measured
+  trigger tuning instead of "pushy" descriptions, Claude Code-only frontmatter
+  guide. `learn-it` v1.3.1 and `skill-retro` v1.2.3 follow the version move.
 - `diagrams/visual` (v1.0.0 → v1.0.1) — fixes from a first my-skill-creator eval
   pass: `--out DIR`, headless `xdg-open` crash, Google Fonts link removed from
   the template, doubled slug suffix. See the skill's `RELEASE_NOTES.md`.
@@ -88,6 +102,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   the first pass. Read-only and safe unattended in each; applying anything
   the retro finds is a separate, explicitly-approved follow-up.
 
+### Fixed
+- `diagrams/visual` v1.0.2 documents the `chmod +x` recovery, fixing
+  `tests/test_script_invocation.py`, which had failed on `main` since #97.
 ### Removed
 - `need_to_productize/research-to-skill.skill`. `meta/learn-it`'s own
   `SKILL.md` already stated it "absorbs and supersedes the draft approach" in
