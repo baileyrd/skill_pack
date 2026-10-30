@@ -84,7 +84,7 @@ producing an artifact.
 
 ## Versioning
 
-Every authored skill's `SKILL.md` frontmatter carries a `version:` field (semver, bumped by hand on meaningful changes), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.
+Every authored skill's `SKILL.md` frontmatter carries a `metadata.version` (quoted semver, bumped by hand on meaningful changes; never top-level, which claude.ai rejects on upload), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.
 
 Skills with real environment requirements (a binary such as `yt-dlp` or `cargo`, the `gh` CLI, network access) also declare them in a `compatibility:` field, per the Agent Skills spec; a skill with nothing to declare omits it. The authoring checklist every skill here is held to — Anthropic's published best practices plus this repo's own conventions — is [`meta/learn-it/references/skill-authoring-conventions.md`](meta/learn-it/references/skill-authoring-conventions.md).
 
@@ -105,7 +105,7 @@ python scripts/install_skills.py [--dry-run] [--target DIR]
 
 ### `scripts/build_skill_zips.py`
 
-Packages every skill (any directory containing a `SKILL.md`) into an installable, version-tagged zip under `zip/` at the repo root (e.g. `zip/dedupe-loop-v<version>.zip`, taking the version from that skill's own `SKILL.md` frontmatter; `notebooklm.zip` has no version suffix since it isn't versioned here). Each archive's single top-level entry is the skill directory itself, matching the [Skills API upload format](https://platform.claude.com/docs/en/build-with-claude/skills-guide) so an archive can be uploaded as-is to claude.ai / Claude Desktop / the Skills API.
+Packages every skill (any directory containing a `SKILL.md`) into an installable, version-tagged zip under `zip/` at the repo root (e.g. `zip/dedupe-loop-v<version>.zip`, taking the version from that skill's own `metadata.version`; `notebooklm.zip` has no version suffix since it isn't versioned here). Each archive's single top-level entry is the skill directory itself, matching the [Skills API upload format](https://platform.claude.com/docs/en/build-with-claude/skills-guide) so an archive can be uploaded as-is to claude.ai / Claude Desktop / the Skills API.
 
 ```bash
 git add -A

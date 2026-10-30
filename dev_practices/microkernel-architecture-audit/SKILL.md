@@ -1,7 +1,8 @@
 ---
 name: microkernel-architecture-audit
 description: Perform a detailed, multi-dimensional audit of a microkernel-style system. Evaluates core/plugin boundaries, IPC contracts, capability-based security, WASM sandbox integrity, plugin lifecycle, dependency inversion, async concurrency, and test coverage. Produces a structured markdown report with Pass/Warn/Fail verdicts per dimension. Targets Nexus Forge (Rust/Tauri), FORGE (FastAPI), or any generic microkernel codebase.
-version: 1.1.0
+metadata:
+  version: "1.1.0"
 ---
 
 # Skill: Microkernel Architecture Audit

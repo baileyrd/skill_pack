@@ -2,20 +2,17 @@
 """Tests for meta/my-skill-creator/scripts/quick_validate.py's frontmatter allowlist.
 
 `validate_skill` is a hard gate in front of `package_skill.py` — a skill that
-fails it cannot be packaged at all. The allowlist is vendored from upstream
-skill-creator, where `version` is not a frontmatter key. This repo requires
-`version` on every authored skill and enforces that in `check_repo.py`, so an
-un-patched allowlist puts the two validators in direct contradiction: one fails
-a skill *without* `version`, the other fails the same skill *with* it.
+fails it cannot be packaged at all. The allowlist must be exactly the Agent
+Skills spec's six keys, because claude.ai upload and the Skills API hard-error
+on anything else.
 
-Bug this would have caught (issue #58): `package_skill.py` refused to package
-`yt_research_for_cc/video-teardown` — and by extension every other skill in
-this repo — with "Unexpected key(s) in SKILL.md frontmatter: version". The
-divergence from upstream is deliberate and easy to lose on a re-sync, which is
-exactly why it needs a test rather than only a comment.
+History: issue #58 found the allowlist rejecting this repo's then top-level
+`version`, and fixed it by widening the allowlist. That made the two validators
+agree with each other while both disagreed with claude.ai. The version now
+lives at `metadata.version` and the allowlist is back to the spec.
 
-Verified by reverting the fix (removing 'version' from ALLOWED_PROPERTIES) and
-watching test_version_is_allowed and test_every_repo_skill_validates fail.
+Verified by re-adding 'version' to ALLOWED_PROPERTIES and watching
+test_top_level_version_rejected fail.
 """
 
 import importlib.util
@@ -76,26 +73,33 @@ class AllowlistTest(unittest.TestCase):
     def tearDown(self):
         self._tmp.cleanup()
 
-    def test_version_is_allowed(self):
-        """`version` must validate — this repo requires it on every skill.
-
-        The regression: upstream's allowlist omits `version`, so this returned
-        False and blocked packaging for every authored skill in the repo.
-        """
+    def test_top_level_version_rejected(self):
+        """A top-level `version` is not a spec key; claude.ai rejects it on upload."""
         skill = write_skill(self.tmpdir, extra="version: 1.0.0\n")
         ok, message = self.qv.validate_skill(str(skill))
-        self.assertTrue(ok, f"a skill with `version` should validate, got: {message}")
+        self.assertFalse(ok, "a top-level `version` should be rejected")
+        self.assertIn("version", message)
+
+    def test_metadata_version_allowed(self):
+        """`metadata.version` is where this repo keeps the version."""
+        skill = write_skill(self.tmpdir, extra='metadata:\n  version: "1.0.0"\n')
+        ok, message = self.qv.validate_skill(str(skill))
+        self.assertTrue(ok, f"metadata.version should validate, got: {message}")
 
     def test_version_absent_still_validates(self):
-        """Adding `version` to the allowlist must not make it required here.
-
-        `check_repo.py` is what enforces its presence; this validator only
-        decides whether the key is *permitted*. Conflating the two would make
-        the fix reject upstream-shaped skills.
+        """This validator decides what is *permitted*; `check_repo.py` decides
+        what is required. An upstream-shaped skill with no version passes here.
         """
         skill = write_skill(self.tmpdir, extra="")
         ok, message = self.qv.validate_skill(str(skill))
-        self.assertTrue(ok, f"a skill without `version` should still validate, got: {message}")
+        self.assertTrue(ok, f"a skill without a version should still validate, got: {message}")
+
+    def test_non_string_metadata_value_rejected(self):
+        """The spec types metadata as string-to-string; unquoted `1.0` is a float."""
+        skill = write_skill(self.tmpdir, extra="metadata:\n  version: 1.0\n")
+        ok, message = self.qv.validate_skill(str(skill))
+        self.assertFalse(ok, "an unquoted float metadata value should be rejected")
+        self.assertIn("version", message)
 
     def test_genuinely_unknown_key_still_rejected(self):
         """The allowlist must still reject typos — widening it isn't disabling it.
@@ -119,8 +123,8 @@ class RealSkillsTest(unittest.TestCase):
         Deliberately unscoped. It catches two distinct bugs already seen here,
         and would catch a third of a kind nobody has thought of yet:
 
-        - #58: the frontmatter allowlist rejected `version`, a key this repo
-          requires, so `package_skill.py` could package nothing.
+        - #58: the frontmatter allowlist and this repo's conventions disagreed
+          about `version`, so `package_skill.py` could package nothing.
         - #59: four skills had a description containing an unquoted ': ',
           invalid YAML that `check_repo.py`'s hand-rolled parser tolerates and
           PyYAML rejects — so a file could be "valid" here and invalid to

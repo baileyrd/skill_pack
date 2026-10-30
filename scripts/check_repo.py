@@ -16,7 +16,8 @@ it.
               (issues #16/#17). Runs against a baseline so only NEW breakage
               fails — see docs-refs-baseline.tsv.
   manifests   Every skill needs `name` matching its directory, a semver
-              `version`, a RELEASE_NOTES.md, a `description` within the
+              `metadata.version` (never top-level: claude.ai rejects
+              non-spec keys), a RELEASE_NOTES.md, a `description` within the
               1024-character limit claude.ai enforces on upload, and a
               SKILL.md body within the 500 lines Anthropic's authoring guide
               sets for progressive disclosure. repo-config's own notes record
@@ -188,6 +189,34 @@ def read_description(path: Path) -> str:
     return ""
 
 
+def read_version(path: Path) -> str:
+    """`metadata.version`, unquoted; "" if absent.
+
+    The Agent Skills spec allows six top-level keys; claude.ai, the Skills API
+    and package_skill.py hard-error on any other, so the version lives under
+    `metadata` as a string. Only the one nested key is read: still not a YAML
+    parser.
+    """
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    if not text.startswith("---"):
+        return ""
+    _, _, rest = text.partition("---\n")
+    body, _, _ = rest.partition("\n---")
+
+    in_metadata = False
+    for line in body.splitlines():
+        if line.strip() and not line.startswith((" ", "\t")):
+            in_metadata = line.split(":", 1)[0].strip() == "metadata"
+            continue
+        key, sep, value = line.strip().partition(":")
+        if in_metadata and sep and key == "version":
+            return value.strip().strip("\"'")
+    return ""
+
+
 def body_line_count(path: Path) -> int:
     """Lines after the frontmatter's closing `---`; 0 if there is none."""
     try:
@@ -210,11 +239,16 @@ def check_manifests() -> list[str]:
             continue
         fm = read_frontmatter(path)
         name = fm.get("name", "")
-        version = fm.get("version", "")
+        version = read_version(path)
         if name != path.parent.name:
             failures.append(f"{rel_dir}/SKILL.md: name '{name}' != directory '{path.parent.name}'")
+        if "version" in fm:
+            failures.append(
+                f"{rel_dir}/SKILL.md: top-level `version` fails claude.ai upload; "
+                "move it to `metadata.version`"
+            )
         if not SEMVER.match(version):
-            failures.append(f"{rel_dir}/SKILL.md: version '{version}' is not semver")
+            failures.append(f"{rel_dir}/SKILL.md: metadata.version '{version}' is not semver")
         if not (path.parent / "RELEASE_NOTES.md").exists():
             failures.append(f"{rel_dir}: no RELEASE_NOTES.md")
         description = read_description(path)

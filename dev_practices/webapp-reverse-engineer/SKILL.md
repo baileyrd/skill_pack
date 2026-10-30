@@ -11,7 +11,8 @@ description: >
   or any request that involves understanding the internals of a running web application.
   Even if the user just pastes a URL and says "analyze this" or "tell me about this app",
   use this skill.
-version: 1.2.0
+metadata:
+  version: "1.2.0"
 ---
 
 # Webapp Reverse Engineering

@@ -109,11 +109,14 @@ def git_file_mode(repo_root: Path, path: Path) -> int:
     return 0o644
 
 
-_VERSION_RE = re.compile(r"^version:\s*(\S+)\s*$", re.MULTILINE)
+# `metadata.version`: the first indented `version:` inside the `metadata:` block.
+_VERSION_RE = re.compile(
+    r"^metadata:[ \t]*\n(?:[ \t]+.*\n)*?[ \t]+version:[ \t]*[\"']?([^\s\"']+)", re.MULTILINE
+)
 
 
 def skill_version(skill_dir: Path) -> str | None:
-    """`version:` field from a skill's SKILL.md frontmatter, if present."""
+    """`metadata.version` from a skill's SKILL.md frontmatter, if present."""
     frontmatter = skill_dir.joinpath("SKILL.md").read_text(encoding="utf-8").split("---", 2)[1]
     match = _VERSION_RE.search(frontmatter)
     return match.group(1) if match else None

@@ -9,6 +9,33 @@ still open.
 
 ---
 
+## v1.5.0 — Always-apply rules first, portable frontmatter, measured triggering
+**2026-10-30**
+
+- **Changed:** the body opens with "Rules that hold for every skill you draft
+  or edit here". Claude Code keeps only the first ~5,000 tokens of a skill
+  after compaction, and the repo rules used to start at line 91.
+- **Changed:** version moves to `metadata.version`. The spec allows six
+  top-level keys and claude.ai upload rejects any other, so the old top-level
+  `version` made every skill here non-portable. `quick_validate.py`'s
+  allowlist is back to the spec's six and it now checks that `metadata`
+  values are strings.
+- **Changed:** the description leads with the use case instead of the fork's
+  provenance, as a `>-` block scalar.
+- **Changed:** dropped upstream's "make descriptions pushy" advice. Triggering
+  is now tuned against should/should-not-trigger sets, with
+  `disable-model-invocation` for task skills that over-fire.
+- **Added:** the Frontmatter guide lists the Claude Code-only keys (`when_to_use`,
+  `disable-model-invocation`, `context: fork`, `hooks`, `paths`, …), when each
+  fits, and that any of them blocks a claude.ai upload.
+- **Moved:** "Retro by default" detail to `references/retro-by-default.md`;
+  the body keeps a summary and pointer.
+- **Still open:** the body is ~29 KB (~7k tokens), over the spec's ~5,000-token
+  recommendation. Line count is within limits; a token-size check and further
+  trimming are a follow-up.
+
+---
+
 ## v1.4.0 — Under 500 lines, and a writing guide that matches the published guidance
 **2026-10-05**
 

@@ -9,6 +9,16 @@ still open.
 
 ---
 
+## v1.3.1 — Version lives under `metadata`
+**2026-10-30**
+
+- **Changed:** the conventions reference, the draft template and step 5 put the
+  version at `metadata.version` (quoted semver). A top-level `version` fails
+  claude.ai upload; it is no longer listed as a deliberate departure from the
+  spec.
+
+---
+
 ## v1.3.0 — Conventions reference carries Anthropic's authoring checklist
 **2026-10-05**
 

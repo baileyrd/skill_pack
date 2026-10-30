@@ -8,7 +8,8 @@ rules and the description-quality bar this draft is held to.
 ---
 name: <lowercase-hyphenated-name>
 description: <One long, dense paragraph. Name the domain explicitly. State what the skill does AND the mechanism it uses. List realistic trigger phrasings, including casual ones. Name companion/sibling skills if relevant. Err toward encouraging triggering over a narrow exact match.>
-version: 1.0.0
+metadata:
+  version: "1.0.0"
 ---
 
 # <Skill Name>

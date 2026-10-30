@@ -1,29 +1,50 @@
 ---
 name: my-skill-creator
-description: This repo's own copy of the skill-creator workflow (draft → test → eval → iterate → optimize description → package), adapted to skill_pack's own authoring conventions and with one behavioral change from the upstream version — every skill it drafts or improves gets a wrap-up-retro step wired to meta/skill-retro by default, not as a separate follow-up change. Use when users want to create a skill from scratch, edit or optimize an existing skill in this repo, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy — same triggers as upstream skill-creator, but prefer this copy over the generic one whenever the target skill lives in (or is meant to land in) skill_pack, since it applies this repo's own conventions and the retro-by-default rule automatically.
-version: 1.4.0
+description: >-
+  Creates, edits, evals and tunes Agent Skills for the skill_pack repo:
+  interview, draft SKILL.md, run test prompts with and without the skill,
+  benchmark with variance analysis, iterate, optimize the description for
+  triggering, package. Applies skill_pack's conventions (metadata.version,
+  RELEASE_NOTES, category placement, repo checks) and wires a wrap-up retro
+  to meta/skill-retro into every skill it drafts. Use when the user wants to
+  create a skill, improve or restructure an existing one, run skill evals or
+  benchmarks, or fix a skill that triggers too often or not at all. Prefer
+  this over the generic skill-creator whenever the skill lives in, or is
+  headed for, skill_pack.
+metadata:
+  version: "1.5.0"
 ---
 
 # My Skill Creator
 
-skill_pack's own copy of Anthropic's `skill-creator` (see
-`/mnt/skills/examples/skill-creator` or the vendored original this was
-forked from), kept and versioned in this repo rather than used from
-outside it, with two additions layered on top of the unchanged upstream
-workflow:
+## Rules that hold for every skill you draft or edit here
 
-1. **This repo's own conventions** are applied automatically when drafting
-   or editing a skill meant to live in `skill_pack` — see "This repo's own
-   conventions" below, right after "Write the SKILL.md."
-2. **Retro by default** — every skill this tool drafts or substantively
-   improves gets a wrap-up-retro step wired to `meta/skill-retro`, applied
-   at draft time rather than as a separate follow-up PR. See "Retro by
-   default" below.
+These come first because Claude Code keeps only the start of a skill after
+a conversation is compacted. The sections below explain each one.
 
-Everything else — the interview, the eval/benchmark loop, description
-optimization, packaging — is the same process upstream `skill-creator`
-already describes well; this file doesn't re-explain what it doesn't
-change.
+- Frontmatter uses only the spec's six keys: `name`, `description`,
+  `license`, `compatibility`, `metadata`, `allowed-tools`. Version goes in
+  `metadata.version` as a quoted semver string; any other top-level key
+  fails claude.ai upload. Claude Code-only keys are the exception, and only
+  for skills that will never leave Claude Code (see "Frontmatter").
+- `description`: third person, ≤1024 characters, the main use case in the
+  first sentence, written as a `>-` block scalar.
+- Body under 500 lines and roughly 5,000 tokens; the rules that must
+  survive compaction go at the top. Depth goes in `references/`, one hop
+  deep.
+- Scripts are invoked through their interpreter (`python3 scripts/x.py`),
+  with `${CLAUDE_SKILL_DIR}` for the path when the skill may be installed
+  outside the repo.
+- Every authored skill gets `RELEASE_NOTES.md` and a wrap-up retro step
+  ("Retro by default"); every change lands through a PR after
+  `python3 scripts/check_repo.py` passes.
+- Evals before polish: a no-skill baseline, then at least three realistic
+  prompts.
+
+This is skill_pack's fork of Anthropic's `skill-creator`. The interview,
+eval/benchmark loop, description optimization and packaging are upstream's
+process; this copy adds the repo conventions ("This repo's own conventions")
+and the retro step ("Retro by default").
 
 A skill for creating new skills and iteratively improving them.
 
@@ -47,7 +68,6 @@ Of course, you should always be flexible and if the user is like "I don't need t
 
 Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
 
-Cool? Cool.
 
 ## Communicating with the user
 
@@ -84,7 +104,7 @@ Check available MCPs - if useful for research (searching docs, finding similar s
 Based on the user interview, fill in these components:
 
 - **name**: Skill identifier
-- **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
+- **description**: What the skill does and when to use it. This is the primary triggering mechanism, so all "when to use" information goes here, not in the body. Lead with the main use case: Claude Code truncates long descriptions in its skill listing and drops some entirely when many skills are installed. Include the words users actually type, including casual phrasings and the adjacent requests that should still trigger it. Don't pad it to force triggering; measure instead, with a should-trigger and should-not-trigger set ("Description Optimization"). A task skill that fires when it shouldn't (deploy, commit) is better served by `disable-model-invocation: true` than by a vaguer description.
 - **compatibility**: real environment requirements only — binaries, network access, intended product (≤500 chars, optional; most skills don't need it)
 - **the rest of the skill :)**
 
@@ -96,8 +116,8 @@ upstream one), layer these on top of the interview above — read
 `meta/learn-it/references/skill-authoring-conventions.md` for the full
 detail; summarized here:
 
-- Add a `version: 1.0.0` field to the frontmatter (new skill), or bump it
-  by hand — semver: patch for wording/doc-only fixes, minor for new
+- Add `metadata:` with `version: "1.0.0"` to the frontmatter (new skill),
+  or bump it by hand — semver: patch for wording/doc-only fixes, minor for new
   guidance/steps, major only for an actual contract change — when editing
   an existing one. Every skill in this repo carries this field.
 - **`description` has a hard ceiling of 1024 characters** — claude.ai's limit,
@@ -162,64 +182,13 @@ someone else, unrelated to this repo) — in that case, follow upstream
 
 ### Retro by default
 
-Every skill this tool drafts from scratch, or substantively improves (a
-real behavioral/content change, not a typo fix), gets a **wrap-up-retro
-step wired to `meta/skill-retro`** added at the same time — this is the
-one behavioral difference from upstream `skill-creator`. It follows the
-convention already applied across every authored skill in `skill_pack`
-(`my_loops/rust-migration` and its five siblings, `yt-search`,
-`yt-pipeline`, `meta/skill-retro`'s own step 6, `meta/learn-it`'s own step
-6). Build it into the first draft the same way `name`/`description`/
-`version` are part of every draft — not an afterthought to suggest once
-the skill is otherwise "done."
-
-Before picking a shape, check the retro's cost against a **typical**
-invocation of the skill, not just its heaviest one. Every existing skill
-carrying a wrap-up retro is a long-running loop, where a retrospective is
-small next to the work it reflects on. Shape-matching without that check is
-how you end up with a final step that runs routinely fail to execute — and a
-step a run reports skipping is worse than no step, because it teaches the
-reader that this skill's instructions are advisory.
-
-How to phrase it depends on the skill's own shape — match what's already
-established here, don't invent a new pattern:
-- **A skill with numbered `Run`/`Procedure` steps** (the `my_loops` shape):
-  add a final numbered step, "Wrap-up retro," right after whatever step
-  reports back to the user — see `my_loops/rust-migration/SKILL.md` step 4
-  or `yt_research_for_cc/yt-pipeline/SKILL.md` step 8 for the phrasing
-  pattern. Ground it in *that skill's own* specific steps, not generic
-  boilerplate — name what this particular skill's retro should actually
-  check (which step's judgment call, which classification, which script).
-- **A single-shot utility with no numbered steps** (the `yt-search` shape):
-  add a short closing section, "## Wrap-up retro," after whatever the
-  skill's last section already is.
-- **A skill that is itself explicitly self-referential or meta** (like this
-  one, or `skill-retro`): follow `skill-retro`'s own step 6 pattern —
-  grounded in how *this run* of the tool went, guarded against firing
-  twice on a direct self-invocation.
-- **A skill with multiple modes of differing weight** — a quick consultation
-  versus a full report-producing pass: scope the retro to the mode that
-  produces a substantial artifact, and say so in the section heading and its
-  first line, e.g. `## Wrap-up retro — audit mode only`. State plainly why the
-  lighter mode is excluded, and offer the retro there as an explicit user
-  request rather than an automatic step.
-  This bullet exists because `dev_practices/unix-philosophy` was drafted
-  against the three shapes above, none of which fit: it has a design mode that
-  may be three paragraphs answering one question and an audit mode that emits a
-  full report. Shape 2 was applied unconditionally, and **two independent
-  design-mode eval runs reported *skipping* the retro** — correctly, since a
-  retrospective on the skill's own instructions is disproportionate appended to
-  a short chat answer, and it fires in contexts that can't support it (a
-  read-only sandbox, no subagents). Fixed downstream in that skill's v1.1.0.
-
-Always state explicitly that running/reporting the retro is automatic and
-safe to run unattended, but *applying* anything `skill-retro` finds is a
-separate, explicitly-approved follow-up — never bundle an applied fix into
-the run that triggered the retro. And never add this step to a skill
-that's vendored from elsewhere and not meant to be hand-edited (the
-`notebooklm` exception, documented in `yt_research_for_cc/README.md`) —
-check whether the target skill is actually authored in this repo before
-adding anything to it.
+Every skill this tool drafts, or substantively improves, gets a wrap-up-retro
+step wired to `meta/skill-retro` in the same change, not as a follow-up. The
+step's shape depends on the skill (numbered procedure, single-shot utility,
+meta skill, or multi-mode), and a light mode may need it excluded. Read
+[`references/retro-by-default.md`](references/retro-by-default.md) before
+adding one. Running the retro is automatic; applying what it finds always
+needs separate approval. Never add it to a vendored skill.
 
 ### Skill Writing Guide
 
@@ -264,9 +233,21 @@ so only the relevant one is read.
 skill does *and* when to use it, with the trigger phrases a user would
 actually type. `compatibility` (≤500 chars): only when the skill has real
 environment requirements — binaries, network, a product — and then name
-them; most skills don't need it. Non-spec keys (`context`, `paths`,
-`disable-model-invocation`, …) are Claude Code-only and fail a claude.ai
-upload; this repo's `version` is the one deliberate extra.
+them; most skills don't need it. `metadata` is a string-to-string map; this
+repo keeps `version` there. Nothing else goes at the top level of a skill
+meant to be portable.
+
+Claude Code-only keys, for skills that will only run there: `when_to_use`
+(extra trigger text, shares the 1,536-character listing cap with
+`description`), `disable-model-invocation` (manual `/name` only),
+`user-invocable: false` (Claude-only), `context: fork` with `agent` (run in a
+subagent; only for skills with an explicit task), `paths` (activate only for
+matching files), `hooks` (rules that must hold every time, not just when
+Claude remembers), `model`, `effort`, `arguments`. Any of them makes the skill
+fail a claude.ai upload, so `quick_validate.py` (run on every skill by the
+repo's tests) rejects them here. The skill is not re-read on later turns: phrase standing rules as
+whole-task ("run the tests after every edit"), and move must-always-hold rules
+into a hook.
 
 #### Degrees of freedom
 
@@ -451,6 +432,7 @@ The references/ directory has additional documentation:
 - `references/eval-workflow.md` — the test-run sequence: workspace layout, spawning runs, assertions, timing, grading, viewer
 - `references/description-optimization.md` — trigger-query design and the `run_loop.py` procedure
 - `references/environment-notes.md` — claude.ai and Cowork adaptations, updating an installed skill
+- `references/retro-by-default.md` — which wrap-up-retro shape to add, and when to exclude it
 - `references/schemas.md` — JSON structures for evals.json, grading.json, etc.
 
 ## Dependencies

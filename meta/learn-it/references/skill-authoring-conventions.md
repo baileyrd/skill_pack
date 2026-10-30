@@ -22,8 +22,9 @@ generic boilerplate.
 ---
 name: <lowercase-hyphenated, matches the directory name>
 description: <one paragraph, see "Description quality" below>
-version: <semver, e.g. 1.0.0>
 compatibility: <optional, ≤500 chars — only real environment requirements>
+metadata:
+  version: "<semver, e.g. 1.0.0>"
 ---
 ```
 
@@ -31,13 +32,15 @@ compatibility: <optional, ≤500 chars — only real environment requirements>
 - `description` is the *only* thing that decides future triggering — no
   other field or file content affects it. Treat drafting it as the most
   important step, not a formality.
-- `version` starts at `1.0.0` for a new skill and is bumped by hand on
-  meaningful changes — patch for wording/doc-only fixes, minor for new
-  guidance/steps, major only for an actual contract change (what callers
-  can rely on shifts). Every skill here carries this field; don't omit it.
-  It is a deliberate extra over the Agent Skills spec (which would put it
-  under `metadata:`); `scripts/check_repo.py` and `build_skill_zips.py`
-  both read it from the top level.
+- `metadata.version` starts at `"1.0.0"` for a new skill and is bumped by
+  hand on meaningful changes — patch for wording/doc-only fixes, minor for
+  new guidance/steps, major only for an actual contract change (what
+  callers can rely on shifts). Every skill here carries it; don't omit it.
+  Quote it: the spec types `metadata` values as strings.
+- No other top-level keys. The spec allows exactly `name`, `description`,
+  `license`, `compatibility`, `metadata`, `allowed-tools`; claude.ai upload
+  and the Skills API hard-error on anything else. `check_repo.py` fails a
+  top-level `version`.
 - `compatibility` names binaries, network access, or the intended product a
   skill genuinely needs (`yt-dlp`, `cargo`, "gh CLI or GitHub MCP tools").
   Leave it out when there is nothing to say — most skills don't need it.
@@ -219,11 +222,10 @@ repo's conventions above. Treat it as the review checklist for any draft:
   a reference never read is unsignalled or unnecessary; one read every time
   belongs in the body.
 
-Where this repo deliberately departs from the published guidance: `version`
-sits at the top level rather than under `metadata:` (tooling reads it there),
-skill names are noun phrases (`parity-loop`) rather than the suggested
-gerunds (`closing-parity-gaps`) because they are already installed under
-those names, and every authored skill ends with a `Wrap-up retro` step the
+Where this repo deliberately departs from the published guidance: skill
+names are noun phrases (`parity-loop`) rather than the suggested gerunds
+(`closing-parity-gaps`) because they are already installed under those
+names, and every authored skill ends with a `Wrap-up retro` step the
 guidance doesn't call for.
 
 ## Standing rules nearly every skill here repeats

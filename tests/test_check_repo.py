@@ -2,7 +2,8 @@
 """Tests for scripts/check_repo.py's frontmatter parsing.
 
 `read_frontmatter` is the input to the `manifests` check, which decides
-whether a skill's `name` matches its directory and its `version` is semver.
+whether a skill's `name` matches its directory and `read_version` finds a
+semver `metadata.version`.
 A parser that silently returns the wrong dict makes that check pass on a
 broken skill, which is worse than not having it.
 
@@ -95,6 +96,50 @@ class TestReadFrontmatter(unittest.TestCase):
 
     def test_unreadable_file_returns_empty_not_raises(self):
         self.assertEqual(chk.read_frontmatter(Path("/nonexistent/SKILL.md")), {})
+
+
+class TestReadVersion(unittest.TestCase):
+    """`read_version` feeds the semver check; a wrong "" fails every skill,
+    a wrong hit passes a skill with no version."""
+
+    def setUp(self):
+        self.paths = []
+
+    def tearDown(self):
+        for p in self.paths:
+            p.unlink(missing_ok=True)
+
+    def version(self, text):
+        path = write(text)
+        self.paths.append(path)
+        return chk.read_version(path)
+
+    def test_reads_quoted_metadata_version(self):
+        self.assertEqual(
+            self.version('---\nname: demo\nmetadata:\n  version: "1.2.3"\n---\n'), "1.2.3"
+        )
+
+    def test_reads_unquoted_metadata_version(self):
+        self.assertEqual(self.version("---\nname: demo\nmetadata:\n  version: 1.2.3\n---\n"), "1.2.3")
+
+    def test_top_level_version_is_not_metadata_version(self):
+        """The old location must not satisfy the check, or nothing forces the move."""
+        self.assertEqual(self.version("---\nname: demo\nversion: 1.2.3\n---\n"), "")
+
+    def test_indented_version_in_another_block_is_ignored(self):
+        """A `version:` continuation under description is not metadata."""
+        text = (
+            "---\nname: demo\ndescription: >-\n  version: 9.9.9\n"
+            'metadata:\n  author: x\n  version: "1.0.0"\n---\n'
+        )
+        self.assertEqual(self.version(text), "1.0.0")
+
+    def test_metadata_block_ends_at_next_top_level_key(self):
+        text = "---\nmetadata:\n  author: x\nlicense: MIT\n---\n"
+        self.assertEqual(self.version(text), "")
+
+    def test_unreadable_file_returns_empty_not_raises(self):
+        self.assertEqual(chk.read_version(Path("/nonexistent/SKILL.md")), "")
 
 
 class TestReadDescription(unittest.TestCase):
