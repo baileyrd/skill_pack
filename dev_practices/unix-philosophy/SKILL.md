@@ -1,19 +1,19 @@
 ---
 name: unix-philosophy
 description: >-
-  Applies Unix software design philosophy — do one thing well, compose small pieces, an open
-  parseable format at every boundary, silence on success, mechanism not policy — in two modes.
-  Design mode shapes what's being built: use it when a tool, CLI, service, module, library API,
-  job, or agent tool is being designed, when the question is "extend this or build a second thing
-  that composes with it", or when a decision turns on interface shape, output format, error
-  behavior, or where a boundary goes — it applies even when nobody says "Unix". Audit mode reviews
-  what exists: "review this against Unix principles", "is this doing too much", "why is this so
-  painful to script against", "should this be one tool or two" — it scores eight dimensions
-  Pass/Warn/Fail against cited evidence and ranks findings by present cost. Translates the
-  principles to libraries, services, pipelines, and agent tools rather than quoting pipes at code
-  that has none, and treats each as a default with a cost, not a law.
+  Reviews and shapes software design with Unix principles: one job per piece, small parts that
+  compose, a parseable format at every boundary, loud failures, policy kept out of mechanism.
+  Use whenever someone asks whether code, a script, CLI, library, service, pipeline or agent/MCP
+  tool is well designed, what is structurally wrong with it, or what to fix first; whether to add
+  a flag or feature to an existing tool or build a separate piece; whether or how to split a
+  system into services, processes, binaries or modules; how two components should talk (stdout,
+  files, queues, JSON, exit codes); or when they cite "do one thing well", "small sharp tools",
+  pipes or text streams. Applies even when nobody says "Unix", including when the literal Unix
+  answer is the wrong one. Design mode shapes what is being built; audit mode scores eight
+  dimensions Pass/Warn/Fail against cited evidence and ranks findings by present cost. Treats
+  each principle as a default with a cost, not a law.
 metadata:
-  version: "1.1.4"
+  version: "1.2.0"
 ---
 
 # unix-philosophy
