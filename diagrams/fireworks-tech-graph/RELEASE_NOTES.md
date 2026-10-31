@@ -7,6 +7,17 @@ meaningful change, honest about what's still open.
 
 ---
 
+## v1.0.2 — Body under the 20 KB ceiling
+**2026-10-30**
+
+- **Changed:** The fourteen per-type layout rules moved to `references/diagram-types.md`, read after the classify step. Body 22.7 KB → 15.4 KB.
+- **Why:** `scripts/check_repo.py` now fails a body over 20,000 bytes (~5,000
+  tokens, the Agent Skills budget and what Claude Code keeps after
+  compaction). No instruction was dropped; each moved block is linked from the
+  step that needs it.
+
+---
+
 ## v1.0.1 — Contents lists and a compatibility field
 **2026-10-05**
 

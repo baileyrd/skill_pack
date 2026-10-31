@@ -69,15 +69,10 @@ MAX_BODY_LINES = 500
 # Claude Code re-attaches only an invoked skill's first 5,000 tokens after
 # compaction. At ~4 bytes per token, 20,000 bytes is that budget.
 MAX_BODY_BYTES = 20_000
-# Skills already over MAX_BODY_BYTES when the check landed, each held at its
-# size then so it can shrink but not grow. Delete an entry once its skill
-# fits; the check fails on an entry that no longer needs to be here.
-BODY_BYTES_BASELINE = {
-    "my_loops/rust-migration": 24_478,
-    "my_loops/parity-loop": 24_235,
-    "diagrams/fireworks-tech-graph": 22_747,
-    "my_loops/sovereignty-loop": 20_264,
-}
+# Skills over MAX_BODY_BYTES, each held at its size so it can shrink but not
+# grow. Empty since every skill was trimmed under the limit; an entry here is a
+# debt to pay down, and the check fails on one that no longer needs to be here.
+BODY_BYTES_BASELINE: dict[str, int] = {}
 BINARY_SUFFIXES = {".skill", ".zip", ".png", ".jpg", ".jpeg", ".gif", ".pdf", ".ico"}
 
 
