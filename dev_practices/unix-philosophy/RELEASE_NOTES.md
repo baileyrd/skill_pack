@@ -6,6 +6,23 @@ this log tracks commits against `main`.
 
 ---
 
+## v1.2.0 — Description rewritten to trigger on everyday phrasing
+**2026-10-31**
+
+- **Changed:** the `description` now lists the questions people actually ask
+  ("is this well designed", "add a flag or build a separate piece", "split
+  into services/binaries", how components talk, "small sharp tools") instead
+  of describing the two modes abstractly. Body unchanged.
+- **Why:** the first Eval-Kit baseline (`evals/suite.toml`) showed the skill
+  loading in only 7 of 12 runs; it never loaded on the reportgen.py review or
+  on the stdin/stdout pipeline proposal. On the runs where it loaded, it lifted
+  the pass rate by 62 points.
+- **Result:** with the same 6 cases and 2 samples, the skill now loads in 11 of
+  12 runs and passes 58% (was 42%); `evalkit gate skill@HEAD skill
+  --max-drop 0.15` passes.
+
+---
+
 ## v1.1.4 — Contents list in philosophy.md
 **2026-10-05**
 
