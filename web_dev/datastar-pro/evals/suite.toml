@@ -78,9 +78,9 @@ input  = """Build a complete Datastar Pro todo application with a FastAPI backen
 checks = [
   { regex = '<script[^>]+src="/static/datastar-pro\.js"', in = "index.html" },
   { regex = '@post\(', in = "index.html" },
-  { regex = '@delete\(', in = "index.html" },
+  { any = [{ regex = '@delete\(', in = "index.html" }, { regex = '@delete\(', in = "server.py" }] },  # item HTML may be server-rendered
   { regex = 'data-persist', in = "index.html" },
-  { regex = 'data-animate', in = "index.html" },
+  { any = [{ regex = 'data-animate', in = "index.html" }, { regex = 'data-animate', in = "server.py" }] },  # item HTML may be server-rendered
   { regex = 'data-indicator', in = "index.html" },
   { regex = 'from datastar_py\.fastapi import', in = "server.py" },
   { judge = "server.py keeps todos in a server-side list and its add and delete endpoints answer with datastar-py SSE events (patch_elements and/or patch_signals) that update the list shown by index.html" },
