@@ -1,0 +1,78 @@
+# Eval-Kit suite for unix-philosophy (https://github.com/baileyrd/Eval-Kit).
+# Cases and criteria come from evals.json (iteration 3). Eval-Kit passes a run
+# only when every check passes, so each case keeps the assertions that
+# evals.json's notes call discriminating rather than all of them; the full
+# rubric stays in evals.json.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "design-mode-feature-creep-no-keyword"
+input  = '''quick design question before i start writing this. we have an internal cli called `ingest` that reads vendor csv drops off an s3 prefix, normalizes them and writes parquet to our warehouse bucket. it's about 900 lines, one repo, we run it from airflow. product now wants a slack ping to #data-alerts whenever a vendor file arrives malformed, with the row numbers that failed. my instinct is to just add a --slack-webhook flag and a notify() call in the validation path since all the row info is already right there. my teammate thinks it belongs somewhere else but couldn't really say why. which way should i go, and if it's the second one how would the two pieces actually talk to each other?'''
+checks = [
+  { judge = '''Recommends against putting the Slack notification inside ingest's validation path — sides with the teammate and identifies the seam between normalizing/writing data and notifying humans''' },  # A1
+  { judge = '''Specifies a concrete interface between the two pieces: names both a format (e.g. NDJSON/JSON lines/structured records/an event payload) and a channel (e.g. stderr, a rejects file/object, an exit code class, a queue)''' },  # A2
+  { judge = '''States an ONGOING cost of its own recommended split that it does not immediately minimize or dismiss — an operational/maintenance cost carried forward (schema to version, extra task to monitor, extra hop for on-call, artifact lifecycle), not a one-time line-count or effort delta waved away in the same breath''' },  # A4
+  { judge = '''Offers a proportionate fallback for the case where the split isn't worth it (a stopgap, a same-repo second entry point, or an explicit 'if X then just add the flag'), rather than presenting the split as the only acceptable answer''' },  # A7
+]
+
+[[case]]
+id     = "audit-mode-existing-cli"
+input  = '''can you take a look at reportgen.py and tell me whether it's well designed? honestly the thing works fine but every time someone asks me for the deploy numbers in a different format i end up copy pasting bits of it into a new script, and last month it silently produced an empty report for two weeks and nobody noticed until the retro. i'd like to know what's actually wrong with it structurally and what to fix first, not a full rewrite.'''
+files  = { "reportgen.py" = "file:fixtures/reportgen.py" }
+checks = [
+  { judge = '''Identifies the bare `except Exception: pass` in fetch_deploys() as a finding AND ranks it the top/highest-severity item''' },  # A3
+  { judge = '''Explicitly connects the swallowed exception in fetch_deploys() to the two-week silent empty report the user described''' },  # A4
+  { judge = '''Identifies the hardcoded SLACK_WEBHOOK as a *secret committed to version control* — a live credential in the repo's history — rather than only as a configuration-placement problem. Naming the constant and prescribing env vars while explicitly scoping security out does not pass.''' },  # A6b
+  { judge = '''Goes beyond the disclosed symptom: identifies that because the try/except wraps the WHOLE read loop rather than one record, a single malformed line silently truncates the report to a prefix of the data — a partially-wrong report that looks correct, which is worse than the empty one the user noticed''' },  # A11
+  { judge = '''Identifies that derived metrics (success rate, average duration) are recomputed independently in render() and write_csv() rather than produced once by summarize(), so the two outputs can drift — a structural cause of the copy-paste problem distinct from the missing machine-readable format''' },  # A12
+]
+
+[[case]]
+id     = "counterweight-resist-over-decomposition"
+input  = '''we're building the billing engine for our b2b saas (rust, ~6 person team, maybe 400 customers). i've been reading about doing one thing well and small composable pieces and i want to get this right from the start. my plan is to split it into six services: invoice generation, tax calculation, payment gateway adapter, dunning/retry, ledger writes, and a pdf renderer. each gets its own repo and deploys independently, they talk over an internal http api. does that decomposition look right? anything i should split further?'''
+checks = [
+  { judge = '''Pushes back on the six-service decomposition rather than validating it — recommends a single deployable (or two) with internal module/crate boundaries as the default at this scale''' },  # A1
+  { judge = '''Identifies that a network boundary anywhere in the money path is a correctness problem rather than an overhead one — that the invoice / tax / ledger work forms one transactionally coupled unit, and splitting it across services turns an atomic money fact into a distributed transaction. Credit whichever coupled pair or cluster is actually named (invoice↔ledger alone is sufficient); do not require all three enumerated, and do not require the phrase 'distributed transaction'.''' },  # A3
+  { judge = '''Reframes the 'anything I should split further' question rather than answering it on the user's premise: any further splits proposed are explicitly module/crate boundaries inside one deployable, not additional services, and the reframe is stated rather than left implicit''' },  # A6
+  { judge = '''States a cost of its own recommendation (boundary discipline becomes voluntary rather than enforced, single blast radius, no independent scaling) and names a concrete trigger for revisiting the decision later''' },  # A8
+]
+
+[[case]]
+id     = "cold-audit-library-no-symptom"
+input  = '''before i socialize this more widely — we're planning to make svcclient.py the standard client every one of our services uses for internal calls, instead of everyone rolling their own requests wrapper. it's been running in two services for a few months without complaints. worth a look before i put it in the platform repo and tell people to adopt it?'''
+files  = { "svcclient.py" = "file:fixtures/svcclient.py" }
+checks = [
+  { judge = '''Identifies that call() returns a human-formatted string rather than the parsed response data, so no caller can act on the actual values — flagged as a top-tier finding, since it is the defect that makes the library unusable as a library''' },  # A1
+  { judge = '''Identifies that failures return None, indistinguishable from a legitimate empty or null response, so callers cannot tell success from failure''' },  # A2
+  { judge = '''Catches the coupling bug in health(): it string-matches 'status: ok' against _format()'s rendered output, so a cosmetic change to the formatter silently breaks every health check''' },  # A6
+  { judge = '''Identifies that HTTP 429 is never retried — the `e.code < 500` branch returns None immediately, so rate limiting is treated as a permanent client error''' },  # A11
+]
+
+[[case]]
+id     = "trap-literal-application-is-wrong"
+input  = '''our image processing pipeline is 5 stages in one python process — decode, denoise, upscale, color correct, encode — passing numpy arrays between functions, roughly 4GB of float32 per batch. i've been reading about small sharp tools that do one thing and talk over text streams, and i want to restructure this so each stage is its own binary reading stdin and writing stdout, serializing the arrays as json between stages. then we could recombine stages and swap implementations freely. sound right?'''
+checks = [
+  { judge = '''Rejects JSON serialization of the arrays between stages, with a concrete technical reason — size inflation of float32 as decimal text, parse/serialize CPU cost, and/or loss of exact float precision''' },  # A1
+  { judge = '''Recommends achieving the recombination/swappability goal in-process (a stage interface/protocol/ABC, a registry, a composed pipeline object) rather than requiring separate processes to get it''' },  # A5
+  { judge = '''Explicitly identifies the user's actual underlying goal (recombination and swapping implementations) and separates it from the transport decision, rather than answering only the stdin/stdout question as posed''' },  # A7
+  { judge = '''Does not endorse the proposed JSON-over-stdout architecture, even partially or as a staged first step''' },  # A8
+]
+
+[[case]]
+id     = "design-mode-agent-tool-surface"
+input  = '''i'm writing an mcp server so claude can drive our internal deploy system. right now it's one tool called `deploy_ops` that takes an `action` string — status, deploy, rollback, logs, approve — plus a params object whose meaning changes per action. it returns a formatted markdown summary of what happened, since the model is just going to read it anyway. does that shape make sense or should i do it differently?'''
+checks = [
+  { judge = '''Recommends splitting the single action-dispatch tool into separate per-action tools, rather than endorsing the current shape''' },  # A1
+  { judge = '''Ties that recommendation specifically to how tool selection works — a tool doing five things cannot be described precisely, so the model triggers it unreliably or picks the wrong action — rather than justifying the split on generic modularity''' },  # A2
+  { judge = '''Recommends returning structured data rather than pre-rendered markdown, with the reason that a rendered summary has to be re-parsed by the model and cannot be fed into a subsequent call''' },  # A4
+  { judge = '''Distinguishes read-only operations (status, logs) from state-changing and irreversible ones (deploy, rollback, approve), and treats that as a boundary worth respecting in the tool surface''' },  # A6
+]

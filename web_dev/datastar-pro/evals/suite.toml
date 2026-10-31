@@ -1,0 +1,87 @@
+# Eval-Kit suite for datastar-pro (https://github.com/baileyrd/Eval-Kit).
+# Cases come from evals.json; each input names its output files so checks can
+# read them. Regex checks cover syntax the skill teaches (Pro bundle path,
+# data-on:click colon form, __debounce); judge checks cover behaviour.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "char-counter"
+input  = """Build me a live character counter page using Datastar Pro. I want a textarea where users type a message, and below it shows the character count updating in real-time, with the count turning red when it exceeds 280 characters. Also add a 'Clear' button that resets the textarea. Just a single HTML file, no backend needed. Save it as index.html."""
+checks = [
+  { regex = '<script[^>]+src="/static/datastar-pro\.js"', in = "index.html" },
+  { regex = '<textarea[^>]*data-bind', in = "index.html" },
+  { regex = 'data-text', in = "index.html" },
+  { regex = 'data-on:click', in = "index.html" },
+  { judge = "index.html turns the character count red when it exceeds 280 characters, using data-class or data-style, and the Clear button resets the message signal so the textarea empties" },
+]
+
+[[case]]
+id     = "book-search-fastapi"
+input  = """I need a Datastar Pro app with a Python FastAPI backend that lets users search for books. There should be a search input with debounced typing that hits a /api/search endpoint. The server should return matching books as HTML cards using SSE. Also show a loading spinner while the request is in flight. Give me both the HTML file and the FastAPI server code using the datastar-py SDK. Save the page as index.html and the server as server.py."""
+checks = [
+  { regex = '<script[^>]+src="/static/datastar-pro\.js"', in = "index.html" },
+  { regex = 'data-on:input__debounce', in = "index.html" },
+  { regex = '@get\(\s*\S/api/search', in = "index.html" },
+  { regex = 'data-indicator', in = "index.html" },
+  { regex = 'from datastar_py\.fastapi import', in = "server.py" },
+  { regex = 'ReadSignals', in = "server.py" },
+  { judge = "server.py answers GET /api/search with SSE events that patch book-card HTML into the results container named by index.html, using datastar-py's ServerSentEventGenerator patch_elements" },
+]
+
+[[case]]
+id     = "persisted-settings"
+input  = """Create a Datastar Pro settings page where users can toggle dark mode, adjust font size with a range slider, and pick an accent color. All preferences should persist across page reloads using localStorage. The page should apply the settings to itself in real-time so users see the effect immediately. Use data-style for the live preview and data-persist for storage. Single HTML file is fine. Save it as index.html."""
+checks = [
+  { regex = '<script[^>]+src="/static/datastar-pro\.js"', in = "index.html" },
+  { regex = 'data-persist', in = "index.html" },
+  { regex = 'type="range"[^>]*data-bind|data-bind[^>]*type="range"', in = "index.html" },
+  { regex = 'type="color"[^>]*data-bind|data-bind[^>]*type="color"', in = "index.html" },
+  { judge = "index.html binds a dark-mode toggle, a font-size range slider and an accent-color picker to signals, and applies all three to the page live through data-style" },
+]
+
+[[case]]
+id     = "scroll-reveal-cards"
+input  = """Build a Datastar Pro page with a portfolio-style card grid where each card fades in and slides up as the user scrolls down. Use data-animate for smooth opacity and transform transitions, and data-on-intersect to trigger the animation when each card enters the viewport. The cards should stagger their entrance — each card animates slightly after the previous one. Include at least 6 cards with placeholder content. Single HTML file, no backend. Save it as index.html."""
+checks = [
+  { regex = '<script[^>]+src="/static/datastar-pro\.js"', in = "index.html" },
+  { regex = 'data-on-intersect[^=\s>]*__once', in = "index.html" },
+  { regex = 'data-animate:opacity', in = "index.html" },
+  { regex = 'data-animate:transform', in = "index.html" },
+  { regex = '__delay', in = "index.html" },
+  { judge = "index.html has at least 6 cards that start hidden and offset (opacity 0, translated down) and fade and slide in with staggered delays when they scroll into view" },
+]
+
+[[case]]
+id     = "rocket-dashboard"
+input  = """Build a Datastar Pro dashboard that uses the Rocket component engine for reusable UI. Define a <template data-rocket:StatCard> component that accepts title, value, and trend props. Then render a grid of 4 StatCards showing different metrics. Also add a data-for loop that renders a list of recent activity items, and use data-if/data-else to show different icons based on the activity type. Use the Pro + Rocket bundle. Save it as index.html."""
+checks = [
+  { regex = '<script[^>]+src="/static/datastar-pro-rocket\.js"', in = "index.html" },
+  { regex = '<template[^>]+data-rocket:StatCard', in = "index.html" },
+  { regex = 'data-props:title', in = "index.html" },
+  { regex = 'data-for', in = "index.html" },
+  { regex = 'data-else', in = "index.html" },
+  { judge = "index.html renders at least 4 StatCard instances with distinct title, value and trend props, and the activity list picks its icon per activity type with data-if / data-else" },
+]
+
+[[case]]
+id     = "todo-fastapi"
+input  = """Build a complete Datastar Pro todo application with a FastAPI backend using the datastar-py SDK. Requirements: (1) Add/delete todos via SSE endpoints, (2) todos persist in a server-side list, (3) new todos slide in with data-animate, (4) a dark mode toggle that persists across reloads using data-persist, (5) a loading indicator when communicating with the server. Give me both the HTML file and the FastAPI server code. Save the page as index.html and the server as server.py."""
+checks = [
+  { regex = '<script[^>]+src="/static/datastar-pro\.js"', in = "index.html" },
+  { regex = '@post\(', in = "index.html" },
+  { regex = '@delete\(', in = "index.html" },
+  { regex = 'data-persist', in = "index.html" },
+  { regex = 'data-animate', in = "index.html" },
+  { regex = 'data-indicator', in = "index.html" },
+  { regex = 'from datastar_py\.fastapi import', in = "server.py" },
+  { judge = "server.py keeps todos in a server-side list and its add and delete endpoints answer with datastar-py SSE events (patch_elements and/or patch_signals) that update the list shown by index.html" },
+]

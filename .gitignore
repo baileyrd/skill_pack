@@ -5,3 +5,6 @@ __pycache__/
 
 # my-skill-creator eval scratch (results, gradings, benchmarks)
 *-workspace/
+
+# Eval-Kit trace stores and ablation copies
+.evalkit/
