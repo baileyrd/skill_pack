@@ -19,10 +19,7 @@ this log tracks commits against `main`.
   the pass rate by 62 points.
 - **Result:** with the same 6 cases and 2 samples, the skill now loads in 11 of
   12 runs and passes 58% (was 42%); `evalkit gate skill@HEAD skill
-  --max-drop 0.15` passes. Now that it loads on the pipeline case, that case
-  regressed: the skill keeps separate binaries with a binary format instead of
-  steering to an in-process stage interface. That is a body issue, left for a
-  separate change.
+  --max-drop 0.15` passes.
 
 ---
 
