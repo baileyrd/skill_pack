@@ -5,6 +5,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `dev_practices/project-handoff` (v1.0.0) — chat→Claude Code handoff pack with
+  provenance-tagged decisions, implementer Q&A, look-before-asking CLAUDE.md
+  rule, remind-me capture, and a resolve mode for open questions.
 - `check_repo.py`'s `manifests` check fails a `SKILL.md` body over 20,000 bytes
   (~5,000 tokens, the spec's budget and what Claude Code keeps after
   compaction). Four skills already over it are held at their current size in
