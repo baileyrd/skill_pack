@@ -5,6 +5,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `dev_practices/project-handoff` v1.1.0 — records the design chat link in
+  SPEC.md and the remind-me capture (`metadata.chat_url`).
+### Fixed
+- `docs-refs-baseline.tsv` accepts project-handoff's target-repo `docs/handoff/`
+  paths; v1.0.0 merged with them flagged because the check skipped untracked files.
 - `dev_practices/project-handoff` (v1.0.0) — chat→Claude Code handoff pack with
   provenance-tagged decisions, implementer Q&A, look-before-asking CLAUDE.md
   rule, remind-me capture, and a resolve mode for open questions.
