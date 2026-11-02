@@ -15,7 +15,7 @@ compatibility: >-
   Best with the rusty-remind-me MCP server and GitHub access (gh or a connected repo). Without
   them it still produces the pack as files to drop into the repo.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # project-handoff
@@ -55,6 +55,11 @@ missing objection isn't agreement. If you can't tell, use `[default]`.
    pick up earlier decisions. If the design happened in another chat, find it
    with `conversation_search`. Settle on a short project **slug** (the repo
    name if one exists). This slug is the tag on everything that follows.
+   Find the **design chat link** too: the `url` that `recent_chats` or
+   `conversation_search` returns for the chat. If you can't get it, ask for it
+   along with any step-4 questions, or record it as `unknown`. Never make up a
+   link. It goes in SPEC.md and the remind-me capture, so a later session knows
+   where the full discussion lives whenever the saved copy falls short.
 2. **Pick the target.** Find out whether a repo exists and is reachable. If it
    isn't clear, ask once, along with any step-4 questions; don't make it a
    separate stop.
@@ -79,7 +84,8 @@ missing objection isn't agreement. If you can't tell, use `[default]`.
    Keep it terse. The pack gets searched, not read cover to cover, so short,
    tagged, greppable lines beat prose.
 6. **Persist to remind-me** (skip if it isn't connected, and say you skipped it):
-   - `remind_me_auto_capture` with the **full** design dialog, tags `[<slug>, handoff]`.
+   - `remind_me_auto_capture` with the **full** design dialog, tags `[<slug>, handoff]`,
+     and `metadata.chat_url` set to the design chat link.
      That verbatim record is what lets Claude Code search the original
      reasoning. This capture also counts as the conversation's end-of-chat
      capture, so don't capture it a second time.
@@ -114,7 +120,8 @@ open questions for X"), so they never have to paste anything.
    reachable, use the `[<slug>, open-question]` items in remind-me.
 2. Answer each one from the design record. Check the pack first, then
    remind-me (`include_raw: true` for the dialog). Go to the original chat with
-   `conversation_search` only if neither one covers the question. Tag every
+   `conversation_search` only if neither one covers the question. Open it at
+   the `Design chat:` link in SPEC.md if there is one. Tag every
    answer. Ask the user about anything still `[open]` in one batched
    `AskUserQuestion` round. When a question comes up that the design never
    considered, say so plainly, since that's how gaps in the design come to

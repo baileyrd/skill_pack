@@ -6,6 +6,18 @@ this log tracks commits against `main`.
 
 ---
 
+## v1.1.0 — Record the design chat link
+**2026-11-02**
+
+- **Added:** handoff step 1 now finds the design chat's claude.ai link, using
+  `recent_chats`/`conversation_search` or asking the user (never invented), and
+  writes it to SPEC.md as `Design chat:` and to the remind-me capture as
+  `metadata.chat_url`. Resolve mode uses that link when it falls back to the
+  original chat.
+- **Why:** a planned Claude Code "design advisor" mod works from the saved
+  dialog in remind-me. When that saved copy isn't enough, the advisor needs to
+  point Nano to the exact chat instead of making him search for it.
+
 ## v1.0.0 — Initial release
 **2026-11-02**
 

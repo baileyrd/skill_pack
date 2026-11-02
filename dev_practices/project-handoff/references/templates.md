@@ -15,7 +15,8 @@ short, tagged, and greppable. `<slug>` is the project slug from step 1.
 
 ```markdown
 # <Project> — spec
-Source: design chat <date>; remind-me tag `<slug>`. Tags: [stated] [agreed] [default] [open].
+Design chat: <claude.ai chat URL, or `unknown`> (<date>) · remind-me tag `<slug>`
+Tags: [stated] [agreed] [default] [open].
 
 ## Intent
 <2–4 lines: who, what job, why now>

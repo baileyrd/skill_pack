@@ -40,3 +40,11 @@ shell-path	diagrams/fireworks-tech-graph/scripts/README.md	../test-output/
 inline-path	my_loops/repo-config/references/development-standards.md	docs/volumes/ATLAS-001-foundation.md
 inline-path	my_loops/repo-config/references/development-standards.md	docs/00-foundation/principles.md
 inline-path	my_loops/repo-config/references/development-standards.md	docs/01-architecture/architecture-model.md
+
+# Target-repo paths: project-handoff writes its pack into the repo being
+# handed off (docs/handoff/ there), not into this skill's own tree.
+inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/SPEC.md
+inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/DECISIONS.md
+inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/QA.md
+inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/OPEN_QUESTIONS.md
+inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/
