@@ -39,7 +39,7 @@ checks = [
 [[case]]
 id     = "update-existing-skill"
 input  = '''The skill_pack checkout is in repo/. Log of today's session is session-flaky-tests.md. Capture what we just learned in the right skill.'''
-files  = { "session-flaky-tests.md" = "file:fixtures/session-flaky-tests.md", "repo/scripts/build_skill_zips.py" = "file:fixtures/repo/scripts/build_skill_zips.py", "repo/dev_practices/pytest-async-hygiene/SKILL.md" = "file:fixtures/repo/dev_practices/pytest-async-hygiene.SKILL.md" }
+files  = { "session-flaky-tests.md" = "file:fixtures/session-flaky-tests.md", "repo/scripts/build_skill_zips.py" = "file:fixtures/repo/scripts/build_skill_zips.py", "repo/dev_practices/pytest-async-hygiene/SKILL.md" = "file:fixtures/repo/dev_practices/pytest-async-hygiene.skill.md" }
 checks = [
   { judge = '''Finds repo/dev_practices/pytest-async-hygiene and proposes updating it rather than creating a second, overlapping skill''' },
   { judge = '''Flags explicitly that the existing rule 3 ("prefer widening the event-loop scope") contradicts what the session found, and asks rather than silently overwriting it''' },

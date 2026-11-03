@@ -3,7 +3,7 @@
 # version under metadata.version as a quoted string, a third-person `>-`
 # description, a RELEASE_NOTES.md, a wrap-up retro step wired to
 # meta/skill-retro, and evals that include a no-skill baseline and
-# should-not-trigger queries. fixtures/code-helper.SKILL.md is a SQL-formatting
+# should-not-trigger queries. fixtures/code-helper.skill.md is a SQL-formatting
 # skill whose description claims every coding task.
 #
 #   python3 -m evalkit run     evals/suite.toml --jobs 4
@@ -30,7 +30,7 @@ checks = [
 [[case]]
 id     = "fix-overtriggering"
 input  = '''this skill (code-helper/SKILL.md) fires on basically everything I do. it's only meant for formatting SQL. fix it.'''
-files  = { "code-helper/SKILL.md" = "file:fixtures/code-helper.SKILL.md" }
+files  = { "code-helper/SKILL.md" = "file:fixtures/code-helper.skill.md" }
 checks = [
   { judge = '''Rewrites the description so it is scoped to formatting SQL (naming the cases it should and should not handle) instead of any programming task''' },
   { judge = '''Proposes or writes trigger eval queries that include both should-trigger prompts (SQL formatting requests) and should-not-trigger near misses (e.g. writing a SQL query, debugging Python), to check the new description''' },
@@ -40,7 +40,7 @@ checks = [
 [[case]]
 id     = "evals-for-existing-skill"
 input  = '''I've got a skill at code-helper/SKILL.md (it formats SQL). How would I know if it actually helps? Set up whatever tests make sense.'''
-files  = { "code-helper/SKILL.md" = "file:fixtures/code-helper.SKILL.md" }
+files  = { "code-helper/SKILL.md" = "file:fixtures/code-helper.skill.md" }
 checks = [
   { judge = '''Writes at least three realistic test prompts with concrete SQL inputs and expected properties (uppercase keywords, one clause per line, leading commas, comments kept)''' },
   { judge = '''Compares against a baseline run without the skill, rather than only checking the skill's own output''' },

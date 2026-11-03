@@ -42,7 +42,7 @@ checks = [
 [[case]]
 id     = "map-skill-pack"
 input  = '''Map the skill pack in pack/ as a zoomable drill-down map: which skills there are, what they run, and how they hand off. Save it as map.html.'''
-files  = { "pack/alpha/SKILL.md" = "file:fixtures/pack/alpha.SKILL.md", "pack/alpha/scripts/collect.py" = "file:fixtures/pack/alpha.collect.py", "pack/beta/SKILL.md" = "file:fixtures/pack/beta.SKILL.md" }
+files  = { "pack/alpha/SKILL.md" = "file:fixtures/pack/alpha.skill.md", "pack/alpha/scripts/collect.py" = "file:fixtures/pack/alpha.collect.py", "pack/beta/SKILL.md" = "file:fixtures/pack/beta.skill.md" }
 checks = [
   { file_exists = "map.html" },
   { judge = '''The reply says map.html shows both skills, alpha's collect.py script, and an edge from alpha to beta for the hand-off, with each skill's what/when filled from its SKILL.md rather than left empty''' },

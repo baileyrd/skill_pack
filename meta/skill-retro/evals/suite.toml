@@ -20,7 +20,7 @@ subject = ".."
 [[case]]
 id     = "retro-from-log"
 input  = '''We just used the csv-cleaner skill (it's in skills/csv-cleaner/); the run is logged in session-log.md. Retro it.'''
-files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.SKILL.md", "session-log.md" = "file:fixtures/session-log.md" }
+files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.skill.md", "session-log.md" = "file:fixtures/session-log.md" }
 checks = [
   { judge = '''Reports the stale script path (step 1 says tools/sniff.py, the script is scripts/sniff.py) as a stale-reference or tooling finding with a concrete edit to step 1''' },
   { judge = '''Reports the undefined duplicate rule in step 4, which caused a redo, as a costly finding with a proposed edit (define duplicates by a key column, or ask which key)''' },
@@ -31,7 +31,7 @@ checks = [
 [[case]]
 id     = "trigger-what-should-change"
 input  = '''that csv-cleaner skill was kind of a pain to follow just now (session-log.md has the run, skill is in skills/csv-cleaner/). what should change in it?'''
-files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.SKILL.md", "session-log.md" = "file:fixtures/session-log.md" }
+files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.skill.md", "session-log.md" = "file:fixtures/session-log.md" }
 checks = [
   { judge = '''Grounds every proposed change in an incident from session-log.md (stale path, header collision guess, date-order question, duplicate redo) rather than giving generic advice about CSV cleaning''' },
   { judge = '''Says which evidence the retro is grounded in (the supplied log) and does not invent incidents that are not in it''' },
@@ -40,7 +40,7 @@ checks = [
 [[case]]
 id     = "no-evidence-general-critique"
 input  = '''retro the csv-cleaner skill in skills/csv-cleaner/ for me'''
-files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.SKILL.md" }
+files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.skill.md" }
 checks = [
   { judge = '''Says there is no run in this session to ground a retro in, and either asks for a log or offers a read-through critique of the SKILL.md that it labels as unvalidated''' },
   { judge = '''Does not present invented run incidents (errors, questions asked, redos) as findings''' },
