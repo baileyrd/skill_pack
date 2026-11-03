@@ -20,12 +20,12 @@ subject = ".."
 
 [[case]]
 id     = "audit-drifted-readme"
-input  = '''Are the docs in this repo still right? Do the review and write up what you find before changing anything; there's no git remote or GitHub access here.'''
+input  = '''Are the docs in this repo still right? Review them and stop at the audit, before any edits; there's no git remote or GitHub access here.'''
 files  = { "README.md" = "file:fixtures/repo/README.md", "CHANGELOG.md" = "file:fixtures/repo/CHANGELOG.md", "pyproject.toml" = "file:fixtures/repo/pyproject.toml", "tidy/cli.py" = "file:fixtures/repo/tidy/cli.py" }
 checks = [
   { file_exists = "docs-audit.md" },
   { regex = '(?i)\bstale\b', in = "docs-audit.md" },
-  { judge = '''docs-audit.md classifies --recursive, .tidyignore and the Python 3.9+ claim as stale against the code and pyproject.toml, lists --exclude as missing from the README, and reports the docs/design.md and CONTRIBUTING.md links as broken''' },
+  { judge = '''docs-audit.md classifies --recursive and the Python 3.9+ claim as stale against the code and pyproject.toml, flags .tidyignore as either stale or a suspected code bug (CHANGELOG added it and never removed it), lists --exclude as missing from the README, and reports the docs/design.md and CONTRIBUTING.md links as broken''' },
   { judge = '''The README's promise that tidy refuses to run on / or the home directory is reported as a likely code bug to file as an issue (the documented safety check is the intended behaviour), not as a doc line to delete to match the code''' },
   { judge = '''CHANGELOG.md is unchanged and is not flagged as stale: its 0.3.0 entries are treated as correct history''' },
 ]

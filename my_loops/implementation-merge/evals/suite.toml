@@ -19,7 +19,7 @@ subject = ".."
 
 [[case]]
 id     = "merge-retry-helpers"
-input  = '''dedupe flagged svc_a/retry.py and svc_b/retry.py as the same capability, diverged. Combine the best of both into one implementation; each has its own tests next to it.'''
+input  = '''dedupe flagged svc_a/retry.py and svc_b/retry.py as the same capability, diverged. Combine the best of both into one implementation; each has its own tests next to it. Keep what you write inside this folder: MERGE-PROPOSAL.md at the top level and the merged source under merge/.'''
 files  = { "svc_a/retry.py" = "file:fixtures/svc_a/retry.py", "svc_a/test_retry.py" = "file:fixtures/svc_a/test_retry.py", "svc_b/retry.py" = "file:fixtures/svc_b/retry.py", "svc_b/test_retry.py" = "file:fixtures/svc_b/test_retry.py" }
 checks = [
   { file_exists = "MERGE-PROPOSAL.md" },
@@ -32,12 +32,12 @@ checks = [
   ] },
   { judge = '''MERGE-PROPOSAL.md classifies the pair as mergeable-conflicting and resolves each behavioural conflict explicitly with a reason: raise RetryError vs return None on failure, and retrying only selected exceptions vs every exception''' },
   { judge = '''MERGE-PROPOSAL.md has a coverage table in which every item from both candidates (RetryError, backoff_delays, full jitter, cap, retry_on, RetryAfter, on_retry, the None return) is marked kept, merged or dropped with a reason; nothing is silently missing''' },
-  { judge = '''The merged source is written to a scratch location and was run against both candidates' tests (or the reply says which tests it adapted and why), and neither svc_a/retry.py nor svc_b/retry.py was modified''' },
+  { judge = '''The merged source is written under merge/ and was run against both candidates' tests (or the reply says which tests it adapted and why), and neither svc_a/retry.py nor svc_b/retry.py was modified''' },
 ]
 
 [[case]]
 id     = "not-mergeable-same-name"
-input  = '''repo-inspector flagged slug_a/text.py and fmt_b/text.py as a duplication cluster ("text utils"). Merge them into one module.'''
+input  = '''repo-inspector flagged slug_a/text.py and fmt_b/text.py as a duplication cluster ("text utils"). Merge them into one module. Keep what you write inside this folder (MERGE-PROPOSAL.md at the top level).'''
 files  = { "slug_a/text.py" = "file:fixtures/slug_a/text.py", "fmt_b/text.py" = "file:fixtures/fmt_b/text.py" }
 checks = [
   { judge = '''Classifies the pair as not-mergeable after reading both: slugify and human_size/human_duration are different-purpose tools that only share a module name, so there is nothing to merge''' },
