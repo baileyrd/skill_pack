@@ -1,0 +1,11 @@
+# FILE docs/adr/001-output.md  (author: dottius, merged 2026-08-01)
+Status: accepted. Digest output is JSON. Rejected: plain text.
+
+# FILE docs/adr/002-retry.md  (author: dottius, merged 2026-08-10)
+Status: accepted. On Tick API failure retry 3 times with backoff, then post an error notice.
+
+# FILE src/config.rs  (HEAD)
+pub const TICK_PORT: u16 = 7421;
+
+# FILE README.md  (HEAD)
+tick_digest posts a daily digest of Tick tasks to a webhook. SQLite holds the sent-log.

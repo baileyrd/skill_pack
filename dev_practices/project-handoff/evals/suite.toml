@@ -48,3 +48,32 @@ checks = [
   { file_exists = "docs/handoff/QA.md" },
   { judge = '''QA.md holds implementer questions answered from the chat (for example timezone/DST handling, where the webhook URL comes from, behaviour with more than 10 items), each tagged [stated], [agreed], [default] or [open]''' },
 ]
+
+[[case]]
+id     = "harvest-mixed-provenance"
+input  = '''Harvest the decisions for tick_digest and build its expert. Sources are in repo-docs.txt, prs.txt, remindme.txt and cards.txt (the repo, merged PRs with reviews, remind-me, Mill Board cards). I am baileyrd. The repo is not reachable, so put the files in this folder.'''
+files  = { "repo-docs.txt" = "file:inputs/harvest/repo-docs.txt", "prs.txt" = "file:inputs/harvest/prs.txt", "remindme.txt" = "file:inputs/harvest/remindme.txt", "cards.txt" = "file:inputs/harvest/cards.txt" }
+checks = [
+  { file_exists = "docs/handoff/SPEC.md" },
+  { file_exists = "docs/handoff/DECISIONS.md" },
+  { file_exists = ".claude/agents/tick_digest-expert.md" },
+  { regex = 'Harvested: 2026-\d\d-\d\d @ 9f8e7d6', in = "docs/handoff/SPEC.md" },
+  { judge = '''DECISIONS.md tags [stated] only where baileyrd's own words are quoted in a Source column: SQLite only (PR #12), NDJSON (PR #15), weekly Monday 8:00 (mem_a), cap of 8 items (card 31). No [agreed] tags appear.''' },
+  { judge = '''Everything settled by dottius, an ADR, a copilot review, "Nano prefers short digests" (model-written, no quote), or card 40 is tagged [default], not [stated]. The CSV drop (PR #18, no user comment) is [open] or listed in OPEN_QUESTIONS, never [stated].''' },
+  { judge = '''The port conflict is resolved for the code value 7421 (code beats memory) and OPEN_QUESTIONS.md records both sources (src/config.rs and mem_c). NDJSON is a newer row that supersedes the JSON row (the old row is kept), and the 3-sections/10-items card comment is superseded by the user's cap of 8.''' },
+  { judge = '''The reply or files show the remind-me alias step first (tickdigest, tick_digest, tick-digest resolved to one project via remind_me_project / remind_me_entity_upsert), before the sources are searched.''' },
+  { judge = '''.claude/agents/tick_digest-expert.md has name tick_digest-expert, a first step that loads remind-me tools through ToolSearch and continues from the pack if they are missing, and the root CLAUDE.md has ONE "Project experts" routing table with the cloud fallback (read the agent file fresh, spawn a general-purpose Agent with its body plus the question) and no copy of the agent file's text.''' },
+  { judge = '''SPEC.md is an index (subsystem, doc paths, owner, status), not a restatement of the docs, and delivery includes a cloud smoke test (answer one known question, log one default, escalate one reversal) recorded as pass or fail in the PR and remind-me.''' },
+]
+
+[[case]]
+id     = "refresh-append-only"
+input  = '''Refresh the tick_digest pack. The current SPEC/DECISIONS and what happened since the last harvest are in existing-decisions.txt. Write the updated files to this folder.'''
+files  = { "existing-decisions.txt" = "file:inputs/harvest/existing-decisions.txt" }
+checks = [
+  { regex = '\| D1 \| SQLite only', in = "docs/handoff/DECISIONS.md" },
+  { regex = '\| D2 \| Output JSON', in = "docs/handoff/DECISIONS.md" },
+  { regex = 'D3', in = "docs/handoff/DECISIONS.md" },
+  { judge = '''D1 and D2 are unchanged, tag included. The NDJSON change is a new D3 row saying it supersedes D2, tagged [stated] with baileyrd's quote; the --quiet flag from PR #21 is a new D4 row tagged [default].''' },
+  { judge = '''The only in-place edit is the Harvested line in SPEC.md, updated to today's date and the current sha; nothing already harvested is re-derived.''' },
+]

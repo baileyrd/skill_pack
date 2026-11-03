@@ -1,0 +1,9 @@
+# gh pr list --state merged  (user login: baileyrd)
+#12 "Store sent-log" merged 2026-08-05 by dottius
+  review by baileyrd: "approved. SQLite only, no Postgres, I don't want a server to run."
+#15 "Switch output to NDJSON" merged 2026-09-02 by dottius
+  review by baileyrd: "ok, NDJSON is better for the pipe, go."
+  review by copilot-reviewer: "Consider gzip for large digests."   (not adopted)
+#18 "Drop CSV export" merged 2026-09-20 by dottius
+  body: "we agreed to drop CSV" (no linked comment from baileyrd)
+HEAD sha: 9f8e7d6

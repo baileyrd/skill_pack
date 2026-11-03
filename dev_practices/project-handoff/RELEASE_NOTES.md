@@ -6,6 +6,46 @@ this log tracks commits against `main`.
 
 ---
 
+## v1.3.0 — Harvest mode, cloud-safe expert, monorepo support
+**2026-11-03**
+
+- **Added:** harvest mode ([references/harvest.md](references/harvest.md)). Builds the
+  pack for a grown project from repo docs and ADRs, merged PRs with their
+  reviews, remind-me (`include_raw`) and Mill Board cards. A remind-me alias
+  step runs first so variant tags resolve to one project. Provenance is
+  stricter: `[stated]` only with a quote of the user's words, agent- or
+  review-settled items are `[default]`, untraceable ones `[open]`, no
+  `[agreed]`, never promote. Precedence: code and repo docs beat memory, newer
+  beats older, conflicts go to OPEN_QUESTIONS with both sources.
+- **Added:** large and merged projects. SPEC.md is an index (subsystem, doc
+  paths, owner, status) and the expert reads sources at call time; QA only for
+  questions actually asked. A merged project gets one pack with a section per
+  subsystem; existing sub-packs and experts are kept and routed to.
+- **Added:** `Harvested: <date> @ <sha>` in SPEC.md and a refresh mode that
+  re-harvests only what was decided since, appends D-rows and never rewrites
+  existing ones.
+- **Added:** cloud smoke test in delivery: in a fresh cloud session on the
+  merged branch the expert answers one known question, logs one default and
+  escalates one reversal; pass or fail goes in the PR and remind-me.
+- **Added:** harvest evals (synthetic history with mixed provenance, and an
+  append-only refresh).
+- **Changed:** the expert is `<slug>-expert`, with a first step that loads the
+  remind-me tools through ToolSearch under any connected name, and carries on
+  from the pack if they are absent.
+- **Changed:** one "Project experts" routing table in the root CLAUDE.md (path
+  globs → expert, one row each) replaces the per-project block. Pack root is
+  configurable: `docs/handoff/`, or `<project dir>/handoff/` in a monorepo.
+- **Fixed:** the claim that cloud sessions always load `.claude/agents/`.
+  Two cloud threads could not load the PythRust agent. The routing table now
+  carries a fallback: read the agent file fresh and spawn a general-purpose
+  Agent with its body plus the question. That counts as the expert; improvising
+  without it is not allowed, and the agent file stays the only copy of its text.
+- **Migration:** v1.2 repos (PythRust, and Let Em Loose if its pack landed)
+  rename `project-expert` to `<slug>-expert` and switch to the routing table.
+  See SKILL.md § Migrating a v1.2 repo.
+- **Why:** grown projects have no single design chat, and experts must run in
+  cloud sessions with no local setup.
+
 ## v1.2.0 — In-repo project expert
 **2026-11-03**
 

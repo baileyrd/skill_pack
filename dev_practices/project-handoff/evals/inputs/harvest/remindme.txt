@@ -1,0 +1,4 @@
+# remind_me_search, include_raw (tags seen: tickdigest, tick_digest, tick-digest; no alias registered)
+mem_a  written_by=human   tags=tickdigest   decision 2026-08-02: user said "Weekly summary goes out Mondays, 8:00 Central, not daily."
+mem_b  written_by=model   tags=tick_digest  decision 2026-08-12: "Nano prefers short digests" (no quote)
+mem_c  written_by=model   tags=tick-digest  fact 2026-08-15: "Tick API is on localhost:7420"
