@@ -1,0 +1,42 @@
+# Eval-Kit suite for yt-pipeline (https://github.com/baileyrd/Eval-Kit).
+# Needs yt-dlp, the yt-search and notebooklm skills, and a logged-in
+# notebooklm CLI; a run that lacks any of them should stop at that
+# prerequisite and say so. Checks target the pipeline's contract: unattended
+# once given a topic, 5-8 diverse sources, one final report with trends,
+# outliers and gaps, the notebook link and the sources actually used, and no
+# invented notebook links or videos.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+timeout       = 1200
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "research-topic"
+input  = '''research home battery backup systems on YouTube for me'''
+checks = [
+  { judge = '''Runs without stopping to ask for confirmation between steps. If every prerequisite works, the single final report gives trends, outliers and gaps across the videos, the NotebookLM notebook link, and the 5-8 sources actually used (flagging any that failed to ingest)''' },
+  { judge = '''If a prerequisite is missing (yt-dlp, the notebooklm CLI or its login), the run names which one and how to fix it, and does not invent a notebook link, video list or takeaways''' },
+]
+
+[[case]]
+id     = "pipeline-with-podcast"
+input  = '''run the YouTube pipeline on "local LLM inference on Apple Silicon" and make a podcast from it'''
+checks = [
+  { judge = '''Generates the podcast (audio overview) only after the notebook is built and reports the downloaded file path, or reports exactly which step failed and why; it never claims a podcast exists that it did not produce''' },
+  { judge = '''The selected sources are diverse (not all from one channel) and recent, or the reply explains why fewer than 5 qualified''' },
+]
+
+[[case]]
+id     = "sparse-topic"
+input  = '''build me a NotebookLM notebook from YouTube videos about "Ledgerline v3 ERP Stripe payout reconciliation"'''
+checks = [
+  { judge = '''If fewer than 5 relevant videos qualify, it says the topic is sparse and proceeds with what it found (or stops honestly if nothing relevant exists) instead of padding with off-topic videos or retrying indefinitely''' },
+]

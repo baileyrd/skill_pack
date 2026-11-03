@@ -1,0 +1,9 @@
+[
+  {"method": "POST", "url": "https://app.acme-notes.example/api/graphql", "request_headers": {"authorization": "Bearer eyJhbGciOiJSUzI1NiJ9.tok_live_9f8e7d6c5b4a.sig", "apollographql-client-name": "acme-web", "apollographql-client-version": "2.31.0"}, "request_body": {"operationName": "NotesList", "query": "query NotesList($workspaceId: ID!, $after: String) { notes(workspaceId: $workspaceId, first: 50, after: $after) { edges { node { id title updatedAt } } pageInfo { endCursor hasNextPage } } }"}, "status": 200},
+  {"method": "POST", "url": "https://app.acme-notes.example/api/graphql", "request_body": {"operationName": "UpdateNote", "query": "mutation UpdateNote($id: ID!, $body: JSON!) { updateNote(id: $id, body: $body) { id updatedAt } }"}, "status": 200},
+  {"method": "GET", "url": "wss://realtime.acme-notes.example/socket/websocket?vsn=2.0.0", "status": 101},
+  {"method": "POST", "url": "https://o450123.ingest.sentry.io/api/4504/envelope/?sentry_key=3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c", "status": 200},
+  {"method": "POST", "url": "https://api.segment.io/v1/t", "status": 200},
+  {"method": "GET", "url": "https://clerk.acme-notes.example/v1/client?_clerk_js_version=5.31.0", "status": 200},
+  {"method": "GET", "url": "https://acme-notes-uploads.s3.us-east-1.amazonaws.com/9b1c2d3e/attachments/diagram.png?X-Amz-Signature=abc", "status": 200}
+]

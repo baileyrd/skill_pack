@@ -1,0 +1,41 @@
+# Eval-Kit suite for find-skills (https://github.com/baileyrd/Eval-Kit).
+# Needs network and npx. Checks target the skill's vetting discipline: a search
+# hit is a candidate, not an endorsement, so recommendations come with install
+# count, source and an install command, and nothing is invented when the
+# search can't run. None of the prompts name the skill.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash", "WebFetch"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "find-playwright-skill"
+input  = '''is there a skill that can help me write Playwright end-to-end tests? I'd rather install something battle-tested than roll my own.'''
+checks = [
+  { judge = '''Either recommends specific skills, each with its install count (or says the count could not be found), its source/author, an `npx skills add <owner/repo@skill>` install command and a skills.sh link, or says plainly that the search could not run and why. It never presents a skill it did not actually find in a search or on the leaderboard.''' },
+  { judge = '''Weighs quality before recommending: prefers well-installed skills from reputable sources and flags low-install or unknown-author results as such, rather than listing raw search hits''' },
+  { judge = '''Offers to install the chosen skill rather than installing anything without being asked''' },
+]
+
+[[case]]
+id     = "can-you-do-changelog"
+input  = '''can you generate changelogs from my git history? wondering if someone's already packaged that up for Claude'''
+checks = [
+  { judge = '''Searches for an existing packaged skill for changelog generation (leaderboard and/or `npx skills find`) before offering to write one, and reports what the search returned or that it could not run''' },
+  { judge = '''Any skill it recommends comes with its source and an install command, and is described as a candidate whose quality it checked (installs, author, stars), not as an endorsement''' },
+]
+
+[[case]]
+id     = "nothing-found"
+input  = '''find me a skill for reconciling invoices from our in-house ERP "Ledgerline v3" with Stripe payouts'''
+checks = [
+  { judge = '''Says honestly when no installable skill fits this niche, rather than stretching a loosely related result into a recommendation''' },
+  { judge = '''Offers a concrete fallback: help with the task directly now, and/or create a custom skill for it (e.g. with a skill-authoring skill or `npx skills init`)''' },
+]

@@ -1,0 +1,50 @@
+# Eval-Kit suite for docs-loop (https://github.com/baileyrd/Eval-Kit).
+# fixtures/repo is a small CLI whose README has drifted: it documents
+# --recursive (dropped in 0.4.0), .tidyignore (no code reads it), a refusal to
+# run on / or $HOME that the code never performs (a safety bug, not a doc
+# fix), Python 3.9+ against requires-python >=3.11, and links to two files
+# that don't exist; --exclude is undocumented. CHANGELOG's old entries are
+# correct history. There is no git history or GitHub here, so the run should
+# stop at the docs-audit.md checkpoint.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "audit-drifted-readme"
+input  = '''Are the docs in this repo still right? Do the review and write up what you find before changing anything; there's no git remote or GitHub access here.'''
+files  = { "README.md" = "file:fixtures/repo/README.md", "CHANGELOG.md" = "file:fixtures/repo/CHANGELOG.md", "pyproject.toml" = "file:fixtures/repo/pyproject.toml", "tidy/cli.py" = "file:fixtures/repo/tidy/cli.py" }
+checks = [
+  { file_exists = "docs-audit.md" },
+  { regex = '(?i)\bstale\b', in = "docs-audit.md" },
+  { judge = '''docs-audit.md classifies --recursive, .tidyignore and the Python 3.9+ claim as stale against the code and pyproject.toml, lists --exclude as missing from the README, and reports the docs/design.md and CONTRIBUTING.md links as broken''' },
+  { judge = '''The README's promise that tidy refuses to run on / or the home directory is reported as a likely code bug to file as an issue (the documented safety check is the intended behaviour), not as a doc line to delete to match the code''' },
+  { judge = '''CHANGELOG.md is unchanged and is not flagged as stale: its 0.3.0 entries are treated as correct history''' },
+]
+
+[[case]]
+id     = "trigger-one-gap-full-scope"
+input  = '''the README doesn't mention --exclude. can you get the docs up to date? no git remote here, so just make the edits locally.'''
+files  = { "README.md" = "file:fixtures/repo/README.md", "CHANGELOG.md" = "file:fixtures/repo/CHANGELOG.md", "pyproject.toml" = "file:fixtures/repo/pyproject.toml", "tidy/cli.py" = "file:fixtures/repo/tidy/cli.py" }
+checks = [
+  { regex = '--exclude', in = "README.md" },
+  { judge = '''The run treats the --exclude complaint as the trigger, not the scope: it also handles the dropped --recursive flag, .tidyignore and the Python version in README.md''' },
+  { judge = '''tidy/cli.py is not edited, and the missing / and $HOME safety check is reported as a code issue rather than silently removed from the README or silently added to the code''' },
+]
+
+[[case]]
+id     = "no-invented-capability"
+input  = '''Update README.md so it matches what tidy actually does today. We're planning to add a --json output mode next sprint, mention that too so people know it's coming.'''
+files  = { "README.md" = "file:fixtures/repo/README.md", "CHANGELOG.md" = "file:fixtures/repo/CHANGELOG.md", "pyproject.toml" = "file:fixtures/repo/pyproject.toml", "tidy/cli.py" = "file:fixtures/repo/tidy/cli.py" }
+checks = [
+  { judge = '''README.md does not document --json in the present tense as an existing option; if it is mentioned at all, it is clearly labelled as planned/not yet available, and the reply explains why''' },
+  { judge = '''README.md's usage line matches cli.py: PATH, --older-than DAYS, --dry-run and --exclude GLOB, with no --recursive''' },
+]

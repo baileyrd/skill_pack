@@ -1,0 +1,55 @@
+# Eval-Kit suite for implementation-merge (https://github.com/baileyrd/Eval-Kit).
+# fixtures/svc_a and svc_b are two retry helpers with their own tests. They are
+# mergeable but conflicting: a raises RetryError after selective retries with
+# full jitter and a cap; b retries every exception, honours RetryAfter, reports
+# attempts through on_retry, and returns None on failure. fixtures/slug_a and
+# fmt_b share only a module name (text.py) and must come out not-mergeable.
+# The skill is dry-run only: candidates stay untouched.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "merge-retry-helpers"
+input  = '''dedupe flagged svc_a/retry.py and svc_b/retry.py as the same capability, diverged. Combine the best of both into one implementation; each has its own tests next to it.'''
+files  = { "svc_a/retry.py" = "file:fixtures/svc_a/retry.py", "svc_a/test_retry.py" = "file:fixtures/svc_a/test_retry.py", "svc_b/retry.py" = "file:fixtures/svc_b/retry.py", "svc_b/test_retry.py" = "file:fixtures/svc_b/test_retry.py" }
+checks = [
+  { file_exists = "MERGE-PROPOSAL.md" },
+  { all = [
+    { regex = 'RetryError', in = "MERGE-PROPOSAL.md" },
+    { regex = 'RetryAfter', in = "MERGE-PROPOSAL.md" },
+    { regex = 'on_retry', in = "MERGE-PROPOSAL.md" },
+    { regex = 'backoff_delays', in = "MERGE-PROPOSAL.md" },
+    { regex = 'retry_on', in = "MERGE-PROPOSAL.md" },
+  ] },
+  { judge = '''MERGE-PROPOSAL.md classifies the pair as mergeable-conflicting and resolves each behavioural conflict explicitly with a reason: raise RetryError vs return None on failure, and retrying only selected exceptions vs every exception''' },
+  { judge = '''MERGE-PROPOSAL.md has a coverage table in which every item from both candidates (RetryError, backoff_delays, full jitter, cap, retry_on, RetryAfter, on_retry, the None return) is marked kept, merged or dropped with a reason; nothing is silently missing''' },
+  { judge = '''The merged source is written to a scratch location and was run against both candidates' tests (or the reply says which tests it adapted and why), and neither svc_a/retry.py nor svc_b/retry.py was modified''' },
+]
+
+[[case]]
+id     = "not-mergeable-same-name"
+input  = '''repo-inspector flagged slug_a/text.py and fmt_b/text.py as a duplication cluster ("text utils"). Merge them into one module.'''
+files  = { "slug_a/text.py" = "file:fixtures/slug_a/text.py", "fmt_b/text.py" = "file:fixtures/fmt_b/text.py" }
+checks = [
+  { judge = '''Classifies the pair as not-mergeable after reading both: slugify and human_size/human_duration are different-purpose tools that only share a module name, so there is nothing to merge''' },
+  { judge = '''Logs the not-mergeable outcome with its reason (e.g. in MERGE-PROPOSAL.md or the reply) rather than producing a combined text.py, and neither candidate file is modified''' },
+]
+
+[[case]]
+id     = "trigger-best-of-both"
+input  = '''we have two versions of the retry helper, svc_a/retry.py and svc_b/retry.py. I don't want to just pick one, I want the best of each. What would that look like?'''
+files  = { "svc_a/retry.py" = "file:fixtures/svc_a/retry.py", "svc_a/test_retry.py" = "file:fixtures/svc_a/test_retry.py", "svc_b/retry.py" = "file:fixtures/svc_b/retry.py", "svc_b/test_retry.py" = "file:fixtures/svc_b/test_retry.py" }
+checks = [
+  { judge = '''Builds an item-by-item comparison of what each candidate has and lacks before proposing the merged design''' },
+  { judge = '''Carries svc_b's Retry-After handling and on_retry hook and svc_a's selective retry_on, jitter and cap into the proposal, and states how the failure contract (raise vs None) is resolved''' },
+  { judge = '''Leaves svc_a/retry.py and svc_b/retry.py untouched; the proposal lives in a separate file or the reply''' },
+]

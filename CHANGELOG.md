@@ -5,6 +5,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- Eval-Kit suites (`evals/suite.toml`, 3 cases each, with fixtures) for the 22
+  skills that had none, so every skill can be run against a no-skill control
+  with `python3 -m evalkit run <skill>/evals/suite.toml`. Skill files are
+  unchanged; Eval-Kit leaves `evals/` out of the skill under test.
 - `dev_practices/project-handoff` v1.1.0 — records the design chat link in
   SPEC.md and the remind-me capture (`metadata.chat_url`).
 ### Fixed

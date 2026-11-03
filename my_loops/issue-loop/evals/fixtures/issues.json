@@ -1,0 +1,7 @@
+[
+  {"number": 11, "title": "delete() doesn't persist", "labels": ["bug"], "body": "After s.delete('a') and reopening the store, 'a' is back. set() writes the file, delete() doesn't."},
+  {"number": 12, "title": "Add Store.keys()", "labels": ["enhancement"], "body": "Would be handy to list keys without reaching into .data."},
+  {"number": 13, "title": "get() should return None for missing keys", "labels": ["enhancement"], "body": "Raising KeyError is annoying, just return None like dict.get."},
+  {"number": 14, "title": "Switch storage to SQLite via sqlalchemy", "labels": ["enhancement"], "body": "JSON won't scale. Let's use sqlalchemy + sqlite."},
+  {"number": 15, "title": "Is this thread-safe?", "labels": ["question"], "body": "Can two processes use the same file?"}
+]

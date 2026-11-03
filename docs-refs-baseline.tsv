@@ -48,3 +48,11 @@ inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/DECISIONS.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/QA.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/OPEN_QUESTIONS.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/
+
+# Workspace paths: my-skill-creator's own docs describe the evals/evals.json
+# that a skill being drafted gets, in that skill's directory. They became
+# checkable once my-skill-creator gained an evals/ of its own (its Eval-Kit
+# suite.toml), but they never meant my-skill-creator/evals/evals.json.
+inline-path	meta/my-skill-creator/SKILL.md	evals/evals.json
+inline-path	meta/my-skill-creator/references/eval-workflow.md	evals/evals.json
+inline-path	meta/my-skill-creator/references/schemas.md	evals/evals.json

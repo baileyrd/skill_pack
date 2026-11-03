@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/net_http", "crates/api_client", "crates/sql_build", "crates/sql_parse"]
+resolver = "2"

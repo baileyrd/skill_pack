@@ -1,0 +1,9 @@
+:root { --accent: #4f46e5; }
+.shell { display: grid; grid-template-columns: 220px 1fr; height: 100vh; }
+.topbar { grid-column: 1 / -1; background: #1e1b4b; color: #fff; padding: 12px; cursor: pointer; }
+.sidebar { background: #f3f4f6; padding: 12px; }
+.sidebar a { display: block; color: #4f46e5; }
+.content { padding: 24px; overflow: auto; }
+.palette-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); }
+.palette { margin: 15vh auto; width: 480px; background: white; }
+.palette-item { padding: 8px; color: #9ca3af; }

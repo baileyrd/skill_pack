@@ -1,0 +1,47 @@
+# Eval-Kit suite for learn-it (https://github.com/baileyrd/Eval-Kit).
+# A one-shot run has no session of its own, so each case hands over a session
+# log. Checks target the skill's gates: qualify before drafting (a one-off path
+# fix is not a skill), ground every pattern in the log, report the draft before
+# writing it, and merge into an existing skill (flagging contradictions)
+# instead of duplicating it. fixtures/repo is a stub skill_pack checkout whose
+# pytest-async-hygiene skill tells you to widen the loop scope, which the
+# session showed hides the real bug.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "distill-new-skill"
+input  = '''Here's the log of the session I just finished: session-flaky-tests.md. We've hit this in three repos now. Turn what we learned into a skill.'''
+files  = { "session-flaky-tests.md" = "file:fixtures/session-flaky-tests.md" }
+checks = [
+  { judge = '''The draft's patterns come from the log: reproduce with randomized order and repetition first; a module-level async client binds to one event loop; widening loop_scope is a mask, not the fix; create clients in a fixture and aclose them; use the respx_mock fixture instead of a class decorator. It does not pad the draft with async-testing advice the session never touched.''' },
+  { judge = '''The widening-loop-scope attempt is recorded as an anti-pattern (tried, reduced failures, hid the bug), not as a recommended fix''' },
+  { judge = '''The full draft (SKILL.md frontmatter with a description saying when to use it, plus the body) is shown for approval, and the reply asks before writing it into a skills directory rather than reporting it already written''' },
+]
+
+[[case]]
+id     = "one-off-does-not-qualify"
+input  = '''Session log is in session-one-off.md. save this as a skill so we don't hit it again'''
+files  = { "session-one-off.md" = "file:fixtures/session-one-off.md" }
+checks = [
+  { judge = '''Says plainly that a single wrong path in deploy.sh is a one-off fix, not reusable behavioural guidance, and does not draft or write a skill for it''' },
+  { judge = '''Suggests a lighter alternative such as a comment, a check in the deploy script, or a note in the project's docs''' },
+]
+
+[[case]]
+id     = "update-existing-skill"
+input  = '''The skill_pack checkout is in repo/. Log of today's session is session-flaky-tests.md. Capture what we just learned in the right skill.'''
+files  = { "session-flaky-tests.md" = "file:fixtures/session-flaky-tests.md", "repo/scripts/build_skill_zips.py" = "file:fixtures/repo/scripts/build_skill_zips.py", "repo/dev_practices/pytest-async-hygiene/SKILL.md" = "file:fixtures/repo/dev_practices/pytest-async-hygiene.SKILL.md" }
+checks = [
+  { judge = '''Finds repo/dev_practices/pytest-async-hygiene and proposes updating it rather than creating a second, overlapping skill''' },
+  { judge = '''Flags explicitly that the existing rule 3 ("prefer widening the event-loop scope") contradicts what the session found, and asks rather than silently overwriting it''' },
+  { judge = '''Proposes a version bump in metadata.version and a RELEASE_NOTES entry as part of the update''' },
+]

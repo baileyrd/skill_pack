@@ -1,0 +1,48 @@
+# Eval-Kit suite for sovereignty-loop (https://github.com/baileyrd/Eval-Kit).
+# fixtures/svc is a small crate depending on libc (a decided floor per
+# RFC-003), serde_json, regex (used with user-supplied patterns: a large
+# hand-roll), base64 (one decode call: a small one), thiserror, and proptest as
+# a dev-dependency. Checks target the skill's rules: the floor is not
+# relitigated, dev-deps are out of default scope, no row is called eliminable
+# without a reachability check, and an L/XL hand-roll becomes a dedicated-repo
+# proposal, never an inline rewrite. GitHub (and so the platform repo search)
+# is unreachable from a run.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "audit-dependencies"
+input  = '''We depend on too many external crates in this repo. Audit the dependencies and propose what to swap for our own platform crates or hand-roll. No GitHub access here, so you can't search our repos; say where that search would go and stop at the audit.'''
+files  = { "Cargo.toml" = "file:fixtures/svc/Cargo.toml", "ARCHITECTURE.md" = "file:fixtures/svc/ARCHITECTURE.md", "src/lib.rs" = "file:fixtures/svc/src/lib.rs" }
+checks = [
+  { judge = '''libc is left alone as the decided floor (citing ARCHITECTURE.md / RFC-003), and proptest is out of scope as a dev-dependency (or explicitly noted as such)''' },
+  { judge = '''Each remaining dependency (serde_json, regex, base64, thiserror) gets a row whose notes record a reachability check (e.g. cargo tree -i) or say plainly it could not be run, and no row is marked removable without one''' },
+  { judge = '''regex, used with user-supplied full regex syntax, is sized as a large (L/XL) hand-roll and handed back as a dedicated-repo proposal or kept external, not proposed for an inline rewrite''' },
+  { judge = '''base64 (one decode call) is sized small and named as a hand-roll or swap candidate pending the platform search, with every row awaiting the user's sign-off''' },
+]
+
+[[case]]
+id     = "just-do-it"
+input  = '''cut our external dependencies in this crate. you have the go-ahead, make the changes. (no GitHub here)'''
+files  = { "Cargo.toml" = "file:fixtures/svc/Cargo.toml", "ARCHITECTURE.md" = "file:fixtures/svc/ARCHITECTURE.md", "src/lib.rs" = "file:fixtures/svc/src/lib.rs" }
+checks = [
+  { judge = '''Does not replace regex with an inline hand-written matcher in src/lib.rs, and does not remove libc''' },
+  { judge = '''Any dependency it does change is a small, self-contained one (e.g. base64) with a stated reachability check, and the reply lists which rows still wait and why''' },
+]
+
+[[case]]
+id     = "trigger-do-we-have-this"
+input  = '''do we already have something of our own for what serde_json and base64 do in this crate? (no GitHub access here, so tell me how you'd find out)'''
+files  = { "Cargo.toml" = "file:fixtures/svc/Cargo.toml", "ARCHITECTURE.md" = "file:fixtures/svc/ARCHITECTURE.md", "src/lib.rs" = "file:fixtures/svc/src/lib.rs" }
+checks = [
+  { judge = '''Names where to look across both platform namespaces (Rusty-Mill/* and baileyrd/rusty_*), e.g. rusty_json as a likely serde_json stand-in, and says a name match is a candidate to confirm by reading the source, not proof''' },
+]

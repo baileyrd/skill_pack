@@ -1,0 +1,51 @@
+# Eval-Kit suite for repo-config (https://github.com/baileyrd/Eval-Kit).
+# Checks target what the skill adds over writing one file: the whole governance
+# set applied together, owner/repo substituted rather than left as a token, an
+# LF-forcing .gitattributes, existing files never overwritten, a monorepo's
+# nested ADR series and release notes surfaced before seeding root copies, and
+# the ongoing rule to log a change in both RELEASE_NOTES.md and CHANGELOG.md.
+# Runs have no git remote or GitHub, so the prompts give the owner/repo.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "one-file-asks-whole-set"
+input  = '''add a CONTRIBUTING.md to this repo. it's github.com/acme/widget (no git remote set up in this checkout, and no GitHub access, so just write the files).'''
+files  = { "README.md" = "file:fixtures/widget/README.md", "pyproject.toml" = "file:fixtures/widget/pyproject.toml", "cli.py" = "file:fixtures/widget/cli.py", "RELEASE_NOTES.md" = "file:fixtures/widget/RELEASE_NOTES.md", "CHANGELOG.md" = "file:fixtures/widget/CHANGELOG.md" }
+checks = [
+  { file_exists = "CONTRIBUTING.md" },
+  { file_exists = "SECURITY.md" },
+  { file_exists = ".github/pull_request_template.md" },
+  { regex = '(?m)^\*\s+text=auto\s+eol=lf|eol=lf', in = ".gitattributes" },
+  { regex = '\A(?![\s\S]*\{\{OWNER_REPO\}\})', in = "SECURITY.md" },
+  { judge = '''README.md still holds its hand-written content (it was not overwritten), and the reply reports which existing files were skipped''' },
+  { judge = '''CONTRIBUTING.md's dev commands fit the manifest (pip install -e ".[dev]", pytest) rather than another stack's''' },
+]
+
+[[case]]
+id     = "monorepo-nested-governance"
+input  = '''bootstrap the standard repo files for this workspace (it's github.com/acme/recall; no git remote or GitHub access here, just write files).'''
+files  = { "Cargo.toml" = "file:fixtures/mono/Cargo.toml", "remind_me/docs/adr/0001-sqlite.md" = "file:fixtures/mono/remind_me/docs/adr/0001-sqlite.md", "dbs/docs/adr/0001-wal-mode.md" = "file:fixtures/mono/dbs/docs/adr/0001-wal-mode.md", "remind_me/RELEASE_NOTES.md" = "file:fixtures/mono/remind_me/RELEASE_NOTES.md", "dbs/RELEASE_NOTES.md" = "file:fixtures/mono/dbs/RELEASE_NOTES.md" }
+checks = [
+  { judge = '''Notices the two existing ADR series (remind_me/docs/adr and dbs/docs/adr, each starting at 0001) and the two nested RELEASE_NOTES.md files before seeding anything at the root''' },
+  { judge = '''Does not create a third ADR series starting at 0001 at the root without saying how it relates to the nested ones: it either asks how to reconcile them or states the relationship explicitly in what it writes''' },
+]
+
+[[case]]
+id     = "ongoing-log-both"
+input  = '''add a --color option to cli.py that sets the badge fill colour (default "#4c1").'''
+files  = { "README.md" = "file:fixtures/widget/README.md", "pyproject.toml" = "file:fixtures/widget/pyproject.toml", "cli.py" = "file:fixtures/widget/cli.py", "RELEASE_NOTES.md" = "file:fixtures/widget/RELEASE_NOTES.md", "CHANGELOG.md" = "file:fixtures/widget/CHANGELOG.md" }
+checks = [
+  { regex = '--color', in = "cli.py" },
+  { regex = '(?i)colou?r', in = "RELEASE_NOTES.md" },
+  { regex = '(?i)colou?r', in = "CHANGELOG.md" },
+]

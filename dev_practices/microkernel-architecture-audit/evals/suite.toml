@@ -1,0 +1,48 @@
+# Eval-Kit suite for microkernel-architecture-audit (https://github.com/baileyrd/Eval-Kit).
+# fixtures/forge is a small FORGE-style (FastAPI) plugin host with planted
+# defects: a plugin importing the core's private registry and another plugin's
+# state, a grant() that allows everything despite the documented capability
+# model, unversioned bus messages, a loader that swallows every exception, a
+# sync run_until_complete inside the bus, and no tests. There is no WASM layer,
+# so dimension 4 should be N/A.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "forge-full-audit"
+input  = '''Do a deep architecture review of this plugin system. Code is under core/ and plugins/, the intended design is docs/ARCHITECTURE.md. Audit all of it, don't ask me to narrow the scope, and write the report to audit.md.'''
+files  = { "docs/ARCHITECTURE.md" = "file:fixtures/forge/docs/ARCHITECTURE.md", "core/host.py" = "file:fixtures/forge/core/host.py", "core/bus.py" = "file:fixtures/forge/core/bus.py", "plugins/weather/plugin.toml" = "file:fixtures/forge/plugins/weather/plugin.toml", "plugins/weather/plugin.py" = "file:fixtures/forge/plugins/weather/plugin.py" }
+checks = [
+  { regex = '(?i)scorecard', in = "audit.md" },
+  { regex = '(?i)(wasm|sandbox)[^\n]*\bN/?A\b', in = "audit.md" },
+  { judge = '''audit.md gives a Pass/Warn/Fail verdict for each of eight dimensions (boundary, IPC, capabilities, WASM sandbox, lifecycle, dependency inversion, async, tests/error handling), and marks the core/plugin boundary FAIL citing plugins/weather/plugin.py importing core.host._registry and reaching into the calendar plugin''' },
+  { judge = '''audit.md explicitly contrasts stated intent with implementation: ARCHITECTURE.md promises capability grants from plugin.toml and versioned bus messages, while core/host.py grant() returns True for everything and bus messages carry no version''' },
+  { judge = '''audit.md flags the bare `except Exception: pass` in core/host.py load_all() (a failing plugin vanishes silently instead of being reported and disabled) and gives a concrete fix naming the file and function, not a generic "improve error handling"''' },
+]
+
+[[case]]
+id     = "trigger-ipc-contract"
+input  = '''Is the IPC contract between core and plugins in this repo sound? Code is in core/ and plugins/, design notes in docs/ARCHITECTURE.md. Write what you find to review.md.'''
+files  = { "docs/ARCHITECTURE.md" = "file:fixtures/forge/docs/ARCHITECTURE.md", "core/host.py" = "file:fixtures/forge/core/host.py", "core/bus.py" = "file:fixtures/forge/core/bus.py", "plugins/weather/plugin.toml" = "file:fixtures/forge/plugins/weather/plugin.toml", "plugins/weather/plugin.py" = "file:fixtures/forge/plugins/weather/plugin.py" }
+checks = [
+  { judge = '''review.md notes that bus messages are untyped dicts with no type/version envelope, contradicting invariant 3 in docs/ARCHITECTURE.md, and cites core/bus.py or the weather plugin's publish call''' },
+  { judge = '''review.md identifies that core/bus.py publish() calls run_until_complete on the event loop, which fails or blocks when called from inside a running asyncio loop such as a FastAPI handler''' },
+  { judge = '''Every finding in review.md cites a specific file, function or doc section as evidence''' },
+]
+
+[[case]]
+id     = "conversation-only-tauri"
+input  = '''We're designing Nexus Forge, a Tauri desktop app. The Rust core hosts plugins compiled to WASM (wasmtime), talking to the core over a JSON event bus. Plugins get a capability token at load time. There's no code yet, just this description. Can you audit the microkernel design? Write it to audit.md.'''
+checks = [
+  { regex = '(?i)insufficient input', in = "audit.md" },
+  { judge = '''audit.md covers all eight dimensions and, where the description gives no evidence, marks the dimension WARN with a note saying what input is needed rather than skipping it or inventing findings''' },
+  { judge = '''audit.md uses Rust/Tauri idioms (crates, traits, Result, wasmtime host functions, Arc<Mutex<T>>), not Python ones''' },
+]
