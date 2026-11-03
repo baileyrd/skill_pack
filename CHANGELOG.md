@@ -5,6 +5,14 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `web_dev/ui-ux-pro-max` (v1.0.0) — UI/UX design database and design-system
+  generator, imported from nextlevelbuilder/ui-ux-pro-max-skill (MIT). Dropped
+  runtime-unused data, the data validator and the `google-fonts` domain
+  (~2.7 MB); `SKILL.md` rewritten to repo conventions.
+- `diagrams/canvas-design` (v1.0.0) — philosophy-first static art in PNG/PDF,
+  adapted from Anthropic's example skill (Apache-2.0). `SKILL.md` cut from
+  ~12 KB to ~4 KB; 10 of 54 bundled fonts kept, under `assets/fonts/`.
+- `.gitattributes` marks `*.ttf` binary.
 - Eval-Kit suites (`evals/suite.toml`, 3 cases each, with fixtures) for the 22
   skills that had none, so every skill can be run against a no-skill control
   with `python3 -m evalkit run <skill>/evals/suite.toml`. Skill files are

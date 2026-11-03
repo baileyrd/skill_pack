@@ -57,6 +57,7 @@ forward.
 | Skill | Does |
 |---|---|
 | [`datastar-pro/`](web_dev/datastar-pro) | Generates Datastar Pro web apps — attribute-driven reactivity (`data-*`, `$signals`, `@actions`), SSE server communication, Rocket components, Stellar CSS theming. Imported from [`baileyrd/datastar-pro-skill`](https://github.com/baileyrd/datastar-pro-skill)'s audited v1.0 milestone. |
+| [`ui-ux-pro-max/`](web_dev/ui-ux-pro-max) | UI/UX design guidance from a local searchable database — styles, product palettes, font pairings, UX/accessibility rules, motion and chart patterns, 22 stacks — plus a generated, optionally persisted design system for a new product or page. Imported from `nextlevelbuilder/ui-ux-pro-max-skill` (MIT) and trimmed by ~2.7 MB. |
 
 ### [`dev_practices/`](dev_practices) — software design and coding discipline
 
@@ -82,6 +83,7 @@ producing an artifact.
 |---|---|
 | [`fireworks-tech-graph/`](diagrams/fireworks-tech-graph) | Generates technical diagrams as SVG (PNG via `rsvg-convert`) across 15 types — architecture, data flow, flowchart, sequence, agent/memory, comparison matrix, timeline, mind map, ER, network topology, and the UML set — in seven named visual styles, with per-type layout rules and a structural validator. Imported from `yizhiyanhua-ai/fireworks-tech-graph` (MIT). |
 | [`visual/`](diagrams/visual) | Turns the current work into one self-contained HTML page with inline SVG diagrams — a branch recap (hunks pulled from git), a read-only plan, an explored folder/architecture, or a zoomable drill-down map of a skill pack — then audits its own output in headless Chrome for edge crossings and label overlap. Adapted from BuilderIO/skills and tt-a1i/archify (MIT). |
+| [`canvas-design/`](diagrams/canvas-design) | Makes original static art (poster, cover, print) as one PNG/PDF: writes a short design philosophy for an invented movement, renders it in code with bundled OFL fonts, then refines rather than adds. Adapted from Anthropic's `canvas-design` (Apache-2.0). |
 
 ## Versioning
 
