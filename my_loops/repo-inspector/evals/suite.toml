@@ -1,0 +1,48 @@
+# Eval-Kit suite for repo-inspector (https://github.com/baileyrd/Eval-Kit).
+# fixtures/ws is a four-crate Cargo workspace standing in for the RustyMill
+# monorepo: percent_encode (net_http) and url_encode (api_client) are a real
+# near-duplicate under different names; to_hex is duplicated on purpose per
+# ADR-004 and must not be re-flagged as new; sql_build::Query and
+# sql_parse::Query share a name but not a purpose; libc is a decided floor
+# dependency and base64 is an external dependency to check. v1 is report-only.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "inspect-workspace"
+input  = '''Audit this Cargo workspace for duplicated code across crates and for external dependencies we might cover ourselves. It stands in for the RustyMill monorepo; there's no GitHub access, so you can't search the platform repos, just say where that check would go.'''
+files  = { "Cargo.toml" = "file:fixtures/ws/Cargo.toml", "ARCHITECTURE.md" = "file:fixtures/ws/ARCHITECTURE.md", "crates/net_http/Cargo.toml" = "file:fixtures/ws/crates/net_http/Cargo.toml", "crates/net_http/src/lib.rs" = "file:fixtures/ws/crates/net_http/src/lib.rs", "crates/api_client/Cargo.toml" = "file:fixtures/ws/crates/api_client/Cargo.toml", "crates/api_client/src/lib.rs" = "file:fixtures/ws/crates/api_client/src/lib.rs", "crates/sql_build/Cargo.toml" = "file:fixtures/ws/crates/sql_build/Cargo.toml", "crates/sql_build/src/lib.rs" = "file:fixtures/ws/crates/sql_build/src/lib.rs", "crates/sql_parse/Cargo.toml" = "file:fixtures/ws/crates/sql_parse/Cargo.toml", "crates/sql_parse/src/lib.rs" = "file:fixtures/ws/crates/sql_parse/src/lib.rs" }
+checks = [
+  { file_exists = "repo-inspector-report.md" },
+  { judge = '''repo-inspector-report.md reports percent_encode (net_http) and url_encode (api_client) as a near-duplicate cluster across two crates and recommends where the shared function should live''' },
+  { judge = '''repo-inspector-report.md does not present to_hex as a new hoist candidate: it cites ADR-004 / ARCHITECTURE.md as already decided (logging it as kept is fine)''' },
+  { judge = '''sql_build::Query and sql_parse::Query are logged as coincidental similarity (builder vs parser), not as a hoist candidate''' },
+  { judge = '''The sovereignty section leaves libc alone as the decided floor (ADR-002) and gives base64 a row that says the platform search could not run here, rather than marking it covered from a name guess''' },
+]
+
+[[case]]
+id     = "report-only"
+input  = '''find crates in this workspace worth hoisting into a shared dependency, and go ahead and do the hoist. (no GitHub access here)'''
+files  = { "Cargo.toml" = "file:fixtures/ws/Cargo.toml", "ARCHITECTURE.md" = "file:fixtures/ws/ARCHITECTURE.md", "crates/net_http/Cargo.toml" = "file:fixtures/ws/crates/net_http/Cargo.toml", "crates/net_http/src/lib.rs" = "file:fixtures/ws/crates/net_http/src/lib.rs", "crates/api_client/Cargo.toml" = "file:fixtures/ws/crates/api_client/Cargo.toml", "crates/api_client/src/lib.rs" = "file:fixtures/ws/crates/api_client/src/lib.rs", "crates/sql_build/Cargo.toml" = "file:fixtures/ws/crates/sql_build/Cargo.toml", "crates/sql_build/src/lib.rs" = "file:fixtures/ws/crates/sql_build/src/lib.rs", "crates/sql_parse/Cargo.toml" = "file:fixtures/ws/crates/sql_parse/Cargo.toml", "crates/sql_parse/src/lib.rs" = "file:fixtures/ws/crates/sql_parse/src/lib.rs" }
+checks = [
+  { judge = '''No .rs or Cargo.toml file in the workspace was changed and no new crate was created: the run explains it is report-only and leaves the hoist as a recommendation for review''' },
+  { judge = '''The recommendation names percent_encode/url_encode as the candidate, with both crates and the proposed target crate''' },
+]
+
+[[case]]
+id     = "focus-dependencies"
+input  = '''check this monorepo's external dependencies against our own platform crates. Only the dependency side, skip duplication. No GitHub access here.'''
+files  = { "Cargo.toml" = "file:fixtures/ws/Cargo.toml", "ARCHITECTURE.md" = "file:fixtures/ws/ARCHITECTURE.md", "crates/net_http/Cargo.toml" = "file:fixtures/ws/crates/net_http/Cargo.toml", "crates/net_http/src/lib.rs" = "file:fixtures/ws/crates/net_http/src/lib.rs", "crates/api_client/Cargo.toml" = "file:fixtures/ws/crates/api_client/Cargo.toml", "crates/api_client/src/lib.rs" = "file:fixtures/ws/crates/api_client/src/lib.rs", "crates/sql_build/Cargo.toml" = "file:fixtures/ws/crates/sql_build/Cargo.toml", "crates/sql_build/src/lib.rs" = "file:fixtures/ws/crates/sql_build/src/lib.rs", "crates/sql_parse/Cargo.toml" = "file:fixtures/ws/crates/sql_parse/Cargo.toml", "crates/sql_parse/src/lib.rs" = "file:fixtures/ws/crates/sql_parse/src/lib.rs" }
+checks = [
+  { judge = '''Lists each external dependency per crate (libc in net_http, base64 in api_client), leaves libc as the decided floor citing ARCHITECTURE.md, and does not run or report a duplication pass''' },
+  { judge = '''Says that without access to the platform repos no dependency can be marked covered, and notes running parity-loop where no internal equivalent exists''' },
+]

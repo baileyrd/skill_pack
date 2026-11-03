@@ -1,0 +1,50 @@
+# Eval-Kit suite for rust-migration (https://github.com/baileyrd/Eval-Kit).
+# fixtures/notify/notify.py is a small Python CLI with capabilities that are
+# easy to drop: a hidden --legacy-csv flag that looks dead, NOTIFY_URL and
+# ~/.notifyrc as config sources with a precedence order, --stdin, exit codes
+# 2/3/4, and retry with exponential backoff that treats 4xx as final. Checks
+# target the boundary contract: every capability is REQUIRED unless the user
+# struck it in writing, and an existing migration plan is reconciled rather
+# than duplicated. GitHub is unreachable, so runs stop at the manifest.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "inventory-before-porting"
+input  = '''Port notify.py to Rust. No GitHub access here, so don't file issues; do the planning part and stop before writing Rust.'''
+files  = { "notify.py" = "file:fixtures/notify/notify.py" }
+checks = [
+  { file_exists = "capability-manifest.md" },
+  { regex = '(?i)legacy[-_]csv', in = "capability-manifest.md" },
+  { judge = '''capability-manifest.md lists the hidden --legacy-csv flag as REQUIRED (raising that it may be dead as a question for the user), not omitted or pre-marked out of scope''' },
+  { judge = '''capability-manifest.md has rows for each config source and their precedence (--url over NOTIFY_URL over ~/.notifyrc url, and retries from ~/.notifyrc), --stdin, and each exit code 0/2/3/4 with its trigger''' },
+  { judge = '''capability-manifest.md captures retry behaviour precisely enough to test: exponential backoff (1, 2, 4... seconds), HTTP 4xx returns 3 immediately without retrying, 5xx and network errors are retried, and exhaustion returns 4''' },
+  { judge = '''No row is marked OUT-OF-SCOPE, optional or nice-to-have on Claude's own judgment''' },
+]
+
+[[case]]
+id     = "reconcile-existing-plan"
+input  = '''Migrate this to Rust. There's already a plan in MIGRATION.md. GitHub isn't reachable here, so get as far as the capability list and stop.'''
+files  = { "notify.py" = "file:fixtures/notify/notify.py", "MIGRATION.md" = "file:fixtures/notify/MIGRATION.md" }
+checks = [
+  { judge = '''Reads MIGRATION.md and reconciles with it: --legacy-csv is marked OUT-OF-SCOPE with the plan's reason and attributed to Nano's decision, not re-litigated and not silently dropped from the manifest''' },
+  { judge = '''Every other capability is REQUIRED, and the plan's constraints (crate name notify-rs, single binary, no async runtime) carry into the manifest or plan''' },
+]
+
+[[case]]
+id     = "trigger-rewrite-in-rust"
+input  = '''rewrite notify.py in Rust, it'll be cleaner. honestly a lot of it is probably cruft you can skip. (no GitHub here; plan first)'''
+files  = { "notify.py" = "file:fixtures/notify/notify.py" }
+checks = [
+  { judge = '''Does not drop capabilities on its own judgment despite the "cruft" remark: it lists every capability as REQUIRED and asks the user to name in writing anything they want out of scope''' },
+  { judge = '''Raises --legacy-csv (hidden from --help) as the likely candidate for the user to strike, with the reason it looks unused, rather than removing it''' },
+]

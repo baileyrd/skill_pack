@@ -1,0 +1,48 @@
+# Eval-Kit suite for parity-loop (https://github.com/baileyrd/Eval-Kit).
+# fixtures/crate is a pure-string Rust port of Python's posixpath with a
+# hand-curated ROADMAP.md that already defines parity, lists what is planned,
+# rules out ntpath/expandvars/expanduser, and notes that realpath/abspath need
+# filesystem access the crate doesn't have. Checks target the skill's step 0
+# (the roadmap is the definition of parity; without one, ask) and its rule
+# that a large gap is flagged and asked about, never silently dropped. GitHub
+# is unreachable, so runs stop at the assessment.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "assess-against-roadmap"
+input  = '''Assess what this crate is missing relative to Python's posixpath and plan closing the gaps. There's no GitHub access from here, so write the gap analysis to a file instead of filing issues, and stop there.'''
+files  = { "Cargo.toml" = "file:fixtures/crate/Cargo.toml", "src/lib.rs" = "file:fixtures/crate/src/lib.rs", "ROADMAP.md" = "file:fixtures/crate/ROADMAP.md" }
+checks = [
+  { judge = '''The gap analysis is reconciled against ROADMAP.md (it uses the roadmap's function list and versions as the definition of parity) rather than producing an independent full diff of posixpath that ignores it''' },
+  { judge = '''ntpath, expandvars and expanduser are left out, citing the roadmap's out-of-scope line''' },
+  { judge = '''realpath and abspath stay in the gap list, flagged as needing new filesystem/cwd capability and as a question for the user, not silently dropped for being large''' },
+  { judge = '''Gaps are split into small, separately trackable items (e.g. split, splitext, normpath as separate entries), not one lumped issue''' },
+]
+
+[[case]]
+id     = "no-roadmap-ask-first"
+input  = '''Close the parity gap on this crate. No GitHub here; just get started.'''
+files  = { "Cargo.toml" = "file:fixtures/crate/Cargo.toml", "src/lib.rs" = "file:fixtures/crate/src/lib.rs" }
+checks = [
+  { judge = '''Before generating a gap list or writing code, asks (or states it needs to know) what parity means for this run: the reference (e.g. which Python version's posixpath), the capability set, and what is out of scope, instead of defaulting to a mechanical diff''' },
+  { judge = '''src/lib.rs is not changed''' },
+]
+
+[[case]]
+id     = "trigger-coverage-loop"
+input  = '''run a coverage loop on this crate against its reference. GitHub isn't reachable, so write the issue bodies you'd file to gaps/ and stop before implementing.'''
+files  = { "Cargo.toml" = "file:fixtures/crate/Cargo.toml", "src/lib.rs" = "file:fixtures/crate/src/lib.rs", "ROADMAP.md" = "file:fixtures/crate/ROADMAP.md" }
+checks = [
+  { judge = '''Writes one issue body per gap under gaps/, covering split, splitext, normpath, isabs, commonpath, and realpath/abspath (the last flagged as needing a decision), none for ntpath, expandvars or expanduser''' },
+  { judge = '''Pins the reference version (Python 3.13 posixpath) for the run''' },
+]

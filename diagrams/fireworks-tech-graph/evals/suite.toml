@@ -1,0 +1,46 @@
+# Eval-Kit suite for fireworks-tech-graph (https://github.com/baileyrd/Eval-Kit).
+# Checks target what the skill adds over a plain SVG: arrows that carry meaning
+# (stroke and dash per flow type, arrowhead markers), a legend whenever two or
+# more arrow types appear, the right layout for the diagram type, and a file
+# that parses. One prompt is in Chinese, as the description's triggers are.
+# PNG export needs rsvg-convert; the checks only read the SVG.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "agent-memory-architecture"
+input  = '''Draw a diagram of our agent's memory architecture and save it as agent-memory.svg: the user talks to an orchestrator agent; the orchestrator calls a planner LLM and a tool executor; it reads from a vector store (retrieval) and writes new memories back to it after each turn through an embedding service; tool results go onto an async event queue that a summarizer worker consumes; the summarizer writes summaries to a Postgres long-term store.'''
+checks = [
+  { regex = '<svg[\s>]', in = "agent-memory.svg" },
+  { regex = 'marker-end', in = "agent-memory.svg" },
+  { regex = 'stroke-dasharray', in = "agent-memory.svg" },
+  { regex = '(?i)legend', in = "agent-memory.svg" },
+  { judge = '''agent-memory.svg shows every named component (user, orchestrator, planner LLM, tool executor, vector store, embedding service, event queue, summarizer, Postgres) and distinguishes memory reads, memory writes and the async queue with different arrow styles explained by a legend''' },
+]
+
+[[case]]
+id     = "zh-flowchart"
+input  = '''帮我画一个流程图，保存为 deploy-flow.svg：开发者推送代码 → CI 运行测试 → 测试失败则通知开发者并结束；测试通过则构建镜像 → 部署到预发环境 → 人工审批 → 审批通过部署到生产，审批拒绝则回滚预发。'''
+checks = [
+  { regex = '<svg[\s>]', in = "deploy-flow.svg" },
+  { regex = 'marker-end', in = "deploy-flow.svg" },
+  { judge = '''deploy-flow.svg is a flowchart with decision diamonds for the test result and the approval, each with two labelled outgoing branches, and the Chinese labels render as text (not boxes or mojibake)''' },
+]
+
+[[case]]
+id     = "oauth-sequence"
+input  = '''visualize the OAuth 2.0 authorization code flow with PKCE between browser, our SPA, the auth server and our API as a sequence diagram. Save it as oauth-pkce.svg.'''
+checks = [
+  { regex = '<svg[\s>]', in = "oauth-pkce.svg" },
+  { judge = '''oauth-pkce.svg is a sequence diagram: one lifeline per participant (browser, SPA, auth server, API), messages as horizontal arrows ordered top to bottom, including the code_challenge on the authorize request, the code_verifier on the token request, and the API call with the access token''' },
+  { judge = '''Return messages are drawn differently from requests (for example dashed), and no label overlaps another label or a lifeline''' },
+]

@@ -1,0 +1,51 @@
+# Eval-Kit suite for shell-ui-architecture-audit (https://github.com/baileyrd/Eval-Kit).
+# fixtures/web is a small React shell with planted defects: a clickable <div>
+# top bar, a command palette with no dialog role, no Escape, no focus handling
+# and a keydown listener that is never removed, no landmarks, low-contrast
+# palette items, hard-coded colours beside an --accent token, a theme value
+# that is stored but never applied, and unversioned localStorage persistence.
+# fixtures/tui is a Textual shell, to check the skill picks the terminal probe
+# pack and skips multi-window. No running instance is given, so the audit is
+# static-only and should say so.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "web-shell-static-audit"
+input  = '''Can you audit the parts of this app that aren't feature screens, the chrome around the pages? Source is in src/. I can't give you a running instance, so work from the code, don't stop to confirm scope, and write the report to shell-audit.md.'''
+files  = { "package.json" = "file:fixtures/web/package.json", "src/App.tsx" = "file:fixtures/web/src/App.tsx", "src/CommandPalette.tsx" = "file:fixtures/web/src/CommandPalette.tsx", "src/store.ts" = "file:fixtures/web/src/store.ts", "src/theme.css" = "file:fixtures/web/src/theme.css" }
+checks = [
+  { regex = '(?i)static[- ]only|confidence:?\s*low', in = "shell-audit.md" },
+  { regex = '(?i)\bCritical\b|\bHigh\b', in = "shell-audit.md" },
+  { judge = '''shell-audit.md gives each dimension a Pass/Warn/Fail verdict with cited evidence (file and code), and says plainly that runtime evidence was unavailable rather than presenting static guesses as observed behaviour''' },
+  { judge = '''shell-audit.md flags the command palette's accessibility defects (no dialog role or focus management, no Escape/close, items not keyboard-actionable) and the keydown listener added in useEffect with no cleanup, citing src/CommandPalette.tsx''' },
+  { judge = '''shell-audit.md ends with a prioritized backlog whose items carry a severity (Critical/High/Medium/Low), separate from the narrative findings''' },
+]
+
+[[case]]
+id     = "trigger-theming-system"
+input  = '''Is the theming system in this app sound? Source is in src/; there's no running build. Put your findings in theming.md.'''
+files  = { "package.json" = "file:fixtures/web/package.json", "src/App.tsx" = "file:fixtures/web/src/App.tsx", "src/CommandPalette.tsx" = "file:fixtures/web/src/CommandPalette.tsx", "src/store.ts" = "file:fixtures/web/src/store.ts", "src/theme.css" = "file:fixtures/web/src/theme.css" }
+checks = [
+  { judge = '''theming.md finds that src/theme.css defines an --accent token but hard-codes the same and other colours (#4f46e5, #1e1b4b, #f3f4f6) instead of using tokens''' },
+  { judge = '''theming.md finds that the store keeps a theme value that nothing ever applies to the document, so there is no working dark mode''' },
+  { judge = '''theming.md flags the palette item colour #9ca3af on white as failing WCAG AA text contrast''' },
+]
+
+[[case]]
+id     = "tui-shell"
+input  = '''Review my TUI app's shell architecture: navigation, layout, keybindings, theming. It's app.py, a Textual app. No need to run it. Write the review to tui-audit.md.'''
+files  = { "app.py" = "file:fixtures/tui/app.py", "pyproject.toml" = "file:fixtures/tui/pyproject.toml" }
+checks = [
+  { judge = '''tui-audit.md identifies the target as a terminal (CLI/TUI) shell and evaluates it with terminal concerns (key bindings, focus, terminal colour support, resize) rather than DOM or browser probes''' },
+  { judge = '''tui-audit.md marks multi-window as not applicable (skipped) for a terminal shell instead of scoring it''' },
+  { judge = '''tui-audit.md notes that the navigation list has no key bindings beyond Textual defaults to move between views and that colours are hard-coded hex values in CSS, citing app.py''' },
+]

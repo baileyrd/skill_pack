@@ -1,0 +1,39 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.000 --> 00:00:04.200
+hey everyone today we're setting up dual WAN failover on pfSense
+
+00:00:04.200 --> 00:00:09.100
+dual WAN failover on pfSense with a fiber line and a Starlink backup
+
+00:00:09.100 --> 00:00:15.800
+the box is a Protectli VP2420 running pfSense Plus 24.11
+
+00:01:02.000 --> 00:01:08.500
+first go to System, Routing, Gateways and add the Starlink gateway
+
+00:01:08.500 --> 00:01:14.000
+set the monitor IP to 1.1.1.1 so it's not pinging the Starlink dish itself
+
+00:02:30.000 --> 00:02:37.400
+now under System, Routing, Gateway Groups make a group called WAN_FAILOVER
+
+00:02:37.400 --> 00:02:44.900
+fiber is tier one, Starlink is tier two, trigger level member down
+
+00:03:10.000 --> 00:03:16.200
+and I set pool options to round robin with sticky address on the group
+
+00:04:05.000 --> 00:04:12.000
+then in Firewall, Rules, LAN edit the default allow rule, advanced options, and set the gateway to WAN_FAILOVER
+
+00:05:20.000 --> 00:05:26.000
+last thing under System, Advanced, Miscellaneous tick flush all states when a gateway goes down
+
+00:06:00.000 --> 00:06:05.000
+you can see here on the gateway group page the pool options field
+
+00:07:40.000 --> 00:07:46.000
+pull the fiber and within about ten seconds traffic is on Starlink

@@ -1,0 +1,50 @@
+# Eval-Kit suite for project-handoff (https://github.com/baileyrd/Eval-Kit).
+# Cases come from evals.json; the design chat is inputs/design-chat.md. Checks
+# target what the skill adds over a plain kickoff prompt: the docs/handoff pack,
+# provenance tags that match who decided what, honest open items, and a short
+# kickoff prompt that points at the pack instead of restating it.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "handoff-new-repo"
+input  = '''The design chat we just had is saved in design-chat.md. Ok write me a prompt to stand this up in Claude Code. Repo will be baileyrd/tick_digest, doesn't exist yet. Put any files you make in this folder.'''
+files  = { "design-chat.md" = "file:inputs/design-chat.md" }
+checks = [
+  { file_exists = "docs/handoff/SPEC.md" },
+  { file_exists = "docs/handoff/DECISIONS.md" },
+  { file_exists = "docs/handoff/OPEN_QUESTIONS.md" },
+  { regex = '\[stated\]', in = "docs/handoff/DECISIONS.md" },
+  { judge = '''DECISIONS.md tags the user's own choices (standalone Rust single binary, Tick HTTP API on localhost:7420, no empty posts, 6:30 Central) as [stated], and the three-sections/10-item format that Claude proposed and the user accepted as [agreed] rather than [stated] or [default]''' },
+  { judge = '''Whether to post on weekends is recorded as an open item ([open]) in OPEN_QUESTIONS.md, not decided silently''' },
+  { judge = '''The reply ends with a kickoff prompt of at most 6 lines that points Claude Code at docs/handoff/ and names a first slice to build, without pasting the spec into the prompt, and the run does not claim to have created the GitHub repo''' },
+]
+
+[[case]]
+id     = "resolve-open-questions"
+input  = '''The design chat is in design-chat.md. CC came back with these, answer the open questions for tick_digest: 1) Should overdue include tasks with no due date? 2) Weekends: post or not? 3) What if the Tick API is down at 6:30? The repo isn't reachable from here, so write the answers to a file.'''
+files  = { "design-chat.md" = "file:inputs/design-chat.md" }
+checks = [
+  { judge = '''Q1 (tasks with no due date in overdue) is answered as a [default], Claude's own choice, since the chat never discussed it, not presented as something the user decided''' },
+  { judge = '''Q2 (weekends) is left open or put back to the user, since the user said they were not sure; it is not answered as settled''' },
+  { judge = '''Q3 (Tick API down) gets a reversible default (e.g. retry then post an error notice or skip) tagged [default]''' },
+  { judge = '''The answers are written to a file under docs/handoff/ (e.g. RESOLVED-<date>.md) with one entry per question giving the answer, its tag and the pack file it belongs in, and the reply lists what was answered and what is still open''' },
+]
+
+[[case]]
+id     = "trigger-terse-hand-off"
+input  = '''hand this off to CC (design chat is in design-chat.md, repo will be baileyrd/tick_digest, not created yet)'''
+files  = { "design-chat.md" = "file:inputs/design-chat.md" }
+checks = [
+  { file_exists = "docs/handoff/SPEC.md" },
+  { file_exists = "docs/handoff/QA.md" },
+  { judge = '''QA.md holds implementer questions answered from the chat (for example timezone/DST handling, where the webhook URL comes from, behaviour with more than 10 items), each tagged [stated], [agreed], [default] or [open]''' },
+]

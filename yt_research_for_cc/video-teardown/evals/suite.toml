@@ -1,0 +1,46 @@
+# Eval-Kit suite for video-teardown (https://github.com/baileyrd/Eval-Kit).
+# Runs can't fetch a real video, so fixtures hold the deduped auto-captions
+# and the description of a made-up pfSense dual-WAN tutorial. No frames are
+# available, so every menu path is narrated, not seen; the one on-screen claim
+# (6:00, the pool options field on the gateway group page) is said in the
+# narration. Checks target the skill's point: a deliverable, not a summary,
+# with provenance marked inline next to each claim and reconstructed paths
+# verified against docs or labelled unverified.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash", "WebFetch", "WebSearch"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "captions-to-build-guide"
+input  = '''Turn this video into a step-by-step guide I can follow. I only have the captions (homelab-failover.en.vtt) and the description (homelab-failover.description.txt), not the video file. Save the guide as guide.md.'''
+files  = { "homelab-failover.en.vtt" = "file:fixtures/homelab-failover.en.vtt", "homelab-failover.description.txt" = "file:fixtures/homelab-failover.description.txt" }
+checks = [
+  { regex = '\d+:\d\d', in = "guide.md" },
+  { judge = '''guide.md is a followable procedure (numbered steps with the settings to enter: gateway monitor IP 1.1.1.1, group WAN_FAILOVER with fiber tier 1 and Starlink tier 2, trigger member down, LAN rule gateway, flush states), not a summary of the video''' },
+  { judge = '''Provenance is marked inline next to individual claims (e.g. "[narrated, 1:02]" / "[reconstructed]" / "[on screen, 6:00]"), not only in a preamble, and menu paths taken from narration are not presented as seen on screen''' },
+  { judge = '''Menu paths and settings reconstructed from narration (e.g. System > Advanced > Miscellaneous state killing, Pool Options on a gateway group) are either checked against official pfSense documentation, with the result stated, or explicitly labelled unverified''' },
+]
+
+[[case]]
+id     = "parts-list"
+input  = '''what hardware and software did they use in this video? captions are homelab-failover.en.vtt, description is homelab-failover.description.txt. make me a parts list (parts.md).'''
+files  = { "homelab-failover.en.vtt" = "file:fixtures/homelab-failover.en.vtt", "homelab-failover.description.txt" = "file:fixtures/homelab-failover.description.txt" }
+checks = [
+  { judge = '''parts.md lists the Protectli VP2420, Starlink Standard kit with the Ethernet Adapter, TP-Link TL-SG108E and pfSense Plus 24.11, each with where it came from (description vs narration and timestamp)''' },
+  { judge = '''parts.md does not add gear the sources never mention (e.g. a fiber ONT model or a UPS) as if it were in the video; anything inferred is labelled as such''' },
+]
+
+[[case]]
+id     = "no-tools-honest"
+input  = '''document this tutorial for me as a runbook: https://www.youtube.com/watch?v=dQw4w9WgXcQ'''
+checks = [
+  { judge = '''If it could not fetch captions or frames (e.g. yt-dlp or network unavailable), it says so and names what is needed instead of writing a runbook from guesses; if it could, the runbook marks each claim's provenance with timestamps. It never presents invented steps as the video's content.''' },
+]

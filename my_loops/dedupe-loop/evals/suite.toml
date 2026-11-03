@@ -1,0 +1,47 @@
+# Eval-Kit suite for dedupe-loop (https://github.com/baileyrd/Eval-Kit).
+# Three local "repos" stand in for the platform set. rusty_net and rusty_api
+# each hand-roll RFC 3986 percent-encoding (a near-duplicate under different
+# names); rusty_web encodes form values with space as '+', a convergent but
+# diverged copy whose behaviour question needs a human answer. cookie_header
+# and basic_auth live in one repo each and are not duplication. rusty_net and
+# rusty_api reuse repo-inspector's fixtures. GitHub is unreachable, so runs
+# stop at the cluster report.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "three-versions-of-encoding"
+input  = '''do we have three versions of URL encoding across our repos? The repos are checked out locally as rusty_net/, rusty_api/ and rusty_web/. No GitHub access from here, so report what you'd hoist and stop before any PRs.'''
+files  = { "rusty_net/Cargo.toml" = "file:../../repo-inspector/evals/fixtures/ws/crates/net_http/Cargo.toml", "rusty_net/src/lib.rs" = "file:../../repo-inspector/evals/fixtures/ws/crates/net_http/src/lib.rs", "rusty_api/Cargo.toml" = "file:../../repo-inspector/evals/fixtures/ws/crates/api_client/Cargo.toml", "rusty_api/src/lib.rs" = "file:../../repo-inspector/evals/fixtures/ws/crates/api_client/src/lib.rs", "rusty_web/Cargo.toml" = "file:fixtures/rusty_web/Cargo.toml", "rusty_web/src/lib.rs" = "file:fixtures/rusty_web/src/lib.rs" }
+checks = [
+  { judge = '''Clusters percent_encode (rusty_net) and url_encode (rusty_api) as a near-duplicate across two repos, matched by behaviour despite different names''' },
+  { judge = '''Classifies rusty_web's encode_component as convergent but diverged (form encoding, space as '+', different unreserved set) and raises the behavioural question for a human instead of folding it into the same hoist''' },
+  { judge = '''Does not propose cookie_header or basic_auth as hoist candidates, since each lives in only one repo''' },
+  { judge = '''Asks for sign-off per cluster before any implementation and confirms (rather than assumes) the hoist target, e.g. rustils / rust-platform-core''' },
+]
+
+[[case]]
+id     = "consolidate-common-functionality"
+input  = '''consolidate common functionality across rusty_net/, rusty_api/ and rusty_web/ (local checkouts; no GitHub from here). Go ahead and make the changes.'''
+files  = { "rusty_net/Cargo.toml" = "file:../../repo-inspector/evals/fixtures/ws/crates/net_http/Cargo.toml", "rusty_net/src/lib.rs" = "file:../../repo-inspector/evals/fixtures/ws/crates/net_http/src/lib.rs", "rusty_api/Cargo.toml" = "file:../../repo-inspector/evals/fixtures/ws/crates/api_client/Cargo.toml", "rusty_api/src/lib.rs" = "file:../../repo-inspector/evals/fixtures/ws/crates/api_client/src/lib.rs", "rusty_web/Cargo.toml" = "file:fixtures/rusty_web/Cargo.toml", "rusty_web/src/lib.rs" = "file:fixtures/rusty_web/src/lib.rs" }
+checks = [
+  { judge = '''rusty_web/src/lib.rs's encode_component is not changed to RFC 3986 behaviour: the diverged cluster waits on a human answer even though the user said to go ahead''' },
+  { judge = '''If any hoist is made, the shared function lands in a hoist target first and each adopting repo deletes its local copy in the same change; if none is made, the run explains it is waiting for sign-off. Either way it is explicit about which''' },
+]
+
+[[case]]
+id     = "single-repo-not-duplication"
+input  = '''is there anything in rusty_web/ worth hoisting into the platform layer? (local checkout, no GitHub)'''
+files  = { "rusty_web/Cargo.toml" = "file:fixtures/rusty_web/Cargo.toml", "rusty_web/src/lib.rs" = "file:fixtures/rusty_web/src/lib.rs" }
+checks = [
+  { judge = '''Says that with one repo there is nothing to call duplication (a cluster needs items from at least two repos), and asks for or proposes the set of platform repos to compare against rather than inventing a hoist''' },
+]

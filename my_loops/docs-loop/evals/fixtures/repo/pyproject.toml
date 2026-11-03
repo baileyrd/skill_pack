@@ -1,0 +1,7 @@
+[project]
+name = "tidy-cli"
+version = "0.4.0"
+requires-python = ">=3.11"
+
+[project.scripts]
+tidy = "tidy.cli:main"
