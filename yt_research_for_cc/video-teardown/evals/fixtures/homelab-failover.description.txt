@@ -1,0 +1,14 @@
+Dual WAN failover on pfSense: fiber + Starlink.
+
+Gear:
+- Protectli VP2420 (4x 2.5GbE)
+- Starlink Standard kit + Starlink Ethernet Adapter
+- TP-Link TL-SG108E switch
+
+Chapters:
+0:00 Intro
+1:00 Gateways
+2:30 Gateway group
+4:00 Firewall rule
+5:15 State killing
+7:30 Testing

@@ -1,0 +1,47 @@
+# Eval-Kit suite for skill-retro (https://github.com/baileyrd/Eval-Kit).
+# A one-shot run has no prior session, so the cases hand over a log of a
+# csv-cleaner run. It holds one of each finding type: a stale script path
+# (tools/ vs scripts/), a guess where the skill was silent (header collisions),
+# a question the skill should have pre-answered (date order for the export's
+# locale), and a wrong default that cost a redo (what counts as a duplicate).
+# Checks target the skill's report shape and its rule not to edit the target
+# skill without approval.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "retro-from-log"
+input  = '''We just used the csv-cleaner skill (it's in skills/csv-cleaner/); the run is logged in session-log.md. Retro it.'''
+files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.skill.md", "session-log.md" = "file:fixtures/session-log.md" }
+checks = [
+  { judge = '''Reports the stale script path (step 1 says tools/sniff.py, the script is scripts/sniff.py) as a stale-reference or tooling finding with a concrete edit to step 1''' },
+  { judge = '''Reports the undefined duplicate rule in step 4, which caused a redo, as a costly finding with a proposed edit (define duplicates by a key column, or ask which key)''' },
+  { judge = '''Each finding names its category, the file and section or step it traces to, and a concrete proposed edit, and the date-order question is treated as a gap the skill should pre-answer (e.g. infer from the export's locale), not as the user's fault''' },
+  { judge = '''skills/csv-cleaner/SKILL.md was not modified: the reply asks for approval before applying any finding''' },
+]
+
+[[case]]
+id     = "trigger-what-should-change"
+input  = '''that csv-cleaner skill was kind of a pain to follow just now (session-log.md has the run, skill is in skills/csv-cleaner/). what should change in it?'''
+files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.skill.md", "session-log.md" = "file:fixtures/session-log.md" }
+checks = [
+  { judge = '''Grounds every proposed change in an incident from session-log.md (stale path, header collision guess, date-order question, duplicate redo) rather than giving generic advice about CSV cleaning''' },
+  { judge = '''Says which evidence the retro is grounded in (the supplied log) and does not invent incidents that are not in it''' },
+]
+
+[[case]]
+id     = "no-evidence-general-critique"
+input  = '''retro the csv-cleaner skill in skills/csv-cleaner/ for me'''
+files  = { "skills/csv-cleaner/SKILL.md" = "file:fixtures/csv-cleaner.skill.md" }
+checks = [
+  { judge = '''Says there is no run in this session to ground a retro in, and either asks for a log or offers a read-through critique of the SKILL.md that it labels as unvalidated''' },
+  { judge = '''Does not present invented run incidents (errors, questions asked, redos) as findings''' },
+]

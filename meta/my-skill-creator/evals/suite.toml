@@ -1,0 +1,47 @@
+# Eval-Kit suite for my-skill-creator (https://github.com/baileyrd/Eval-Kit).
+# Checks target skill_pack's conventions that a generic skill author misses:
+# version under metadata.version as a quoted string, a third-person `>-`
+# description, a RELEASE_NOTES.md, a wrap-up retro step wired to
+# meta/skill-retro, and evals that include a no-skill baseline and
+# should-not-trigger queries. fixtures/code-helper.skill.md is a SQL-formatting
+# skill whose description claims every coding task.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "draft-new-skill-pack-skill"
+input  = '''I want a new skill for skill_pack that writes Conventional Commits messages from the staged diff (type, optional scope, imperative subject under 72 chars, body explaining why, BREAKING CHANGE footer when an API changes). Don't interview me, you have enough; draft it into dev_practices/commit-msg/ here.'''
+checks = [
+  { regex = 'metadata:\s*\n\s+version:\s*"\d+\.\d+\.\d+"', in = "dev_practices/commit-msg/SKILL.md" },
+  { regex = 'description:\s*>-', in = "dev_practices/commit-msg/SKILL.md" },
+  { file_exists = "dev_practices/commit-msg/RELEASE_NOTES.md" },
+  { regex = '(?i)skill-retro', in = "dev_practices/commit-msg/SKILL.md" },
+  { judge = '''The SKILL.md frontmatter uses only spec keys (name, description, license, compatibility, metadata, allowed-tools), with no top-level version key, and the description is third person and says both what the skill does and when to use it''' },
+]
+
+[[case]]
+id     = "fix-overtriggering"
+input  = '''this skill (code-helper/SKILL.md) fires on basically everything I do. it's only meant for formatting SQL. fix it.'''
+files  = { "code-helper/SKILL.md" = "file:fixtures/code-helper.skill.md" }
+checks = [
+  { judge = '''Rewrites the description so it is scoped to formatting SQL (naming the cases it should and should not handle) instead of any programming task''' },
+  { judge = '''Proposes or writes trigger eval queries that include both should-trigger prompts (SQL formatting requests) and should-not-trigger near misses (e.g. writing a SQL query, debugging Python), to check the new description''' },
+  { judge = '''Bumps metadata.version (a description change is at least a patch or minor bump) and adds or proposes a RELEASE_NOTES entry''' },
+]
+
+[[case]]
+id     = "evals-for-existing-skill"
+input  = '''I've got a skill at code-helper/SKILL.md (it formats SQL). How would I know if it actually helps? Set up whatever tests make sense.'''
+files  = { "code-helper/SKILL.md" = "file:fixtures/code-helper.skill.md" }
+checks = [
+  { judge = '''Writes at least three realistic test prompts with concrete SQL inputs and expected properties (uppercase keywords, one clause per line, leading commas, comments kept)''' },
+  { judge = '''Compares against a baseline run without the skill, rather than only checking the skill's own output''' },
+]

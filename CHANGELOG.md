@@ -13,6 +13,13 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   adapted from Anthropic's example skill (Apache-2.0). `SKILL.md` cut from
   ~12 KB to ~4 KB; 10 of 54 bundled fonts kept, under `assets/fonts/`.
 - `.gitattributes` marks `*.ttf` binary.
+- Eval-Kit suites (`evals/suite.toml`, 3 cases each, with fixtures) for the 22
+  skills that had none, so every skill can be run against a no-skill control
+  with `python3 -m evalkit run <skill>/evals/suite.toml`. Skill files are
+  unchanged; Eval-Kit leaves `evals/` out of the skill under test.
+- `dev_practices/project-handoff` v1.2.0 — in-repo `project-expert` subagent
+  template and a CLAUDE.md rule that routes design questions to it before the
+  user; supersedes the planned design-advisor mod.
 - `dev_practices/project-handoff` v1.1.0 — records the design chat link in
   SPEC.md and the remind-me capture (`metadata.chat_url`).
 ### Fixed

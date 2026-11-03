@@ -48,3 +48,20 @@ inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/DECISIONS.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/QA.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/OPEN_QUESTIONS.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/
+inline-path	dev_practices/project-handoff/SKILL.md	.claude/agents/
+inline-path	dev_practices/project-handoff/SKILL.md	.claude/agents/project-expert.md
+
+# Workspace paths: my-skill-creator's own docs describe the evals/evals.json
+# that a skill being drafted gets, in that skill's directory. They became
+# checkable once my-skill-creator gained an evals/ of its own (its Eval-Kit
+# suite.toml), but they never meant my-skill-creator/evals/evals.json.
+inline-path	meta/my-skill-creator/SKILL.md	evals/evals.json
+inline-path	meta/my-skill-creator/references/eval-workflow.md	evals/evals.json
+inline-path	meta/my-skill-creator/references/schemas.md	evals/evals.json
+
+# Eval fixtures: deliberately broken or not-yet-existing paths. docs-loop's
+# fixture README links to a missing design doc for the audit to find, and
+# visual's fixture plan names files the plan would create.
+link	my_loops/docs-loop/evals/fixtures/repo/README.md	docs/design.md
+inline-path	diagrams/visual/evals/fixtures/plan.md	svc/sweeper.py
+inline-path	diagrams/visual/evals/fixtures/plan.md	tests/test_expiry.py

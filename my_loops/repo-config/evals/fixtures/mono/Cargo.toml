@@ -1,0 +1,3 @@
+[workspace]
+members = ["remind_me", "dbs"]
+resolver = "2"

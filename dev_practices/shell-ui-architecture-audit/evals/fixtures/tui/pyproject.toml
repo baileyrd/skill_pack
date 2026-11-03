@@ -1,0 +1,4 @@
+[project]
+name = "ops-console"
+version = "0.3.0"
+dependencies = ["textual>=0.80"]

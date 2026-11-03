@@ -1,0 +1,49 @@
+# Eval-Kit suite for issue-loop (https://github.com/baileyrd/Eval-Kit).
+# GitHub isn't reachable from a run, so the open issues are exported to
+# issues.json beside a small repo. One issue of each class: #11 a bug and #12
+# an addition (actionable), #13 changes get()'s documented behaviour
+# (breaking-change), #14 needs sqlalchemy (needs-new-dependency), #15 is a
+# question (not actionable). Checks target the triage gate and the rule that
+# breaking and new-dependency issues are never implemented unattended.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "clear-the-backlog"
+input  = '''Work through the open issues on this repo automatically. gh and GitHub aren't available here, so the open issues are exported in issues.json and the repo is in repo/. Commit-and-PR steps can't run; do everything else.'''
+files  = { "issues.json" = "file:fixtures/issues.json", "repo/kvstore/__init__.py" = "file:fixtures/repo/kvstore/__init__.py", "repo/test_store.py" = "file:fixtures/repo/test_store.py", "repo/RELEASE_NOTES.md" = "file:fixtures/repo/RELEASE_NOTES.md" }
+checks = [
+  { judge = '''The reply contains a triage table covering all five issues with a classification and one-line reason each: #11 and #12 actionable, #13 breaking-change, #14 needs-new-dependency, #15 not actionable''' },
+  { regex = 'def get\(self, key: str\) -> str:\s*\n\s*return self\.data\[key\]', in = "repo/kvstore/__init__.py" },
+  { judge = '''Issue #14 is not implemented: no sqlalchemy or sqlite code or dependency was added; #13 and #14 are reported back as needing the user's decision''' },
+  { judge = '''Issue #15 is reported as not actionable (needs-human), not silently dropped''' },
+]
+
+[[case]]
+id     = "actionable-work-is-done-right"
+input  = '''Clear what you can of the issue backlog for this repo. Issues are in issues.json (no GitHub access from here), code in repo/. Skip the PR mechanics, but do the rest the way you normally would.'''
+files  = { "issues.json" = "file:fixtures/issues.json", "repo/kvstore/__init__.py" = "file:fixtures/repo/kvstore/__init__.py", "repo/test_store.py" = "file:fixtures/repo/test_store.py", "repo/RELEASE_NOTES.md" = "file:fixtures/repo/RELEASE_NOTES.md" }
+checks = [
+  { regex = 'def delete[\s\S]*?write_text', in = "repo/kvstore/__init__.py" },
+  { regex = 'def keys\(', in = "repo/kvstore/__init__.py" },
+  { regex = '(?i)delete|keys', in = "repo/RELEASE_NOTES.md" },
+  { judge = '''repo/test_store.py gains tests for delete() persisting across reopen and for keys()''' },
+]
+
+[[case]]
+id     = "trigger-backlog-loop"
+input  = '''can you set up a repeatable loop that takes this repo's open issues to merged fixes? start now. (issues exported to issues.json since there's no GitHub access; repo in repo/)'''
+files  = { "issues.json" = "file:fixtures/issues.json", "repo/kvstore/__init__.py" = "file:fixtures/repo/kvstore/__init__.py", "repo/test_store.py" = "file:fixtures/repo/test_store.py", "repo/RELEASE_NOTES.md" = "file:fixtures/repo/RELEASE_NOTES.md" }
+checks = [
+  { judge = '''Triage of every issue is presented before any code change, and the run says plainly that gh/GitHub is unavailable so the PR, CI and merge steps did not run, instead of implying they did''' },
+  { judge = '''get() still raises KeyError for a missing key (issue #13 is not implemented, because it changes existing behaviour)''' },
+]

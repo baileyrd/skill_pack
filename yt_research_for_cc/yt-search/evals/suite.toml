@@ -1,0 +1,40 @@
+# Eval-Kit suite for yt-search (https://github.com/baileyrd/Eval-Kit).
+# Needs yt-dlp and network access to YouTube. Checks target the skill's output
+# contract (per-video title, channel, subscribers, views, duration, upload
+# date, URL and an engagement ratio as views/subscribers), its defaults (20
+# results, last 6 months) and flags, and honesty when yt-dlp is missing: no
+# invented results.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Bash"]
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "find-videos-default"
+input  = '''find youtube videos about claude code skills'''
+checks = [
+  { judge = '''Either lists real search results, each with title, channel, subscriber count, view count, duration, upload date, a youtube.com/watch URL and an engagement ratio shown like "2.81x" (or N/A when subscribers are hidden), or says the search could not run (e.g. yt-dlp missing) and how to fix it. It never lists videos it did not get from a search.''' },
+  { judge = '''If results are listed, they default to recent videos (the last 6 months) and about 20 results, or the reply says what window and count it used''' },
+]
+
+[[case]]
+id     = "overperformers"
+input  = '''which videos about home assistant dashboards are overperforming right now? top 10 from the last 3 months'''
+checks = [
+  { judge = '''Ranks or highlights videos by views-to-subscribers ratio and explains that a ratio well above 1x means the video is outperforming its channel's size, or says plainly the search could not run, without inventing numbers''' },
+  { judge = '''Honours the requested count (10) and window (3 months)''' },
+]
+
+[[case]]
+id     = "json-for-script"
+input  = '''pull video stats for "rust async runtime" from youtube as JSON, no date filter, 5 results. save it to results.json'''
+checks = [
+  { judge = '''results.json, if written, is a JSON array of 5 objects with fields such as title, channel, view_count, subscriber_count, engagement_ratio, upload_date and url, not including videos filtered by date; if the search could not run, no fabricated results.json is written and the reply says why''' },
+]

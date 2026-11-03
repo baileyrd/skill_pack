@@ -3,8 +3,9 @@ name: project-handoff
 description: >-
   Turns a design conversation into a handoff pack Claude Code can build from without coming back
   to ask what was already settled: SPEC, DECISIONS (each with why, rejected options and
-  provenance), a pre-answered implementer Q&A, OPEN_QUESTIONS, and a CLAUDE.md rule to look
-  before asking and write back every answer. Also saves the design dialog and decisions to
+  provenance), a pre-answered implementer Q&A, OPEN_QUESTIONS, and an in-repo project-expert
+  subagent that answers design questions from the pack, logs defaults and escalates only intent,
+  scope or taste. Also saves the design dialog and decisions to
   remind-me so Claude Code can search the original reasoning. Resolve mode closes the loop when
   Claude Code's open questions come back, with no copy-paste. Use at the end of any chat where
   an idea or project was fleshed out and is about to be built: "write me a prompt for Claude
@@ -15,7 +16,7 @@ compatibility: >-
   Best with the rusty-remind-me MCP server and GitHub access (gh or a connected repo). Without
   them it still produces the pack as files to drop into the repo.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # project-handoff
@@ -24,9 +25,12 @@ A kickoff prompt is a lossy summary of the design chat. It carries *what* to
 build and drops the *why*: rejected alternatives, edge cases already talked
 through, defaults that were agreed. Claude Code then hits those gaps and asks,
 and the user ends up relaying questions between surfaces by hand. This skill
-replaces the prompt with a pack the implementer can search, plus a rule that
-makes it search before asking and save every new answer, so no question is
-asked twice.
+replaces the prompt with a pack the implementer can search, plus a
+**project expert**: a subagent in the repo that answers design questions from
+the pack and the saved dialog, so threads ask it instead of the user and no
+question is asked twice. It lives in the repo because cloud sessions load
+`.claude/agents/` and CLAUDE.md with no local setup; mods and local config
+don't reach them.
 
 Two modes:
 
@@ -79,7 +83,17 @@ missing objection isn't agreement. If you can't tell, use `[default]`.
    - `docs/handoff/DECISIONS.md`: one row per decision, with why, what was rejected, and its tag
    - `docs/handoff/QA.md`: the step-3 questions, grouped by area
    - `docs/handoff/OPEN_QUESTIONS.md`: the `[open]` items, and where Claude Code adds new ones
-   - a `CLAUDE.md` block appended to the repo's CLAUDE.md, or used to create one
+   - `.claude/agents/project-expert.md`: the subagent. It looks in the pack,
+     then remind-me, then the user's standing principles; answers with a cited
+     source, logs a `[default]` for implementation detail, and escalates only
+     intent, scope or taste, or a reversal of a `[stated]` row. It is the one
+     writer of settled answers (DECISIONS.md row, `remind_me_add`, tick in
+     OPEN_QUESTIONS.md), which keeps each one recorded exactly once.
+   - a `CLAUDE.md` block appended to the repo's CLAUDE.md, or used to create
+     one: threads and the orchestrator consult project-expert before asking
+     the user anything, and hand the user's answers back to it to record.
+   A repo with a pack from before v1.2.0 needs only these two: add the
+   subagent and replace the old "Before asking" CLAUDE.md block.
 
    Keep it terse. The pack gets searched, not read cover to cover, so short,
    tagged, greppable lines beat prose.
@@ -113,7 +127,9 @@ missing objection isn't agreement. If you can't tell, use `[default]`.
 ## Resolve mode
 
 Run this when the user comes back with Claude Code's questions ("answer the
-open questions for X"), so they never have to paste anything.
+open questions for X"), so they never have to paste anything. Inside the repo
+the project expert handles most of them; resolve mode is for its escalations
+and for repos set up before v1.2.0.
 
 1. Collect the questions: the ones the user gave, plus
    `docs/handoff/OPEN_QUESTIONS.md` from the repo. If the repo isn't
