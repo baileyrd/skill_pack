@@ -48,6 +48,8 @@ inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/DECISIONS.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/QA.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/OPEN_QUESTIONS.md
 inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/
+inline-path	dev_practices/project-handoff/SKILL.md	.claude/agents/
+inline-path	dev_practices/project-handoff/SKILL.md	.claude/agents/project-expert.md
 
 # Workspace paths: my-skill-creator's own docs describe the evals/evals.json
 # that a skill being drafted gets, in that skill's directory. They became

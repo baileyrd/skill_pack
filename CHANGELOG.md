@@ -9,6 +9,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   skills that had none, so every skill can be run against a no-skill control
   with `python3 -m evalkit run <skill>/evals/suite.toml`. Skill files are
   unchanged; Eval-Kit leaves `evals/` out of the skill under test.
+- `dev_practices/project-handoff` v1.2.0 — in-repo `project-expert` subagent
+  template and a CLAUDE.md rule that routes design questions to it before the
+  user; supersedes the planned design-advisor mod.
 - `dev_practices/project-handoff` v1.1.0 — records the design chat link in
   SPEC.md and the remind-me capture (`metadata.chat_url`).
 ### Fixed
