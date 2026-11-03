@@ -19,3 +19,6 @@
 # so explicitly so `text=auto` above can never guess wrong on one.
 *.skill binary
 *.zip binary
+
+# Fonts bundled as skill assets (diagrams/canvas-design).
+*.ttf binary
