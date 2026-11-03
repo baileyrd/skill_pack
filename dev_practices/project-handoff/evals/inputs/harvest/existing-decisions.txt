@@ -1,0 +1,12 @@
+# docs/handoff/SPEC.md (existing)
+Harvested: 2026-09-01 @ 4c3b2a1
+
+# docs/handoff/DECISIONS.md (existing)
+| # | Decision | Why | Rejected | Tag | Source |
+|---|---|---|---|---|---|
+| D1 | SQLite only | no server | Postgres | [stated] | PR #12 review by baileyrd: "SQLite only, no Postgres, I don't want a server to run." |
+| D2 | Output JSON | ADR-001 | plain text | [default] | docs/adr/001-output.md (agent-authored) |
+
+# New since 2026-09-01 @ 4c3b2a1
+PR #15 (merged 2026-09-02, review by baileyrd): "ok, NDJSON is better for the pipe, go."
+PR #21 (merged 2026-10-05) by dottius: adds a --quiet flag; no user comment.

@@ -65,3 +65,4 @@ inline-path	meta/my-skill-creator/references/schemas.md	evals/evals.json
 link	my_loops/docs-loop/evals/fixtures/repo/README.md	docs/design.md
 inline-path	diagrams/visual/evals/fixtures/plan.md	svc/sweeper.py
 inline-path	diagrams/visual/evals/fixtures/plan.md	tests/test_expiry.py
+inline-path	dev_practices/project-handoff/references/templates.md	docs/handoff/

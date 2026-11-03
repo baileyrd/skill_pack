@@ -1,0 +1,4 @@
+# card_get  (board actor of user: baileyrd)
+card 31 "Digest format" comment by dottius 2026-08-20: "Going with three sections, 10 items max."
+card 31 comment by baileyrd 2026-08-21: "Three sections is right, but make the cap 8, not 10."
+card 40 "Webhook retries" comment by dottius 2026-09-05: "Agreed with itself: 3 retries is fine."
