@@ -6,6 +6,28 @@ this log tracks commits against `main`.
 
 ---
 
+## v1.2.0 — In-repo project expert
+**2026-11-03**
+
+- **Added:** a `project-expert` subagent template
+  (`.claude/agents/project-expert.md`). It answers design questions from
+  `docs/handoff/`, then remind-me (`include_raw: true`), then the user's
+  standing principles, and cites the source of every answer. Three tiers:
+  answer when the record settles it; pick and log a `[default]` for
+  implementation detail; escalate only intent, scope or taste, or a reversal
+  of a `[stated]` row, as a short question, options and recommendation.
+- **Changed:** the CLAUDE.md block now sends every design question from
+  threads and the orchestrator to project-expert first, never to the user,
+  and hands the user's answers back to it. The expert is the one writer: a
+  DECISIONS.md row, one `remind_me_add`, and an OPEN_QUESTIONS.md tick per
+  settled answer.
+- **Superseded:** the "design advisor" mod planned in v1.1.0. Mods don't run
+  in Claude Code cloud sessions; a subagent and CLAUDE.md in the repo do,
+  with no local setup.
+- **Why:** Nano was relaying design questions between threads and the design
+  chat by hand. The agent holding the design context should answer, and only
+  the questions it can't settle should reach him.
+
 ## v1.1.0 — Record the design chat link
 **2026-11-02**
 
