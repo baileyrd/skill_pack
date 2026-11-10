@@ -1,4 +1,4 @@
-# Eval-Kit suite for project-handoff (https://github.com/baileyrd/Eval-Kit).
+# Eval-Kit suite for project-expert (https://github.com/baileyrd/Eval-Kit).
 # Cases come from evals.json; the design chat is inputs/design-chat.md. Checks
 # target what the skill adds over a plain kickoff prompt: the docs/handoff pack,
 # provenance tags that match who decided what, honest open items, and a short
@@ -63,7 +63,7 @@ checks = [
   { judge = '''The port conflict is resolved for the code value 7421 (code beats memory) and OPEN_QUESTIONS.md records both sources (src/config.rs and mem_c). NDJSON is a newer row that supersedes the JSON row (the old row is kept), and the 3-sections/10-items card comment is superseded by the user's cap of 8.''' },
   { judge = '''The reply or files show the remind-me alias step first (tickdigest, tick_digest, tick-digest resolved to one project via remind_me_project / remind_me_entity_upsert), before the sources are searched.''' },
   { judge = '''.claude/agents/tick_digest-expert.md has name tick_digest-expert, a first step that loads remind-me tools through ToolSearch and continues from the pack if they are missing, and the root CLAUDE.md has ONE "Project experts" routing table with the cloud fallback (read the agent file fresh, spawn a general-purpose Agent with its body plus the question) and no copy of the agent file's text.''' },
-  { judge = '''SPEC.md is an index (subsystem, doc paths, owner, status), not a restatement of the docs, and delivery includes a cloud smoke test (answer one known question, log one default, escalate one reversal) recorded as pass or fail in the PR and remind-me.''' },
+  { judge = '''SPEC.md is an index (subsystem, doc paths, owner, status), not a restatement of the docs, and delivery runs the acceptance checks (answer with a source, log one default, escalate one reversal) with results recorded in the PR and remind-me.''' },
 ]
 
 [[case]]
@@ -76,4 +76,25 @@ checks = [
   { regex = 'D3', in = "docs/handoff/DECISIONS.md" },
   { judge = '''D1 and D2 are unchanged, tag included. The NDJSON change is a new D3 row saying it supersedes D2, tagged [stated] with baileyrd's quote; the --quiet flag from PR #21 is a new D4 row tagged [default].''' },
   { judge = '''The only in-place edit is the Harvested line in SPEC.md, updated to today's date and the current sha; nothing already harvested is re-derived.''' },
+]
+
+[[case]]
+id     = "no-pack-monorepo"
+input  = '''Set up an expert for the Orion project in this monorepo (paths crates/orion/**). A DECISIONS.md (D1-D20) is at docs/orion/DECISIONS.md on an unmerged branch. No handoff pack yet. Reviewer: alice. Put files you make in this folder.'''
+checks = [
+  { judge = '''DECISIONS.md is a pointer to docs/orion/DECISIONS.md that keeps its D-numbering; the CLAUDE.md row is scoped to crates/orion/** only; the PR plan branches from the unmerged docs branch and names the reviewer; unsourced items are in OPEN_QUESTIONS and listed in the PR body.''' },
+]
+
+[[case]]
+id     = "pack-exists-migrate"
+input  = '''build an expert for tick_digest; docs/handoff already exists from an older project-handoff with a project-expert.md agent. Put files you make in this folder.'''
+checks = [
+  { judge = '''SPEC and DECISIONS are untouched; the agent is renamed tick_digest-expert; the old CLAUDE.md block is replaced by one Project experts table; no second pack is written.''' },
+]
+
+[[case]]
+id     = "implicit-trigger"
+input  = '''I am tired of relaying design questions between Claude sessions for this repo. Fix that. Put files you make in this folder.'''
+checks = [
+  { judge = '''Uses single-repo defaults (docs/handoff, glob **), asks at most one blocking question, invents no decisions, and puts unsourced items in OPEN_QUESTIONS.md.''' },
 ]

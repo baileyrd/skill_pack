@@ -1,8 +1,41 @@
 # Release Notes
 
-project-handoff lives at
-[github.com/baileyrd/skill_pack](https://github.com/baileyrd/skill_pack/tree/main/dev_practices/project-handoff) —
+project-expert (formerly project-handoff) lives at
+[github.com/baileyrd/skill_pack](https://github.com/baileyrd/skill_pack/tree/main/dev_practices/project-expert) —
 this log tracks commits against `main`.
+
+---
+
+## v2.0.0 — Renamed from project-handoff; merged with the expert builder
+**2026-11-10**
+
+- **Changed (breaking):** skill renamed `project-handoff` to `project-expert`,
+  because the expert is the product and the pack is its basis. The old name stays
+  in the description so existing triggers ("apply project-handoff to X") still match.
+- **Added:** core procedure with a pack check first (glob, then open PRs and
+  branches by changed file names; an open PR that adds a pack is the pack, ask
+  once), an intake table (scope globs, existing decision log, chat link, tags,
+  reviewer), pointer-style DECISIONS for an existing log, delivery from an
+  unmerged docs branch, a PR body that lists every unsourced open question and
+  unreadable source, and acceptance checks by a separate agent
+  ([references/acceptance.md](references/acceptance.md)) in place of the
+  post-merge smoke test.
+- **Fixed, found by two blind dry runs on baileyrd/portfolio_intelligence:**
+  `remind_me_search` needs a `query` and trimmed results need `remind_me_get`;
+  agent-written docs, PRs and reviews under the owner's login, and model-written
+  memories that paraphrase the user, are `[default]`; memories from earlier runs
+  of this skill are discounted; unread design-chat share pages are reported, not
+  inferred; QA is seeded only from sourced answers; AGENTS.md-only repos get a
+  CLAUDE.md plus a pointer; SPEC header order; optional "Hard lines" in the
+  expert; board-key spelling and filter caveats.
+- **Fixed after a third blind run:** step 1 lists PR file names with REST
+  (`get_files` returns patches even at `perPage=1`; `list_pull_requests` returns
+  bodies); a verbatim user turn may be lifted from a discounted capture; cloud
+  `gh` GraphQL 403 falls back to REST; QA wording matches in templates; alias
+  upsert skipped when aliases exist; user-identity mapping; PR author can't be
+  the reviewer.
+- **Known gap:** the fixed skill has not yet had a clean blind run (the second
+  dry run leaked PR content through `get_files`; step 1 now says to list names).
 
 ---
 

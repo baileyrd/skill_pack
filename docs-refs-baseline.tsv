@@ -41,15 +41,15 @@ inline-path	my_loops/repo-config/references/development-standards.md	docs/volume
 inline-path	my_loops/repo-config/references/development-standards.md	docs/00-foundation/principles.md
 inline-path	my_loops/repo-config/references/development-standards.md	docs/01-architecture/architecture-model.md
 
-# Target-repo paths: project-handoff writes its pack into the repo being
+# Target-repo paths: project-expert writes its pack into the repo being
 # handed off (docs/handoff/ there), not into this skill's own tree.
-inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/SPEC.md
-inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/DECISIONS.md
-inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/QA.md
-inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/OPEN_QUESTIONS.md
-inline-path	dev_practices/project-handoff/SKILL.md	docs/handoff/
-inline-path	dev_practices/project-handoff/SKILL.md	.claude/agents/
-inline-path	dev_practices/project-handoff/SKILL.md	.claude/agents/project-expert.md
+inline-path	dev_practices/project-expert/SKILL.md	docs/handoff/SPEC.md
+inline-path	dev_practices/project-expert/SKILL.md	docs/handoff/DECISIONS.md
+inline-path	dev_practices/project-expert/SKILL.md	docs/handoff/QA.md
+inline-path	dev_practices/project-expert/SKILL.md	docs/handoff/OPEN_QUESTIONS.md
+inline-path	dev_practices/project-expert/SKILL.md	docs/handoff/
+inline-path	dev_practices/project-expert/SKILL.md	.claude/agents/
+inline-path	dev_practices/project-expert/SKILL.md	.claude/agents/project-expert.md
 
 # Workspace paths: my-skill-creator's own docs describe the evals/evals.json
 # that a skill being drafted gets, in that skill's directory. They became
@@ -65,4 +65,4 @@ inline-path	meta/my-skill-creator/references/schemas.md	evals/evals.json
 link	my_loops/docs-loop/evals/fixtures/repo/README.md	docs/design.md
 inline-path	diagrams/visual/evals/fixtures/plan.md	svc/sweeper.py
 inline-path	diagrams/visual/evals/fixtures/plan.md	tests/test_expiry.py
-inline-path	dev_practices/project-handoff/references/templates.md	docs/handoff/
+inline-path	dev_practices/project-expert/references/templates.md	docs/handoff/

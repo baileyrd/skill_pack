@@ -1,7 +1,7 @@
 # Pack templates
 
 These are sensible defaults; adapt headings to the project. Keep every file
-short, tagged, and greppable. `<slug>` is the project slug from step 1.
+short, tagged, and greppable. `<slug>` is the project slug (SKILL.md Layout).
 `<root>` is the pack root: `docs/handoff/`, or `<project dir>/handoff/` in a
 monorepo. Write the literal path into every file you generate.
 
@@ -19,6 +19,7 @@ monorepo. Write the literal path into every file you generate.
 ```markdown
 # <Project> — spec
 Design chat: <claude.ai chat URL, or `unknown`> (<date>) · remind-me tag `<slug>`
+Owner: <name> (<GitHub login>) — the person whose words count as `[stated]`
 Tags: [stated] [agreed] [default] [open].
 
 ## Intent
@@ -38,7 +39,7 @@ Tags: [stated] [agreed] [default] [open].
 - [ ] …
 ```
 
-Harvest variant: same header, plus `Harvested: <date> @ <sha>`, and the body
+Harvest variant: same header (`Design chat:` first line), `Harvested: <date> @ <sha>` on the line after, and the body
 is an index. Pointers only; the expert reads the listed docs at call time.
 
 ```markdown
@@ -79,7 +80,7 @@ in the user's words. Never edit a row; supersede it with a new one.
 ```markdown
 # Implementer Q&A — <slug>
 Questions an implementer would ask, answered from the design chat.
-Harvest packs start this file empty; the expert adds only questions actually asked.
+Harvest packs seed only questions the sources settle, each citing its source; the expert adds the rest as they are asked.
 
 ## Data
 - **Q:** What's the identity key for a file? **A:** content hash (BLAKE3) + size. [agreed]
@@ -133,23 +134,29 @@ continue from the pack.
 1. `<root>`: DECISIONS.md, SPEC.md, QA.md, OPEN_QUESTIONS.md. If SPEC.md
    indexes docs for the subsystem in question, open those docs now; they are
    the source and the pack only points at them.
-2. remind-me: `remind_me_search` with tags `["<slug>"]` and
-   `include_raw: true`, which includes the verbatim design record.
+2. remind-me: `remind_me_search` with a `query` (the project name), tags
+   `["<slug>"]` and `include_raw: true` (it needs the query). Results are
+   trimmed: fetch the trimmed ids with `remind_me_get`. Ignore other projects.
 3. The user's standing principles: CLAUDE.md, and remind-me preferences.
 Precedence: code and repo docs beat memory; a newer decision beats an older
 one. If sources disagree, answer by that rule and add the conflict, with both
 sources, to OPEN_QUESTIONS.md.
 
+## Hard lines (optional)
+Project-specific prohibitions the user stated (e.g. "no retirement commands"),
+one line each with its D#. Anything that would break one escalates.
+
 ## Decide the tier
-1. **Answer** when step 1–3 settles it. Cite the source of every answer:
+1. **Answer** when the pack, remind-me or standing principles settle it. Cite the source of every answer:
    `DECISIONS.md D4`, `QA.md § Data`, a doc path, or a remind-me memory id.
 2. **Default** when it's implementation detail the user wouldn't judge
    (naming, layout, library choice inside the stated stack, error wording).
    Pick the reversible option and record it tagged `[default]` with a
    one-line why.
 3. **Escalate** only for intent, scope or taste, or for anything that would
-   reverse a `[stated]` or `[agreed]` row. Don't record anything; return the
-   escalation block below and let the caller ask the user.
+   reverse a `[stated]` row (or `[agreed]`, if this pack has any). Record no
+   decision; return the escalation block below and let the caller ask the user.
+   You may still append the question to OPEN_QUESTIONS.md if it is not blocking.
 When unsure between 2 and 3: if the user could tell the result apart without
 reading the code, escalate.
 
@@ -157,13 +164,16 @@ reading the code, escalate.
 Skip this when the answer is already a DECISIONS.md row. Otherwise:
 - DECISIONS.md: append a row with the next D#, its why, and its tag
   (`[default]`, or `[stated]` when recording the user's answer; in a Source
-  column pack, quote the user's words). Never edit an existing row.
+  column pack, quote the user's words, attributed to the SPEC's `Owner:`). Never edit an existing row; to confirm or replace one, add a row that
+  says `confirms D<n>` or `supersedes D<n>`.
 - `remind_me_add`: `memory_type: decision`, `metadata.rationale`,
   `metadata.tag` (default or stated), tags `["<slug>"]`. Search first; if
   a matching decision exists, don't add another.
-- OPEN_QUESTIONS.md: tick the item if it was listed and point it at the D#.
+- OPEN_QUESTIONS.md: tick the item if it was listed and point it at the D#
+  (`- [x] Q6 → D34`). Ticking is the only in-place edit allowed.
 - QA.md: if the pack has one, add the question and its answer when it was
-  answered from sources rather than a new decision.
+  answered from sources rather than a new decision. If a QA entry contradicts
+  code or a newer row, don't rewrite it: log the conflict in OPEN_QUESTIONS.md.
 No remind-me? Record in DECISIONS.md and say remind-me was skipped.
 
 ## Reply to the caller
