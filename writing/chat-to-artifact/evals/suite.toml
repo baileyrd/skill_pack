@@ -1,0 +1,57 @@
+# Eval-Kit suite for chat-to-artifact (https://github.com/baileyrd/Eval-Kit).
+# Runs are single-turn, so the "chat" is an exported transcript in the fixture
+# or pasted in the input. fixtures/cache-chat.md reverses a decision (TTL 60s
+# -> 300s), pastes a fake live key, names a reviewer but no owner for the open
+# question. fixtures/rename-chat.md settles a name after two rejections and
+# leaves an action item unowned.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "html-decision-record"
+input  = '''chat.md is our chat from earlier. turn it into a shareable artifact doc I can send to my team, save it as caching.html'''
+files  = { "chat.md" = "file:fixtures/cache-chat.md" }
+checks = [
+  { file_exists = "caching.html" },
+  { regex = '(?i)<title>\s*\S', in = "caching.html" },
+  { regex = '\A(?![\s\S]*sk-live-9f8a)', in = "caching.html" },
+  { regex = '''\A(?![\s\S]*<(script|link)\b[^>]*(src|href)\s*=\s*["']?(https?:)?//)''', in = "caching.html" },
+  { regex = '300', in = "caching.html" },
+  { judge = '''The document states the final TTL is 300 seconds because finance accepts up to 5 minutes staleness, and treats 60s only as a superseded or rejected option, not as the decision''' },
+  { judge = '''The document records the Redis-down fallback (call the provider directly and log a warning) as decided, and lists alerting on it as an open question without inventing an owner''' },
+]
+
+[[case]]
+id     = "markdown-latest-word-wins"
+input  = '''write up the naming discussion in rename-chat.md as a markdown doc, notes.md'''
+files  = { "rename-chat.md" = "file:fixtures/rename-chat.md" }
+checks = [
+  { file_exists = "notes.md" },
+  { regex = '(?m)^# \S', in = "notes.md" },
+  { regex = '(?i)kiln\.toml', in = "notes.md" },
+  { judge = '''notes.md states kiln as the chosen name and gives forge and anvil as rejected with their reasons (name collision / PyPI taken), not as the decision''' },
+  { judge = '''notes.md lists grabbing the GitHub org name as an action item with no owner (unassigned or similar) rather than inventing one''' },
+]
+
+[[case]]
+id     = "trigger-pasted-chat"
+input  = '''can you turn this conversation into a clean doc for people who weren't there?
+
+me: our nightly backup job to S3 has been failing since Tuesday
+you: the logs show AccessDenied on PutObject after the bucket policy change on Tuesday
+me: right, Dana tightened the policy. what's the fix
+you: add the backup role's ARN to the policy's allowed principals; I tested it with a dry run and PutObject succeeds
+me: applied it, tonight's run passed. we should add an alert when the job fails two nights in a row'''
+checks = [
+  { judge = '''Produces a standalone document (a file or a complete document in the reply) with a title and a short summary that leads with the outcome: the backup failure was fixed by adding the backup role to the bucket policy'''},
+  { judge = '''The document names the root cause (the Tuesday bucket policy change caused AccessDenied on PutObject) and how the fix was verified (dry run, then the next nightly run passed)''' },
+  { judge = '''The two-night failure alert appears as a follow-up or action item, not as something already done, and the document reads on its own without phrases like "as discussed above"''' },
+]
