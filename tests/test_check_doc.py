@@ -14,25 +14,29 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MODULE_PATH = REPO_ROOT / "writing/chat-to-artifact/scripts/check_doc.py"
+EMBED_PATH = REPO_ROOT / "writing/chat-to-artifact/scripts/embed_images.py"
 TEMPLATE = REPO_ROOT / "writing/chat-to-artifact/assets/template.html"
 
 
-def load_module():
+def load_module(name: str, path: Path):
     """Import by path: the skill directory name has a hyphen."""
-    spec = importlib.util.spec_from_file_location("check_doc", MODULE_PATH)
+    spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
-    sys.modules["check_doc"] = module
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
 
-cd = load_module()
+cd = load_module("check_doc", MODULE_PATH)
+ei = load_module("embed_images", EMBED_PATH)
+SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="4" height="4"/></svg>'
 
 
-def filled(body: str, title: str = "Cache rollout") -> str:
+def filled(body: str, title: str = "Cache rollout", date: str = "2026-11-10") -> str:
     """The real template with every placeholder replaced."""
     text = TEMPLATE.read_text(encoding="utf-8")
-    for key, value in {"TITLE": title, "SUBTITLE": "2026-11-10", "BODY": body, "FOOTER": "f"}.items():
+    values = {"TITLE": title, "DATE": date, "AUTHOR": "Priya", "LEAD": "Cached.", "BODY": body}
+    for key, value in values.items():
         text = text.replace("{{" + key + "}}", value)
     return text
 
@@ -68,7 +72,24 @@ class TestHtml(unittest.TestCase):
         self.assertEqual(self.check(filled('<a href="https://github.com/o/r/pull/1">PR</a>')), [])
 
     def test_empty_title_flagged(self):
-        self.assertIn("missing or empty <title>", self.check(filled("<p>x</p>", title="")))
+        findings = self.check(filled("<p>x</p>", title=""))
+        self.assertIn("missing or empty <title>", findings)
+        self.assertIn("missing <h1> title", findings)
+
+    def test_html_byline_needs_date(self):
+        """No as-of date: the reader can't tell how stale the page is."""
+        findings = self.check(filled("<p>x</p>", date="today"))
+        self.assertTrue(any(f.startswith("missing byline") for f in findings))
+
+    def test_local_image_not_inlined_flagged(self):
+        """A relative <img> breaks once the page is sent on its own."""
+        findings = self.check(filled('<figure><img src="shot.png" alt="p95"></figure>'))
+        self.assertTrue(any("embed_images.py" in f for f in findings))
+
+    def test_inline_svg_and_data_image_pass(self):
+        body = (f'<figure>{SVG}<figcaption>c</figcaption></figure>'
+                '<img src="data:image/png;base64,QUtJQUFCQ0RFRkdISUpLTE1OT1A=" alt="x">')
+        self.assertEqual(self.check(filled(body)), [])
 
     def test_pasted_key_flagged(self):
         """A key pasted into the chat must not reach the shared document."""
@@ -89,6 +110,15 @@ class TestHtml(unittest.TestCase):
         findings = self.check("---\ntitle: x\n---\n# Kiln\n\n2026-11-10\n", ".md")
         self.assertTrue(findings[0].startswith("first line must be the '# Title'"))
 
+    def test_markdown_missing_image_flagged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            doc = Path(tmp) / "doc.md"
+            doc.write_text("# T\n\n2026-11-10\n\n![p95](images/p95.png)\n", encoding="utf-8")
+            self.assertTrue(cd.check(doc)[0].startswith("image images/p95.png"))
+            (Path(tmp) / "images").mkdir()
+            (Path(tmp) / "images/p95.png").write_bytes(b"x")
+            self.assertEqual(cd.check(doc), [])
+
     def test_markdown_missing_byline_flagged(self):
         """A doc with no as-of date gives the reader no idea how stale it is."""
         findings = self.check("# Kiln naming\n\nThe CLI is called kiln.\n", ".md")
@@ -96,6 +126,29 @@ class TestHtml(unittest.TestCase):
 
     def test_unsupported_suffix(self):
         self.assertTrue(self.check("x", ".txt")[0].startswith("unsupported file type"))
+
+
+class TestEmbedImages(unittest.TestCase):
+    def test_inlines_local_and_leaves_remote(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "chart.svg").write_text(SVG, encoding="utf-8")
+            html = '<img src="chart.svg" alt="a"><img src="https://x.example/b.png" alt="b">'
+            text, count, errors = ei.embed(html, Path(tmp))
+            self.assertEqual((count, errors), (1, []))
+            self.assertIn('src="data:image/svg+xml;base64,', text)
+            self.assertIn('src="https://x.example/b.png"', text)
+
+    def test_missing_image_reported_and_left(self):
+        """Never write a half-embedded page: the caller stops on any error."""
+        with tempfile.TemporaryDirectory() as tmp:
+            text, count, errors = ei.embed('<img src="gone.png">', Path(tmp))
+            self.assertEqual(count, 0)
+            self.assertTrue(errors[0].startswith("missing image"))
+
+    def test_non_image_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "notes.txt").write_text("x", encoding="utf-8")
+            self.assertTrue(ei.embed('<img src="notes.txt">', Path(tmp))[2][0].startswith("not an image"))
 
 
 if __name__ == "__main__":

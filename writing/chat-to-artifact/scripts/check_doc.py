@@ -4,9 +4,9 @@
 Usage: python3 scripts/check_doc.py <file.html|file.md>
 
 Prints one finding per line and exits 1 if there are any, 0 on a clean pass.
-Checks: leftover {{PLACEHOLDER}}s, a missing or empty title, the Claude Docs
-byline (Markdown), external resources that break the page offline (HTML), and
-strings shaped like credentials.
+Checks: leftover {{PLACEHOLDER}}s, the Claude Docs head (title, then a dated
+byline), resources that break the file on its own (remote scripts, styles and
+images, or local images not yet inlined), and strings shaped like credentials.
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ from pathlib import Path
 
 PLACEHOLDER = re.compile(r"\{\{\s*[A-Z_]+\s*\}\}")
 HTML_TITLE = re.compile(r"<title>\s*(.*?)\s*</title>", re.IGNORECASE | re.DOTALL)
+MD_IMAGE = re.compile(r"!\[[^\]]*\]\(\s*<?([^)\s>]+)")
 BYLINE = re.compile(r"^\d{4}-\d{2}-\d{2}( · \S.*)?$")
 
 # Tags whose src/href is fetched when the page loads. Plain <a href> links are
@@ -27,6 +28,11 @@ EXTERNAL_RESOURCE = re.compile(
 )
 CSS_IMPORT = re.compile(r"@import\s+(url\()?[\"']?(https?:)?//", re.IGNORECASE)
 CSS_URL = re.compile(r"url\(\s*[\"']?(https?:)?//", re.IGNORECASE)
+LOCAL_IMG = re.compile(r"<img\b[^>]*\bsrc\s*=\s*[\"']?(?!data:|https?:|//)[^\"'\s>]", re.IGNORECASE)
+HTML_H1 = re.compile(r"<h1\b[^>]*>\s*[^<\s]", re.IGNORECASE)
+HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
+HTML_BYLINE = re.compile(r"class=[\"']byline[\"'][^>]*>.*?\d{4}-\d{2}-\d{2}", re.IGNORECASE | re.DOTALL)
+DATA_URI = re.compile(r"data:[\w/+.-]+;base64,[A-Za-z0-9+/=]+")
 
 SECRETS: dict[str, re.Pattern[str]] = {
     "API key (sk-...)": re.compile(r"\bsk-[A-Za-z0-9_-]{16,}"),
@@ -40,11 +46,19 @@ SECRETS: dict[str, re.Pattern[str]] = {
 
 
 def check_html(text: str) -> list[str]:
-    """Return findings specific to an HTML document."""
+    """Return findings specific to an HTML document (comments are ignored)."""
+    text = HTML_COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), text)
     findings: list[str] = []
     title = HTML_TITLE.search(text)
     if title is None or not title.group(1):
         findings.append("missing or empty <title>")
+    if not HTML_H1.search(text):
+        findings.append("missing <h1> title")
+    if not HTML_BYLINE.search(text):
+        findings.append("missing byline: <p class=\"byline\"> with a YYYY-MM-DD date")
+    for match in LOCAL_IMG.finditer(text):
+        findings.append(f"local image at line {line_of(text, match.start())} is not inlined: "
+                        "run scripts/embed_images.py")
     for pattern, label in ((EXTERNAL_RESOURCE, "external resource"),
                            (CSS_IMPORT, "external CSS @import"),
                            (CSS_URL, "external CSS url()")):
@@ -53,14 +67,19 @@ def check_html(text: str) -> list[str]:
     return findings
 
 
-def check_markdown(text: str) -> list[str]:
-    """Return findings for the Claude Docs head: '# Title', then the byline."""
+def check_markdown(text: str, base: Path) -> list[str]:
+    """Return findings for the Claude Docs head ('# Title', then the byline)
+    and for image links whose file is missing next to the document."""
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if not lines or not lines[0].startswith("# ") or len(lines[0]) < 3:
         return ["first line must be the '# Title' heading (no front matter)"]
     if len(lines) < 2 or not BYLINE.match(lines[1]):
         return ["second line must be the byline 'YYYY-MM-DD · Author' (or the date alone)"]
-    return []
+    return [
+        f"image {m.group(1)} at line {line_of(text, m.start())} is not next to the document"
+        for m in MD_IMAGE.finditer(text)
+        if not re.match(r"^(https?:|data:)", m.group(1)) and not (base / m.group(1)).is_file()
+    ]
 
 
 def check_common(text: str) -> list[str]:
@@ -69,8 +88,9 @@ def check_common(text: str) -> list[str]:
         f"leftover placeholder {m.group(0)} at line {line_of(text, m.start())}"
         for m in PLACEHOLDER.finditer(text)
     ]
+    scannable = DATA_URI.sub(lambda m: " " * len(m.group(0)), text)  # base64 is not a secret
     for label, pattern in SECRETS.items():
-        for match in pattern.finditer(text):
+        for match in pattern.finditer(scannable):
             findings.append(f"possible {label} at line {line_of(text, match.start())}: remove it")
     return findings
 
@@ -82,7 +102,7 @@ def check(path: Path) -> list[str]:
     if suffix in (".html", ".htm"):
         specific = check_html(text)
     elif suffix in (".md", ".markdown"):
-        specific = check_markdown(text)
+        specific = check_markdown(text, path.parent)
     else:
         return [f"unsupported file type {suffix or '(none)'}: expected .html or .md"]
     return specific + check_common(text)

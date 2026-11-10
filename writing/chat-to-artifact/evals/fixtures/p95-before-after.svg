@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 160" role="img" aria-label="p95 latency before and after caching">
+  <rect width="320" height="160" fill="#ffffff"/>
+  <rect x="60" y="20" width="80" height="120" fill="#a54f31"/>
+  <rect x="180" y="124" width="80" height="16" fill="#2f6a47"/>
+  <text x="100" y="155" font-size="12" text-anchor="middle">before 1.8 s</text>
+  <text x="220" y="155" font-size="12" text-anchor="middle">after 240 ms</text>
+</svg>
