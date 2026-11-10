@@ -161,10 +161,12 @@ When unsure between 2 and 3: if the user could tell the result apart without
 reading the code, escalate.
 
 ## Record, once per settled answer
-Skip this when the answer is already a DECISIONS.md row. Otherwise:
+Skip this when the answer is already a DECISIONS.md row or QA entry: add nothing. Otherwise:
 - DECISIONS.md: append a row with the next D#, its why, and its tag
   (`[default]`, or `[stated]` when recording the user's answer; in a Source
-  column pack, quote the user's words, attributed to the SPEC's `Owner:`). Never edit an existing row; to confirm or replace one, add a row that
+  column pack, quote the user's words, attributed to the SPEC's `Owner:`; an answer the caller relays from the user is
+  `[stated]` with locator `relayed by <caller>, <date>`, replaced by a memory id
+  when a dialog turn exists). Never edit an existing row; to confirm or replace one, add a row that
   says `confirms D<n>` or `supersedes D<n>`.
 - `remind_me_add`: `memory_type: decision`, `metadata.rationale`,
   `metadata.tag` (default or stated), tags `["<slug>"]`. Search first; if
@@ -178,7 +180,7 @@ No remind-me? Record in DECISIONS.md and say remind-me was skipped.
 
 ## Reply to the caller
 Answer or default:
-    ANSWER: <one or two lines>
+    ANSWER: <one or two lines; for a default, name the chosen value>
     SOURCE: <file § / D# / memory id>
     TIER: answered | default (logged D<n>)
 Escalation, kept short:
