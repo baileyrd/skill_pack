@@ -54,7 +54,12 @@ unsourced goes to OPEN_QUESTIONS.md.
 
 ## 2. Fork: is there a pack?
 
-Glob `**/handoff/SPEC.md` and `.claude/agents/*-expert.md` for the slug.
+Glob `**/handoff/SPEC.md` and `.claude/agents/*-expert.md` for the slug, then
+check what is not on the default branch yet: open PRs and remote branches that
+touch `**/handoff/` or `.claude/agents/` (`list_pull_requests`, `list_branches`).
+**An open PR that already carries a pack is the pack.** Do not open a
+duplicate: tell the user, then either review and extend that PR or stop. Only
+a merged pack, or none anywhere, decides the two cases below.
 
 - **Pack exists** (cases: v1.3 pack; v1.2 pack with `project-expert.md` or a
   per-project CLAUDE.md block). Keep its SPEC and DECISIONS untouched. Add or
