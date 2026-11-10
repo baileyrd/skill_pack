@@ -5,6 +5,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `dev_practices/project-expert` (v1.0.0) — stands up an in-repo project expert
+  with or without an existing handoff pack (intake table, pack/no-pack fork,
+  ordered source sweep that reports unreadable sources, pointer-style
+  DECISIONS, acceptance checks); reuses project-handoff templates.
 - `web_dev/ui-ux-pro-max` (v1.0.0) — UI/UX design database and design-system
   generator, imported from nextlevelbuilder/ui-ux-pro-max-skill (MIT). Dropped
   runtime-unused data, the data validator and the `google-fonts` domain

@@ -1,0 +1,21 @@
+# Eval-Kit suite for project-expert. Cases mirror evals.json.
+#   python3 -m evalkit run dev_practices/project-expert/evals/suite.toml --jobs 4
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "no-pack-monorepo"
+input  = '''Set up an expert for the Orion project in this monorepo (paths crates/orion/**). A DECISIONS.md (D1-D20) is at docs/orion/DECISIONS.md on an unmerged branch. No handoff pack yet. Reviewer: alice. Put files you make in this folder.'''
+
+[[case]]
+id     = "pack-exists"
+input  = '''build an expert for tick_digest; docs/handoff already exists from project-handoff v1.2 with a project-expert.md. Put files you make in this folder.'''
+
+[[case]]
+id     = "implicit-trigger"
+input  = '''I'm tired of relaying design questions between Claude sessions for this repo. Fix that. Put files you make in this folder.'''

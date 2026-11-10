@@ -1,0 +1,23 @@
+{
+  "skill_name": "project-expert",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up an expert for the Orion project in this monorepo (paths crates/orion/**). There is a DECISIONS.md at docs/orion/DECISIONS.md (D1-D20) on an unmerged branch docs/orion-concept. No handoff pack yet. Design chat: https://claude.ai/share/example. Reviewer: alice.",
+      "expected_output": "No-pack path: pack under docs/projects/orion or crates/orion/handoff; DECISIONS.md is a pointer keeping D-numbering; expert file orion-expert.md; CLAUDE.md row scoped to crates/orion/**; branch from docs/orion-concept noted in PR; chat-link read failure reported not guessed; PR lists unsourced OPEN_QUESTIONS; reviewer requested.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "build an expert for tick_digest, the pack in docs/handoff already exists from project-handoff v1.2 with a project-expert.md",
+      "expected_output": "Pack-exists path: SPEC and DECISIONS untouched; expert renamed tick_digest-expert; old CLAUDE.md block replaced by a single Project experts table; no new pack files written.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I'm tired of relaying design questions between Claude sessions for this repo. Fix that.",
+      "expected_output": "Triggers without naming the skill; single-repo defaults (docs/handoff, glob **); asks at most one blocking question; never invents decisions; unsourced items go to OPEN_QUESTIONS.md.",
+      "files": []
+    }
+  ]
+}
