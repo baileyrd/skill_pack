@@ -8,11 +8,6 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 - `meta/context-audit` and `meta/zen` (v1.0.0) — Claude setup hygiene: a
   token-waste audit with a score, and a reviewed, reversible declutter.
   Imported from uploads; non-spec frontmatter dropped, retro steps added.
-- `self_improvement/` category with `improvement-intake-planner` and
-  `data-intake` (v1.0.0) — the harvest half of a self-improvement loop,
-  imported from the AIOS self-improvement starter. Planner scripts gained the
-  CLI entry points their docs promised; the local dashboard schedule hook and
-  references to skills not in this pack were removed.
 - `dev_practices/project-expert` v2.0.0 — `project-handoff` renamed and merged with
   the new expert builder. Adds a pack check first (incl. open PRs, by file
   names), an intake table, pointer-style DECISIONS for an existing log,

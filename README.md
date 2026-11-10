@@ -75,19 +75,6 @@ structured review of what already exists.
 | [`microkernel-architecture-audit/`](dev_practices/microkernel-architecture-audit) | Audits a microkernel-style system across eight dimensions — core/plugin boundaries, IPC contracts, capability-based security, WASM sandbox integrity, plugin lifecycle, dependency inversion, async concurrency, test coverage — with archetype-aware language for Rust/Tauri and FastAPI targets plus a generic fallback. |
 | [`project-expert/`](dev_practices/project-expert) | Builds an in-repo project expert (formerly `project-handoff`): a `<slug>-expert` subagent plus a path-scoped CLAUDE.md routing rule, backed by a handoff pack (SPEC, DECISIONS with provenance tags, pre-answered Q&A, OPEN_QUESTIONS), so threads ask it design questions and only intent, scope or taste reaches you. Works with or without a pack and a design chat: handoff mode from a chat, harvest mode from repo docs, merged PRs, remind-me and cards; checks open PRs for an existing pack first; points at an existing decision log instead of copying it; lists every unsourced open question. Refresh, resolve and migrate modes; cloud-safe fallback; acceptance checks. |
 
-### [`self_improvement/`](self_improvement) — harvest signal for a self-improving setup
-
-The harvest half of a self-improvement loop: decide which connected sources
-carry recurring correction, drift or demand signal, then pull curated events
-into `evidence/intake/raw-events/` for human review. Read-only and weekly by
-default. The downstream half (turning events into proposed skill or context
-changes) is not in this pack yet.
-
-| Skill | Does |
-|---|---|
-| [`improvement-intake-planner/`](self_improvement/improvement-intake-planner) | Run first. Scaffolds the `evidence/` workspace, maps connected MCP servers to the kind of signal they carry, and writes a harvest plan plus adapter stanzas that all ship disabled. |
-| [`data-intake/`](self_improvement/data-intake) | Runs the plan: validates the event envelope, sorts to a source folder, dedupes by source and event id, checkpoints state. Pulls MCP sources in session, runs script adapters, drains a push dropzone. |
-
 ### [`diagrams/`](diagrams) — the diagram is the deliverable
 
 Skills whose output is a picture rather than code, prose, or a change to a
