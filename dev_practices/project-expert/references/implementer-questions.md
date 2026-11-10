@@ -1,6 +1,6 @@
 # Implementer questions
 
-Prompts for the step-3 implementer pass. They are prompts, not a form. Skip any
+Prompts for the implementer pass (SKILL.md core procedure step 3). They are prompts, not a form. Skip any
 area that doesn't apply, and add questions this specific project raises. The
 point is to ask what Claude Code will ask halfway through the build, before it
 gets there.

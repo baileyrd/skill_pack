@@ -1,7 +1,7 @@
 # Pack templates
 
 These are sensible defaults; adapt headings to the project. Keep every file
-short, tagged, and greppable. `<slug>` is the project slug from step 1.
+short, tagged, and greppable. `<slug>` is the project slug (SKILL.md Layout).
 `<root>` is the pack root: `docs/handoff/`, or `<project dir>/handoff/` in a
 monorepo. Write the literal path into every file you generate.
 
@@ -38,7 +38,7 @@ Tags: [stated] [agreed] [default] [open].
 - [ ] …
 ```
 
-Harvest variant: same header, plus `Harvested: <date> @ <sha>`, and the body
+Harvest variant: same header (`Design chat:` first line), `Harvested: <date> @ <sha>` on the line after, and the body
 is an index. Pointers only; the expert reads the listed docs at call time.
 
 ```markdown
@@ -140,8 +140,12 @@ Precedence: code and repo docs beat memory; a newer decision beats an older
 one. If sources disagree, answer by that rule and add the conflict, with both
 sources, to OPEN_QUESTIONS.md.
 
+## Hard lines (optional)
+Project-specific prohibitions the user stated (e.g. "no retirement commands"),
+one line each with its D#. Anything that would break one escalates.
+
 ## Decide the tier
-1. **Answer** when step 1–3 settles it. Cite the source of every answer:
+1. **Answer** when the pack, remind-me or standing principles settle it. Cite the source of every answer:
    `DECISIONS.md D4`, `QA.md § Data`, a doc path, or a remind-me memory id.
 2. **Default** when it's implementation detail the user wouldn't judge
    (naming, layout, library choice inside the stated stack, error wording).
