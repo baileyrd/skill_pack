@@ -47,6 +47,8 @@ loop-closing step already built in. Mostly aimed at the skills in this repo;
 | [`learn-it/`](meta/learn-it) | Distills a session's actual patterns/anti-patterns/gotchas into a new (or updated) skill matching this repo's own authoring conventions, reported for approval before anything is written. |
 | [`my-skill-creator/`](meta/my-skill-creator) | This repo's own fork of Anthropic's `skill-creator` (draft → test → eval → iterate → optimize description → package), with `skill_pack`'s own authoring conventions applied automatically and a `skill-retro` wrap-up step built into every skill it drafts or improves by default. |
 | [`find-skills/`](meta/find-skills) | Finds a skill someone else already wrote: checks the skills.sh leaderboard, searches `npx skills find`, and screens install count and source reputation before recommending. The only `meta/` skill pointed outward rather than at this repo. |
+| [`context-audit/`](meta/context-audit) | Audits a Claude Code setup for token waste: a script scores MCP servers, skills, settings, effort, LSP, hooks, compaction and `.claudeignore`, then every CLAUDE.md rule is tested for defaults, contradictions, redundancy, bandaids and vagueness. Returns a 0-100 score with fixes ranked by impact. |
+| [`zen/`](meta/zen) | Fortnightly declutter of a whole Claude setup (skills, agents, plugins, hooks, connectors, scheduled jobs, chats, artifacts): a read-only scan, one review page where the owner rules on each item, then only approved changes, archived rather than deleted and undoable. |
 
 ### [`web_dev/`](web_dev) — web framework code generation
 

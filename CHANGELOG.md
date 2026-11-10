@@ -5,6 +5,9 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `meta/context-audit` and `meta/zen` (v1.0.0) — Claude setup hygiene: a
+  token-waste audit with a score, and a reviewed, reversible declutter.
+  Imported from uploads; non-spec frontmatter dropped, retro steps added.
 - `dev_practices/project-expert` v2.0.0 — `project-handoff` renamed and merged with
   the new expert builder. Adds a pack check first (incl. open PRs, by file
   names), an intake table, pointer-style DECISIONS for an existing log,

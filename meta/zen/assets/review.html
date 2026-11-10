@@ -1,0 +1,522 @@
+<title>Zen Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one Notion-style working column; sticky progress bar; sections as toggles; every item carries its own ruling control. */
+:root{
+  --bg:#ffffff; --surface:#f7f7f5; --surface-2:#f1f1ef; --fg:#37352f; --muted:#787774; --line:#e9e9e7;
+  --accent:#2383e2; --accent-bg:#e7f0fb;
+  --crit:#c4302b; --crit-bg:#fdebec; --warn:#a8701a; --warn-bg:#fbf3db; --ok:#3f7d57; --ok-bg:#edf3ec;
+  --ask:#8055a8; --ask-bg:#f4eefa;
+  --bar-skills:#2383e2; --bar-agents:#8055a8; --bar-instr:#3f7d57; --bar-mem:#a8701a;
+  --display:"Newsreader", "Iowan Old Style", Georgia, serif;
+  --body:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#191919; --surface:#202020; --surface-2:#262626; --fg:#e6e6e4; --muted:#9b9a97; --line:#2f2f2f;
+  --accent:#529cca; --accent-bg:#1d2a36;
+  --crit:#f08782; --crit-bg:#3a2224; --warn:#e3b25a; --warn-bg:#352c1b; --ok:#6fbf84; --ok-bg:#20302a;
+  --ask:#b48fdb; --ask-bg:#2c2335;
+  --bar-skills:#529cca; --bar-agents:#b48fdb; --bar-instr:#6fbf84; --bar-mem:#e3b25a;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#191919; --surface:#202020; --surface-2:#262626; --fg:#e6e6e4; --muted:#9b9a97; --line:#2f2f2f;
+  --accent:#529cca; --accent-bg:#1d2a36;
+  --crit:#f08782; --crit-bg:#3a2224; --warn:#e3b25a; --warn-bg:#352c1b; --ok:#6fbf84; --ok-bg:#20302a;
+  --ask:#b48fdb; --ask-bg:#2c2335;
+  --bar-skills:#529cca; --bar-agents:#b48fdb; --bar-instr:#6fbf84; --bar-mem:#e3b25a;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 80px}
+h1{font:600 2.5rem/1.1 var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font:600 1.35rem/1.25 var(--body);margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:.5rem 0 0;max-width:62ch}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--surface-2);padding:.08em .35em;border-radius:4px}
+
+/* sticky bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-top:22px}
+.bar-in{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-block:10px}
+.prog{flex:1 1 220px;min-width:0}
+.prog-label{font-size:.82rem;color:var(--muted);display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums}
+.prog-track{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
+.status{font-size:.8rem;padding:3px 9px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.status.ok{background:var(--ok-bg);color:var(--ok)} .status.err{background:var(--warn-bg);color:var(--warn)}
+.navlinks{display:flex;gap:4px;flex-wrap:wrap}
+.navlinks a{font-size:.82rem;color:var(--muted);text-decoration:none;padding:3px 8px;border-radius:6px}
+.navlinks a:hover,.navlinks a:focus-visible{background:var(--surface-2);color:var(--fg)}
+
+/* headline numbers */
+.nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
+.num{background:var(--surface);border-radius:10px;padding:14px 16px;min-width:0}
+.num b{display:block;font:600 2rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.num span{color:var(--muted);font-size:.86rem}
+.num.crit b{color:var(--crit)}
+.budget{margin-top:14px}
+.stack{display:flex;height:12px;border-radius:4px;overflow:hidden;background:var(--surface-2)}
+.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:8px;font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.legend em{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+
+.callout{display:flex;gap:12px;background:var(--surface);border-radius:8px;padding:12px 14px;margin-top:20px;font-size:.92rem}
+.callout svg{flex:none;margin-top:2px;color:var(--accent)}
+.callout p{margin:0}
+
+/* sections */
+section{margin-top:40px}
+.sec-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.sec-head .count{color:var(--muted);font-size:.85rem}
+.sec-head .tone{width:10px;height:10px;border-radius:3px;flex:none;align-self:center}
+.sec-lede{color:var(--muted);margin:8px 0 0;font-size:.92rem;max-width:66ch}
+.items{display:flex;flex-direction:column;gap:2px;margin-top:10px}
+.item{padding:14px 12px;border-radius:8px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.item:hover{background:var(--surface)}
+.item.ruled .ititle{opacity:.92}
+.ihead{display:flex;gap:8px 10px;align-items:baseline;flex-wrap:wrap}
+.id{font:500 .74rem var(--mono);color:var(--muted);background:var(--surface-2);padding:1px 6px;border-radius:4px;white-space:nowrap}
+.ititle{font-weight:600;min-width:0}
+.sugg{font-size:.76rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+.sugg b{font-weight:600}
+.ibody{margin:0;color:var(--fg);max-width:70ch;font-size:.93rem}
+.ibody .muted{color:var(--muted)}
+
+/* ruling control */
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--bg)}
+.seg button{font:500 .82rem var(--body);color:var(--muted);background:transparent;border:0;padding:5px 11px;cursor:pointer;border-right:1px solid var(--line);position:relative}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--surface-2);color:var(--fg)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.seg button.is-sugg::after{content:"";position:absolute;top:4px;right:4px;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.55}
+.seg button[aria-pressed="true"][data-v="keep"]{background:var(--ok-bg);color:var(--ok)}
+.seg button[aria-pressed="true"][data-v="do"]{background:var(--accent-bg);color:var(--accent)}
+.seg button[aria-pressed="true"][data-v="change"]{background:var(--warn-bg);color:var(--warn)}
+.seg button[aria-pressed="true"][data-v="ask"]{background:var(--ask-bg);color:var(--ask)}
+.seg.inherit button[aria-pressed="true"]{opacity:.62}
+.seg button[aria-pressed="true"][data-v="archive"]{background:var(--accent-bg);color:var(--accent)}
+.seg button[aria-pressed="true"][data-v="delete"]{background:var(--crit-bg);color:var(--crit)}
+.dctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.gsel{font:inherit;font-size:.8rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:3px 6px}
+.gsel:focus-visible{outline:2px solid var(--accent)}
+.dname{font-weight:500;font-size:.9rem;color:var(--fg);text-decoration:none;overflow-wrap:anywhere}
+a.dname{color:var(--accent)} a.dname:hover{text-decoration:underline}
+.dgroup .callout{margin-top:0}
+#declutter .callout{margin-top:12px}
+.seg.sm button{padding:3px 8px;font-size:.76rem}
+.note{flex:1 1 220px;min-width:0;font:inherit;font-size:.86rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 9px}
+.note:focus-visible{outline:2px solid var(--accent);outline-offset:-1px}
+.batch{font:500 .8rem var(--body);color:var(--accent);background:transparent;border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer}
+.batch:hover{background:var(--accent-bg)}
+.batch:focus-visible{outline:2px solid var(--accent)}
+
+/* member lists */
+details.members{margin-top:2px}
+details.members>summary{cursor:pointer;font-size:.84rem;color:var(--muted);list-style:none;display:inline-flex;gap:6px;align-items:center;padding:2px 0}
+details.members>summary::-webkit-details-marker{display:none}
+details.members>summary::before{content:"";width:0;height:0;border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .15s}
+details.members[open]>summary::before{transform:rotate(90deg)}
+.mlist{display:flex;flex-direction:column;margin-top:6px;border-left:2px solid var(--line);padding-left:12px}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow .mt{min-width:0;font-size:.86rem}
+.mrow .mt b{font-weight:500;font-family:var(--mono);font-size:.82rem;word-break:break-word}
+.mrow .me{color:var(--muted);font-size:.8rem;display:block;overflow-wrap:anywhere}
+.mrow .id{margin-right:6px}
+
+/* questions */
+.q{padding:14px 12px;border-radius:8px}
+.q:hover{background:var(--surface)}
+.q p{margin:0 0 8px;font-weight:600;max-width:70ch}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.opt{font:500 .84rem var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer}
+.opt:hover{background:var(--surface-2)}
+.opt[aria-pressed="true"]{background:var(--accent-bg);border-color:transparent;color:var(--accent)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* full list */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;align-items:center}
+.chip{font:500 .8rem var(--body);color:var(--muted);background:var(--surface);border:0;border-radius:99px;padding:4px 10px;cursor:pointer;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#q{flex:1 1 200px;min-width:0;font:inherit;font-size:.88rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 10px}
+.full .mrow{grid-template-columns:minmax(0,1fr) auto}
+.risk{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
+.risk.high{color:var(--crit)} .risk.med{color:var(--warn)}
+.empty{color:var(--muted);font-size:.9rem;padding:16px 0}
+.results{margin-top:36px}
+.ba{margin-top:14px;display:grid;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ba-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 120px;gap:12px;padding:9px 14px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;align-items:baseline}
+.ba-row:first-child{border-top:0}
+.ba-head{background:var(--surface);font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.ba-row span:nth-child(2){color:var(--muted)}
+.ba-row b{color:var(--ok);font-weight:600}
+.fine{color:var(--muted);font-size:.84rem;margin:10px 0 0;max-width:72ch}
+.rcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-top:22px}
+.rcol{min-width:0}
+.rcol h3{font-size:1rem;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.rcol h3+ul{margin-top:0}
+.rcol ul{margin:0 0 18px;padding-left:18px;display:flex;flex-direction:column;gap:7px;font-size:.92rem}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot.ok{background:var(--ok)} .dot.ask{background:var(--ask)} .dot.warn{background:var(--warn)}
+@media (max-width:600px){.rcols{grid-template-columns:minmax(0,1fr)}.ba-row{grid-template-columns:minmax(0,1fr) 70px 90px}}
+/* camera mode: blur chat titles, finding names and evidence */
+body.private .dname,body.private .mrow .mt b,body.private .me,body.private .rcol li{filter:blur(6px)}
+.tag{font:500 .72rem var(--body);color:var(--warn);background:var(--warn-bg);padding:1px 7px;border-radius:99px;margin-left:6px}
+.priv{font:500 .8rem var(--body);color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer}
+.priv[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+footer{margin-top:48px;color:var(--muted);font-size:.84rem;border-top:1px solid var(--line);padding-top:14px}
+
+@media (max-width:600px){
+  h1{font-size:2rem}
+  .nums{grid-template-columns:minmax(0,1fr)}
+  .sugg{margin-left:0;width:100%}
+  .mrow,.full .mrow{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header id="head"></header>
+  <section id="results" class="results" hidden></section>
+
+  <nav class="bar" aria-label="Progress">
+    <div class="bar-in">
+      <div class="prog">
+        <div class="prog-label"><span id="progText">0 of 0 ruled</span><span id="fullText"></span></div>
+        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+      </div>
+      <span class="status" id="status">Connecting…</span>
+      <button type="button" class="priv" id="priv" aria-pressed="false">Hide titles</button>
+      <div class="navlinks" id="navlinks"></div>
+    </div>
+  </nav>
+
+  <main id="sections"></main>
+
+  <section id="questions-sec">
+    <div class="sec-head"><span class="tone" style="background:var(--ask)"></span><h2 id="qTitle">Questions</h2><span class="count">they change the rulings above</span></div>
+    <div id="questions"></div>
+  </section>
+
+  <section id="all">
+    <div class="sec-head"><span class="tone" style="background:var(--muted)"></span><h2 id="allTitle">All findings</h2><span class="count">rule any one here to override its group</span></div>
+    <div class="filters" id="filters"></div>
+    <div class="mlist full" id="fullList" style="border-left:0;padding-left:0"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+/* Data comes from build_page.py, which replaces the REVIEW marker below. */
+const REVIEW = /*REVIEW*/{};
+const FINDINGS = REVIEW.findings || [];
+const BY = Object.fromEntries(FINDINGS.map(f => [f.id, f]));
+const LABEL = { keep: "Keep", do: "Do it", change: "Change", ask: "Ask" };
+const SECTIONS = REVIEW.sections || [];
+const QUESTIONS = REVIEW.questions || [];
+const SIDEBAR_GROUPS = REVIEW.sidebar_groups || [];
+const OPTS = { archive: [["archive", "Archive"], ["keep", "Keep"]], delete: [["delete", "Delete"], ["keep", "Keep"]] };
+const DECLUTTER = (REVIEW.declutter || []).map(g => Object.assign({}, g, { opts: OPTS[g.kind] || OPTS.archive }));
+const ROWS = {}; DECLUTTER.forEach(g => g.rows.forEach(r => { ROWS[r.id] = r; }));
+const info = id => BY[id];
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>';
+
+(function renderHead() {
+  const h = REVIEW.head || {};
+  document.title = h.title || "Zen Review";
+  const nums = (h.nums || []).map(n => `<div class="num${n.tone === "crit" ? " crit" : ""}"><b>${esc(n.value)}</b><span>${esc(n.label)}</span></div>`).join("");
+  const total = (h.budget || []).reduce((a, b) => a + (b.tokens || 0), 0) || 1;
+  const bars = (h.budget || []).map(b => `<i style="width:${(100 * b.tokens / total).toFixed(1)}%;background:var(${b.color})"></i>`).join("");
+  const legend = (h.budget || []).map(b => `<span><em style="background:var(${b.color})"></em>${esc(b.label)} ${Number(b.tokens).toLocaleString()}</span>`).join("");
+  document.getElementById("head").innerHTML = `<h1>${esc(h.title || "Zen Review")}</h1><p class="sub">${h.sub || ""}</p>
+    <div class="nums">${nums}</div>
+    ${bars ? `<div class="budget" aria-label="Where the tokens go"><div class="stack">${bars}</div><div class="legend">${legend}</div></div>` : ""}
+    <div class="callout">${ICON}<p>${h.callout || ""}</p></div>`;
+  document.getElementById("foot").innerHTML = REVIEW.footer || "";
+  const r = REVIEW.results;
+  if (r) {
+    const el = document.getElementById("results"); el.hidden = false;
+    const rows = (r.before_after || []).map(x => `<div class="ba-row" role="row"><span role="rowheader">${esc(x[0])}</span><span>${esc(x[1])}</span><b>${esc(x[2])}</b></div>`).join("");
+    const list = (t, cls, items) => items && items.length ? `<h3><span class="dot ${cls}"></span>${t}</h3><ul>${items.map(i => `<li>${i}</li>`).join("")}</ul>` : "";
+    el.innerHTML = `<div class="sec-head"><span class="tone" style="background:var(--ok)"></span><h2>Results</h2><span class="count">${esc(r.when || "")}</span></div>
+      <p class="sec-lede">${r.lede || ""}</p>
+      <div class="ba" role="table" aria-label="Before and after"><div class="ba-row ba-head" role="row"><span role="columnheader"></span><span role="columnheader">Before</span><span role="columnheader">After</span></div>${rows}</div>
+      ${r.fine ? `<p class="fine">${r.fine}</p>` : ""}
+      <div class="rcols"><div class="rcol">${list("Done", "ok", r.done)}</div><div class="rcol">${list("Left for you", "ask", r.left)}${list("Undone or unchanged", "warn", r.undone)}</div></div>`;
+  }
+  document.getElementById("qTitle").textContent = QUESTIONS.length === 1 ? "One question" : QUESTIONS.length + " questions";
+  if (!QUESTIONS.length) document.getElementById("questions-sec").hidden = true;
+  document.getElementById("allTitle").textContent = "All " + FINDINGS.length + " findings";
+  const priv = document.getElementById("priv");
+  priv.addEventListener("click", () => { const on = document.body.classList.toggle("private"); priv.setAttribute("aria-pressed", on); });
+})();
+/* ---------- state ---------- */
+const R = {};            // id -> {d, note}
+const groupOf = {};      // member id -> group item
+SECTIONS.forEach(s => s.items.forEach(it => (it.members || []).forEach(m => { groupOf[m] = it; })));
+let db = null, canSave = false;
+const status = document.getElementById("status");
+function setStatus(t, cls) { status.textContent = t; status.className = "status" + (cls ? " " + cls : ""); }
+
+const pending = {};
+function save(id) {
+  const v = R[id] || { d: null, note: "" };
+  if (!canSave) return;
+  clearTimeout(pending[id]);
+  pending[id] = setTimeout(async () => {
+    setStatus("Saving…");
+    try {
+      if (!v.d && !v.note && !v.sg) await db.doc("rulings/" + id).delete();
+      else await db.doc("rulings/" + id).set({ decision: v.d || null, note: v.note || "", group: groupOf[id] ? groupOf[id].id : null, sidebarGroup: v.sg || null, title: ROWS[id] ? ROWS[id].title : null, at: new Date().toISOString() });
+      setStatus("Saved", "ok");
+    } catch (e) { setStatus("Not saved: " + (e && e.code || "error"), "err"); }
+    delete pending[id];
+  }, 120);
+}
+function rule(id, d, opts = {}) {
+  const cur = R[id] || { d: null, note: "" };
+  const next = { d: (cur.d === d && !opts.force) ? null : d, note: cur.note || "", sg: cur.sg || "" };
+  if (next.d === "keep" && !next.sg && ROWS[id] && ROWS[id].sg) next.sg = ROWS[id].sg;
+  R[id] = next; save(id); refresh();
+}
+function effective(id) {
+  if (R[id] && R[id].d) return { d: R[id].d, inherit: false };
+  const g = groupOf[id];
+  if (g && R[g.id] && R[g.id].d) return { d: (g.memberSugg && g.memberSugg[id] && R[g.id].d === g.sugg) ? g.memberSugg[id] : R[g.id].d, inherit: true };
+  return { d: null, inherit: false };
+}
+function suggOf(id) {
+  if (ROWS[id]) return ROWS[id].sugg;
+  const g = groupOf[id];
+  if (g) return (g.memberSugg && g.memberSugg[id]) || g.sugg;
+  for (const s of SECTIONS) for (const it of s.items) if (it.id === id) return it.sugg;
+  return null;
+}
+
+/* ---------- render ---------- */
+function seg(id, small) {
+  const wrap = document.createElement("div");
+  wrap.className = "seg" + (small ? " sm" : "");
+  wrap.setAttribute("role", "group"); wrap.setAttribute("aria-label", "Ruling for " + id);
+  wrap.dataset.for = id;
+  const sg = suggOf(id);
+  for (const v of ["keep", "do", "change", "ask"]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.v = v; b.textContent = LABEL[v];
+    if (v === sg) { b.classList.add("is-sugg"); b.title = "Suggested"; }
+    b.addEventListener("click", () => rule(id, v));
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+function noteInput(id) {
+  const n = document.createElement("input");
+  n.type = "text"; n.className = "note"; n.id = "note-" + id; n.dataset.for = id;
+  n.placeholder = "Note for Claude (optional)"; n.setAttribute("aria-label", "Note for " + id);
+  n.addEventListener("input", () => { R[id] = { ...(R[id] || { d: null, sg: "" }), note: n.value }; clearTimeout(n._t); n._t = setTimeout(() => save(id), 600); });
+  return n;
+}
+function memberRow(id, withNote) {
+  const f = info(id); if (!f) return null;
+  const row = document.createElement("div"); row.className = "mrow"; row.dataset.id = id;
+  const t = document.createElement("div"); t.className = "mt";
+  const idc = document.createElement("span"); idc.className = "id"; idc.textContent = id;
+  const name = document.createElement("b"); name.textContent = f.t;
+  t.append(idc, name);
+  if (f.r === "high" || f.r === "med") { const r = document.createElement("span"); r.className = "risk " + f.r; r.textContent = f.r === "high" ? "high" : "medium"; t.appendChild(r); }
+  const e = document.createElement("span"); e.className = "me"; e.textContent = f.e + (f.s ? "  →  " + f.s : "");
+  t.appendChild(e);
+  row.append(t, seg(id, true));
+  return row;
+}
+function renderSections() {
+  const host = document.getElementById("sections");
+  const nav = document.getElementById("navlinks");
+  SECTIONS.forEach(s => {
+    const sec = document.createElement("section"); sec.id = s.key;
+    sec.innerHTML = `<div class="sec-head"><span class="tone" style="background:${s.tone}"></span><h2>${s.title}</h2><span class="count">${s.items.length} items</span></div><p class="sec-lede">${s.lede}</p>`;
+    const list = document.createElement("div"); list.className = "items";
+    if (!s.items.length) list.innerHTML = '<p class="empty">Nothing to do here.</p>';
+    s.items.forEach(it => {
+      const el = document.createElement("article"); el.className = "item"; el.dataset.id = it.id;
+      const n = (it.members || []).length;
+      el.innerHTML = `<div class="ihead"><span class="id">${it.id}</span><span class="ititle"></span><span class="sugg">Suggested: <b>${LABEL[it.sugg]}</b></span></div><p class="ibody">${it.body}</p>`;
+      el.querySelector(".ititle").textContent = it.title;
+      const ctl = document.createElement("div"); ctl.className = "ctl";
+      ctl.append(seg(it.id), noteInput(it.id));
+      el.appendChild(ctl);
+      if (n) {
+        const d = document.createElement("details"); d.className = "members";
+        const sm = document.createElement("summary"); sm.textContent = `${n} item${n > 1 ? "s" : ""} in this batch, rule any one to make an exception`;
+        d.appendChild(sm);
+        d.addEventListener("toggle", () => {
+          if (!d.open || d._built) return; d._built = true;
+          const ml = document.createElement("div"); ml.className = "mlist";
+          it.members.forEach(m => { const r = memberRow(m); if (r) ml.appendChild(r); });
+          d.appendChild(ml); refresh();
+        });
+        el.appendChild(d);
+      }
+      list.appendChild(el);
+    });
+    sec.appendChild(list); host.appendChild(sec);
+    const a = document.createElement("a"); a.href = "#" + s.key; a.textContent = s.nav || s.title.split(" ")[0]; nav.appendChild(a);
+  });
+  if (REVIEW.results) { const ra = document.createElement("a"); ra.href = "#results"; ra.textContent = "Results"; nav.insertBefore(ra, nav.firstChild); }
+  if (DECLUTTER.length) { const da = document.createElement("a"); da.href = "#declutter"; da.textContent = "Declutter"; nav.appendChild(da); }
+  if (QUESTIONS.length) { const qa = document.createElement("a"); qa.href = "#questions-sec"; qa.textContent = "Questions"; nav.appendChild(qa); }
+  const aa = document.createElement("a"); aa.href = "#all"; aa.textContent = "All"; nav.appendChild(aa);
+}
+function pick(id, opts) {
+  const wrap = document.createElement("div");
+  wrap.className = "seg sm"; wrap.dataset.for = id;
+  wrap.setAttribute("role", "group"); wrap.setAttribute("aria-label", "Decision for " + (ROWS[id] ? ROWS[id].title : id));
+  const sg = suggOf(id);
+  opts.forEach(([v, label]) => {
+    const b = document.createElement("button"); b.type = "button"; b.dataset.v = v; b.textContent = label;
+    if (v === sg) { b.classList.add("is-sugg"); b.title = "Suggested"; }
+    b.addEventListener("click", () => rule(id, v));
+    wrap.appendChild(b);
+  });
+  return wrap;
+}
+function groupSelect(row) {
+  const s = document.createElement("select"); s.className = "gsel"; s.id = "grp-" + row.id.replace(/[^\w-]/g, "_"); s.dataset.for = row.id;
+  s.setAttribute("aria-label", "Sidebar group for " + row.title);
+  [["", "No group"]].concat(SIDEBAR_GROUPS.map(g => [g, g])).forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; s.appendChild(o); });
+  s.addEventListener("change", () => { R[row.id] = { ...(R[row.id] || { d: null, note: "" }), sg: s.value }; save(row.id); refresh(); });
+  return s;
+}
+function renderDeclutter() {
+  const sec = document.createElement("section"); sec.id = "declutter";
+  const total = DECLUTTER.reduce((n, g) => n + g.rows.length, 0);
+  sec.innerHTML = `<div class="sec-head"><span class="tone" style="background:var(--accent)"></span><h2>Declutter</h2><span class="count">${total} chats, projects and artifacts</span></div>
+    <p class="sec-lede">Each line is one thing. The suggestion is already marked; use a group's button to take all its suggestions at once, then change any line.</p>
+    <div class="callout"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg><p>${REVIEW.declutter_note || ""}</p></div>`;
+  const list = document.createElement("div"); list.className = "items";
+  DECLUTTER.forEach(g => {
+    const el = document.createElement("article"); el.className = "item dgroup"; el.dataset.key = g.key;
+    el.innerHTML = `<div class="ihead"><span class="ititle"></span><span class="sugg dcount" data-key="${g.key}"></span></div><p class="ibody">${g.lede}</p>`;
+    el.querySelector(".ititle").textContent = g.title;
+    if (g.manual) { const tg = document.createElement("span"); tg.className = "tag"; tg.textContent = "you do this in the app"; el.querySelector(".ititle").appendChild(tg); }
+    const ctl = document.createElement("div"); ctl.className = "ctl";
+    const all = document.createElement("button"); all.type = "button"; all.className = "batch"; all.textContent = `Use the suggestion for all ${g.rows.length}`;
+    all.addEventListener("click", () => {
+      g.rows.forEach(r => { const cur = R[r.id] || {}; R[r.id] = { d: r.sugg, note: cur.note || "", sg: cur.sg || (r.sugg === "keep" && r.sg) || "" }; save(r.id); });
+      refresh();
+    });
+    ctl.appendChild(all); el.appendChild(ctl);
+    const d = document.createElement("details"); d.className = "members"; d.open = !!g.open;
+    const sm = document.createElement("summary"); sm.textContent = `Show all ${g.rows.length}`; d.appendChild(sm);
+    const ml = document.createElement("div"); ml.className = "mlist";
+    g.rows.forEach(r => {
+      const row = document.createElement("div"); row.className = "mrow drow"; row.dataset.id = r.id;
+      const t = document.createElement("div"); t.className = "mt";
+      const name = r.link ? document.createElement("a") : document.createElement("span");
+      name.className = "dname"; name.textContent = r.title;
+      if (r.link) { name.href = r.link; name.target = "_blank"; name.rel = "noopener"; }
+      const m = document.createElement("span"); m.className = "me"; m.textContent = r.meta;
+      t.append(name, m);
+      const right = document.createElement("div"); right.className = "dctl";
+      right.appendChild(pick(r.id, g.opts));
+      if (g.groups) { const s = groupSelect(r); s.dataset.suggest = r.sg || ""; right.appendChild(s); }
+      row.append(t, right); ml.appendChild(row);
+    });
+    d.appendChild(ml); el.appendChild(d); list.appendChild(el);
+  });
+  sec.appendChild(list);
+  document.getElementById("sections").appendChild(sec);
+}
+function renderQuestions() {
+  const host = document.getElementById("questions");
+  QUESTIONS.forEach(q => {
+    const el = document.createElement("div"); el.className = "q"; el.dataset.id = q.id;
+    const p = document.createElement("p"); p.textContent = q.q; el.appendChild(p);
+    const o = document.createElement("div"); o.className = "opts";
+    q.opts.forEach(t => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.textContent = t; b.dataset.v = t;
+      b.addEventListener("click", () => rule(q.id, t));
+      o.appendChild(b);
+    });
+    el.append(o, noteInput(q.id));
+    host.appendChild(el);
+  });
+}
+let filterArea = "all", query = "";
+function renderFilters() {
+  const host = document.getElementById("filters");
+  const counts = {}; FINDINGS.forEach(f => counts[f.a] = (counts[f.a] || 0) + 1);
+  const mk = (key, label) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.area = key;
+    b.textContent = label; b.setAttribute("aria-pressed", key === filterArea);
+    b.addEventListener("click", () => { filterArea = key; host.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.area === key)); renderFull(); });
+    host.appendChild(b);
+  };
+  mk("all", "All " + FINDINGS.length);
+  Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => mk(k, k + " " + v));
+  const q = document.createElement("input"); q.id = "q"; q.type = "search"; q.placeholder = "Search findings"; q.setAttribute("aria-label", "Search findings");
+  q.addEventListener("input", () => { query = q.value.toLowerCase(); renderFull(); });
+  host.appendChild(q);
+}
+function renderFull() {
+  const host = document.getElementById("fullList"); host.textContent = "";
+  const rows = FINDINGS.filter(f => (filterArea === "all" || f.a === filterArea) && (!query || (f.id + " " + f.t + " " + f.e).toLowerCase().includes(query)));
+  if (!rows.length) { host.innerHTML = '<p class="empty">No findings match.</p>'; return; }
+  rows.forEach(f => { const r = memberRow(f.id); if (r) host.appendChild(r); });
+  refresh();
+}
+function refresh() {
+  document.querySelectorAll(".seg").forEach(s => {
+    const id = s.dataset.for, e = effective(id);
+    s.classList.toggle("inherit", e.inherit);
+    s.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === e.d));
+  });
+  document.querySelectorAll(".note").forEach(n => { const v = (R[n.dataset.for] || {}).note || ""; if (document.activeElement !== n && n.value !== v) n.value = v; });
+  document.querySelectorAll(".q").forEach(q => { const d = (R[q.dataset.id] || {}).d; q.querySelectorAll(".opt").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === d)); });
+  document.querySelectorAll(".gsel").forEach(s => {
+    const v = R[s.dataset.for] || {};
+    const keep = v.d === "keep";
+    s.hidden = !keep;
+    if (s.value !== (v.sg || "")) s.value = v.sg || "";
+  });
+  DECLUTTER.forEach(g => {
+    const n = g.rows.filter(r => R[r.id] && R[r.id].d).length;
+    const c = document.querySelector(`.dcount[data-key="${g.key}"]`);
+    const arch = g.rows.filter(r => R[r.id] && (R[r.id].d === "archive" || R[r.id].d === "delete")).length;
+    if (c) c.textContent = n ? `${n} of ${g.rows.length} decided · ${arch} to ${g.opts[0][1].toLowerCase()}` : `${g.rows.length} to decide`;
+  });
+  const top = SECTIONS.flatMap(s => s.items.map(i => i.id)).concat(QUESTIONS.map(q => q.id)).concat(Object.keys(ROWS));
+  const done = top.filter(id => R[id] && R[id].d).length;
+  document.getElementById("progText").textContent = `${done} of ${top.length} ruled`;
+  document.getElementById("progFill").style.width = (100 * done / top.length) + "%";
+  const ruledFindings = FINDINGS.filter(f => effective(f.id).d).length;
+  document.getElementById("fullText").textContent = `${ruledFindings} of ${FINDINGS.length} findings covered`;
+  document.querySelectorAll(".item").forEach(el => el.classList.toggle("ruled", !!(R[el.dataset.id] && R[el.dataset.id].d)));
+}
+
+renderSections(); if (DECLUTTER.length) renderDeclutter(); renderQuestions(); renderFilters(); renderFull(); refresh();
+
+/* ---------- storage ---------- */
+(async () => {
+  const timer = setTimeout(() => setStatus("Can't reach saved rulings: rule in chat instead", "err"), 10000);
+  let cap = null;
+  try { cap = await (window.claude && window.claude.use ? window.claude.use("db") : null); } catch (e) { cap = null; }
+  if (!cap) { clearTimeout(timer); setStatus("View only: rulings won't save here", "err"); return; }
+  db = cap;
+  db.collection("rulings").onSnapshot(snap => {
+    clearTimeout(timer); canSave = true;
+    const ids = new Set();
+    snap.docs.forEach(d => { ids.add(d.id); if (pending[d.id]) return; const v = d.data() || {}; R[d.id] = { d: v.decision || null, note: v.note || "", sg: v.sidebarGroup || "" }; });
+    Object.keys(R).forEach(k => { if (!ids.has(k) && !pending[k]) delete R[k]; });
+    if (status.textContent === "Connecting…") setStatus(snap.docs.length ? `${snap.docs.length} rulings loaded` : "Ready", "ok");
+    refresh();
+  }, err => { clearTimeout(timer); setStatus("Not saving: " + (err && err.code || "error"), "err"); });
+})();
+</script>

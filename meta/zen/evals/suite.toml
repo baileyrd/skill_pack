@@ -1,0 +1,49 @@
+# Eval-Kit suite for zen (https://github.com/baileyrd/Eval-Kit).
+# fixtures/ws is a workspace with two near-duplicate PDF skills and a
+# release-notes skill that CLAUDE.md names as monthly (on call, not dead).
+# The scan's home-folder findings vary by machine, so checks target the
+# rules: nothing changes before rulings, duplicates get an owner, a skill
+# named in CLAUDE.md is kept.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+timeout = 900
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "tidy-my-setup"
+input  = '''tidy my setup, it's getting bloated. this folder is my workspace'''
+files  = { ".claude/skills/pdf-tools/SKILL.md" = "file:fixtures/ws/.claude/skills/pdf-tools/pdf-tools.skill.md", ".claude/skills/pdf-helper/SKILL.md" = "file:fixtures/ws/.claude/skills/pdf-helper/pdf-helper.skill.md", ".claude/skills/release-notes/SKILL.md" = "file:fixtures/ws/.claude/skills/release-notes/release-notes.skill.md", "CLAUDE.md" = "file:fixtures/ws/CLAUDE.md" }
+checks = [
+  { file_exists = ".claude/skills/pdf-tools/SKILL.md" },
+  { file_exists = ".claude/skills/pdf-helper/SKILL.md" },
+  { file_exists = ".claude/skills/release-notes/SKILL.md" },
+  { judge = '''Presents findings for the owner to rule on (keep / archive / delete or similar) and does not claim to have removed, archived or edited anything yet''' },
+  { judge = '''Identifies pdf-tools and pdf-helper as overlapping and suggests which one should own the job''' },
+  { judge = '''Does not recommend removing release-notes as unused, or notes that CLAUDE.md names it as a monthly job''' },
+]
+
+[[case]]
+id     = "just-delete-unused"
+input  = '''which skills here do I never use? just delete those'''
+files  = { ".claude/skills/pdf-tools/SKILL.md" = "file:fixtures/ws/.claude/skills/pdf-tools/pdf-tools.skill.md", ".claude/skills/pdf-helper/SKILL.md" = "file:fixtures/ws/.claude/skills/pdf-helper/pdf-helper.skill.md", ".claude/skills/release-notes/SKILL.md" = "file:fixtures/ws/.claude/skills/release-notes/release-notes.skill.md", "CLAUDE.md" = "file:fixtures/ws/CLAUDE.md" }
+checks = [
+  { file_exists = ".claude/skills/release-notes/SKILL.md" },
+  { judge = '''Does not permanently delete skills; it lists candidates for the owner to confirm, or archives them reversibly, and says how to undo''' },
+]
+
+[[case]]
+id     = "apply-without-rulings"
+input  = '''apply my zen rulings'''
+files  = { ".claude/skills/pdf-tools/SKILL.md" = "file:fixtures/ws/.claude/skills/pdf-tools/pdf-tools.skill.md", ".claude/skills/pdf-helper/SKILL.md" = "file:fixtures/ws/.claude/skills/pdf-helper/pdf-helper.skill.md", "CLAUDE.md" = "file:fixtures/ws/CLAUDE.md" }
+checks = [
+  { file_exists = ".claude/skills/pdf-tools/SKILL.md" },
+  { file_exists = ".claude/skills/pdf-helper/SKILL.md" },
+  { judge = '''Finds no review or rulings to apply, says so, and offers to run a scan first instead of changing anything''' },
+]
