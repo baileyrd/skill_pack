@@ -1,19 +1,23 @@
 ---
 name: chat-to-artifact
 description: >-
-  Turns a chat discussion into one polished, self-contained artifact document
-  that someone who missed the conversation can read cold, in Claude's
-  artifact style. Harvests decisions with their reasons, context, outcomes,
-  rejected options, open questions and action items, keeps only what the chat
-  actually settled, strips secrets, then renders a single HTML page (inline
-  CSS, no CDN, light and dark, prints cleanly) or Markdown, and checks it with
-  scripts/check_doc.py. Use when the user asks to "turn this chat into a doc",
-  "write this up", "make an artifact of this conversation", "summarize what we
-  decided", "make this shareable for my team", or pastes a transcript and
-  wants a clean document out of it. Not for diagrams of code or branches
-  (that is visual) or for a pack an agent will consult later (that is
-  project-expert).
-compatibility: Python 3 (stdlib only) for the optional check script.
+  Turns a chat discussion into one polished, self-contained document in the
+  Claude Docs format that someone who missed the conversation can read cold.
+  Harvests decisions with their reasons, context, outcomes, rejected options,
+  open questions and action items, keeps only what the chat actually settled,
+  strips secrets, then writes Claude Docs Markdown (title, as-of byline, lead
+  that answers, short sections, pipe tables, task lists), or creates it in
+  Claude Docs when that connector is present, or a self-contained HTML page
+  on request; scripts/check_doc.py checks it. Agent-neutral: works in any
+  agent that loads Agent Skills, not only Claude. Use when the user asks to
+  "turn this chat into a doc", "write this up", "make an artifact of this
+  conversation", "summarize what we decided", "make this shareable for my
+  team", or pastes a transcript and wants a clean document out of it. Not
+  for diagrams of code or branches (that is visual) or for a pack an agent
+  will consult later (that is project-expert).
+compatibility: >-
+  Any agent that reads SKILL.md (Claude Code, claude.ai, Codex, Gemini CLI,
+  Cursor and others). The check script needs Python 3, standard library only.
 metadata:
   version: "1.0.0"
 ---
@@ -24,6 +28,15 @@ The reader was not in the chat. Everything below follows from that: the
 document has to stand alone, say what was decided and why, and leave out the
 path the conversation took to get there unless that path explains a decision.
 
+The output format is the Claude Docs format, whatever agent or model is
+running this skill: Markdown with a fixed head (title, as-of byline, a lead
+that answers) and a plain house style. It reads well as a raw `.md` file,
+renders on GitHub and in any Markdown viewer, and goes into Claude Docs
+without rework. [`references/claude-doc-format.md`](references/claude-doc-format.md)
+is the full spec with an example; read it before step 4. Nothing here
+assumes a particular agent's tools: where a step names a tool, it says what
+to do when that tool is absent.
+
 ## Rules that hold every run
 
 - **Only what the chat settled.** A decision is something a participant
@@ -33,7 +46,8 @@ path the conversation took to get there unless that path explains a decision.
   out when the chat never gave one. A plausible reason you inferred is still
   invented; so is a "why" column for follow-ups nobody justified, a lessons
   section the chat never drew, or a job title ("the on-call engineer") for a
-  speaker the chat never described.
+  speaker the chat never described. An inference the reader needs goes under
+  `## Assumptions to check`, marked as yours.
 - **Latest word wins.** When the chat changed its mind, record the final
   position; the earlier one goes under rejected options with the reason it
   lost, and only if the reason is useful to the reader.
@@ -66,34 +80,42 @@ path the conversation took to get there unless that path explains a decision.
    each: decision record (default), plan or spec, explainer, incident or
    debugging write-up, meeting-style notes. Drop any empty section rather
    than writing "None".
-4. **Write.** Title that names the subject, not "Chat summary". One-line
-   subtitle with the date and audience. A TL;DR of two to four sentences that
-   leads with the outcome. Then the sections. Tables for anything compared on
-   the same attributes; code blocks only for code or commands the reader will
-   run. Keep it shorter than the chat.
+4. **Write** in the Claude Docs format (the example in the format
+   reference is the model): `# Title` that names the
+   subject (not "Chat summary"); the byline `<as-of date> · <author>` (the
+   author is the person who asked, by the name the chat uses; no name, no
+   author); a lead of one to three sentences whose first sentence is the
+   outcome; then `## ` sections. Pipe tables for items compared on the same
+   attributes, `- [ ]` tasks for action items, code blocks only for code or
+   commands the reader will run, a `## Sources` list last when the chat
+   cited links, and `## Assumptions to check` last when you inferred
+   anything (inferences go there, nowhere else). Keep it shorter than the
+   chat.
 5. **Render.** Choose the output in this order:
    1. The user named a format or file name: use it.
-   2. The environment has a native artifact or document tool (a claude.ai
-      artifact, a Docs or artifact-publishing connector): create the
-      document there with the same content.
-   3. Otherwise write one HTML file from
-      [`assets/template.html`](assets/template.html): replace `{{TITLE}}`,
-      `{{SUBTITLE}}`, `{{BODY}}` and `{{FOOTER}}` (source and date only:
-      "Written up from a chat on 2026-11-10"), using the classes listed
-      in the template's header comment. Name it after the title in
-      kebab-case (`auth-token-rotation.html`) and write it in the user's
-      working directory, never inside this skill's folder.
-   4. Markdown instead when the destination is a repo, PR, wiki or chat
-      paste: same sections, `# Title` first, no HTML.
+   2. A Claude Docs connector is available: create the doc there from the
+      same Markdown, following the connector's own instructions (outline
+      first, then one section per update; the byline as its date and
+      mention chips).
+   3. Otherwise write `<title-in-kebab-case>.md` (`auth-token-rotation.md`)
+      in the user's working directory, never inside this skill's folder.
+      An agent with its own artifact or canvas view may also show it there,
+      with the same Markdown.
+   4. A styled page was asked for (HTML, "a page", "something I can open in
+      a browser"): fill [`assets/template.html`](assets/template.html)'s
+      `{{TITLE}}`, `{{SUBTITLE}}` (the byline), `{{BODY}}` (the same
+      sections as HTML, using the classes in its header comment) and
+      `{{FOOTER}}` (source and date only: "Written up from a chat on
+      2026-11-10"). Same content, same order as the Markdown.
 6. **Check.** For a file, run
    `python3 <skill-folder>/scripts/check_doc.py <file>` from the user's
    working directory (the sync drops the executable bit, so to run it
    directly first `chmod +x scripts/*.py 2>/dev/null || true` in the skill
-   folder). It fails on a leftover `{{placeholder}}`, an empty title,
-   external scripts, styles, fonts or images, and strings shaped like keys
-   or tokens. Fix every finding and run it again; deliver only on a clean
-   pass. If running it is refused, check those four by eye and say the
-   script did not run. Then reread once as the cold reader: does each
+   folder). It fails on a leftover `{{placeholder}}`, a missing title or
+   byline, external scripts, styles, fonts or images, and strings shaped
+   like keys or tokens. Fix every finding and run it again; deliver only on
+   a clean pass. If the agent can't run scripts, or running it is refused,
+   check those by eye and say the script did not run. Then reread once as the cold reader: does each
    decision carry the why the chat gave, and is any reference meaningful only
    inside the chat?
 7. **Deliver.** Give the path or link and a two-line summary of what the

@@ -94,7 +94,7 @@ self-contained document rather than code, a diagram, or a change to a repo.
 
 | Skill | Does |
 |---|---|
-| [`chat-to-artifact/`](writing/chat-to-artifact) | Turns a chat discussion (live or a pasted transcript) into one polished, self-contained document for a reader who wasn't there: decisions with their reasons, outcomes, rejected options, open questions and action items, only what the chat settled, secrets stripped. Renders a dependency-free HTML page (light/dark, print) or Markdown, or uses the environment's native artifact tool, then runs `check_doc.py` for placeholders, external resources and leaked keys. |
+| [`chat-to-artifact/`](writing/chat-to-artifact) | Turns a chat discussion (live or a pasted transcript) into one polished, self-contained document for a reader who wasn't there: decisions with their reasons, outcomes, rejected options, open questions and action items, only what the chat settled, secrets stripped. Writes the Claude Docs format (title, as-of byline, a lead that answers, short sections, tables, tasks, assumptions to check) as Markdown any agent can produce, creates it in Claude Docs when that connector is present, or a dependency-free HTML page on request; `check_doc.py` checks the head, placeholders, external resources and leaked keys. Agent-neutral: Claude, Codex, Gemini CLI, Cursor. |
 
 ## Versioning
 

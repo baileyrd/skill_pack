@@ -4,9 +4,9 @@
 Usage: python3 scripts/check_doc.py <file.html|file.md>
 
 Prints one finding per line and exits 1 if there are any, 0 on a clean pass.
-Checks: leftover {{PLACEHOLDER}}s, a missing or empty title, external
-resources that break the page offline (HTML only), and strings shaped like
-credentials.
+Checks: leftover {{PLACEHOLDER}}s, a missing or empty title, the Claude Docs
+byline (Markdown), external resources that break the page offline (HTML), and
+strings shaped like credentials.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from pathlib import Path
 
 PLACEHOLDER = re.compile(r"\{\{\s*[A-Z_]+\s*\}\}")
 HTML_TITLE = re.compile(r"<title>\s*(.*?)\s*</title>", re.IGNORECASE | re.DOTALL)
-MD_TITLE = re.compile(r"^# \S", re.MULTILINE)
+BYLINE = re.compile(r"^\d{4}-\d{2}-\d{2}( · \S.*)?$")
 
 # Tags whose src/href is fetched when the page loads. Plain <a href> links are
 # fine: the page still renders without them.
@@ -54,8 +54,13 @@ def check_html(text: str) -> list[str]:
 
 
 def check_markdown(text: str) -> list[str]:
-    """Return findings specific to a Markdown document."""
-    return [] if MD_TITLE.search(text) else ["no '# Title' heading"]
+    """Return findings for the Claude Docs head: '# Title', then the byline."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if not lines or not lines[0].startswith("# ") or len(lines[0]) < 3:
+        return ["first line must be the '# Title' heading (no front matter)"]
+    if len(lines) < 2 or not BYLINE.match(lines[1]):
+        return ["second line must be the byline 'YYYY-MM-DD · Author' (or the date alone)"]
+    return []
 
 
 def check_common(text: str) -> list[str]:

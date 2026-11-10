@@ -1,8 +1,8 @@
 # Document shapes
 
-Read this at step 3 to pick a section order. Every shape opens with title,
-subtitle and TL;DR. Drop empty sections; rename a heading when the subject
-has a better word for it.
+Read this at step 3 to pick a section order. Every shape opens with the
+Claude Docs head (title, byline, lead; see `claude-doc-format.md`). Drop
+empty sections; rename a heading when the subject has a better word for it.
 
 ## Decision record (default)
 
@@ -13,8 +13,9 @@ For a chat that weighed options and settled something.
    why the chat gave (none given: no why line).
    Use the `decision` class in HTML.
 3. Outcomes: what now exists (PRs, files, measurements), with links.
-4. Rejected options: a table of option, why not.
-5. Open questions and action items: a table of item, owner, status.
+4. Rejected options: a pipe table of option, why not.
+5. Open questions and action items: open questions as bullets; action items as `- [ ]` tasks with the owner
+   when one was named.
 
 ## Plan or spec
 
@@ -54,4 +55,4 @@ future debugger would otherwise repeat.
 For a broad chat touching several topics with no single thread.
 
 1. One heading per topic, each with its own short decisions and open points.
-2. A combined action-item table at the end.
+2. A combined `- [ ]` action-item list at the end.

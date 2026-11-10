@@ -6,9 +6,10 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 ## [Unreleased]
 ### Added
 - `writing/chat-to-artifact` (v1.0.0) — turns a chat into a self-contained
-  artifact document (HTML or Markdown) with a placeholder/offline/secret
-  check script, unit tests and a 3-case Eval-Kit suite. Opens the `writing/`
-  category.
+  document in the Claude Docs format (Markdown any agent can write; Claude
+  Docs via the connector; HTML on request), with a head/placeholder/offline/
+  secret check script, unit tests and a 3-case Eval-Kit suite. Agent-neutral.
+  Opens the `writing/` category.
 - `meta/context-audit` and `meta/zen` (v1.0.0) — Claude setup hygiene: a
   token-waste audit with a score, and a reviewed, reversible declutter.
   Imported from uploads; non-spec frontmatter dropped, retro steps added.

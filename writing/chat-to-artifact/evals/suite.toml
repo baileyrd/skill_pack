@@ -3,7 +3,8 @@
 # or pasted in the input. fixtures/cache-chat.md reverses a decision (TTL 60s
 # -> 300s), pastes a fake live key, names a reviewer but no owner for the open
 # question. fixtures/rename-chat.md settles a name after two rejections and
-# leaves an action item unowned.
+# leaves an action item unowned; notes.md must open with the Claude Docs head
+# (title, then the as-of byline).
 #
 #   python3 -m evalkit run     evals/suite.toml --jobs 4
 #   python3 -m evalkit compare evals/suite.toml control skill
@@ -36,7 +37,7 @@ input  = '''write up the naming discussion in rename-chat.md as a markdown doc, 
 files  = { "rename-chat.md" = "file:fixtures/rename-chat.md" }
 checks = [
   { file_exists = "notes.md" },
-  { regex = '(?m)^# \S', in = "notes.md" },
+  { regex = '\A# \S[^\n]*\n\s*\d{4}-\d{2}-\d{2}', in = "notes.md" },
   { regex = '(?i)kiln\.toml', in = "notes.md" },
   { judge = '''notes.md states kiln as the chosen name and gives forge and anvil as rejected with their reasons (name collision / PyPI taken), not as the decision''' },
   { judge = '''notes.md lists grabbing the GitHub org name as an action item with no owner (unassigned or similar) rather than inventing one''' },

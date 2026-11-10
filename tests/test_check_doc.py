@@ -79,9 +79,20 @@ class TestHtml(unittest.TestCase):
         findings = self.check(filled("<p>postgres://app:hunter2@db.internal/x</p>"))
         self.assertTrue(any("credentials in URL" in f for f in findings))
 
-    def test_markdown_needs_title(self):
-        self.assertEqual(self.check("# Kiln naming\n\nBody\n", ".md"), [])
-        self.assertEqual(self.check("Body only\n", ".md"), ["no '# Title' heading"])
+    def test_markdown_claude_docs_head_passes(self):
+        doc = "# Kiln naming\n\n2026-11-10 · Sam\n\nThe CLI is called kiln.\n"
+        self.assertEqual(self.check(doc, ".md"), [])
+        self.assertEqual(self.check("# Kiln naming\n\n2026-11-10\n\nLead.\n", ".md"), [])
+
+    def test_markdown_front_matter_flagged(self):
+        """Front matter pushes the title off line one; Claude Docs shows it as text."""
+        findings = self.check("---\ntitle: x\n---\n# Kiln\n\n2026-11-10\n", ".md")
+        self.assertTrue(findings[0].startswith("first line must be the '# Title'"))
+
+    def test_markdown_missing_byline_flagged(self):
+        """A doc with no as-of date gives the reader no idea how stale it is."""
+        findings = self.check("# Kiln naming\n\nThe CLI is called kiln.\n", ".md")
+        self.assertTrue(findings[0].startswith("second line must be the byline"))
 
     def test_unsupported_suffix(self):
         self.assertTrue(self.check("x", ".txt")[0].startswith("unsupported file type"))
