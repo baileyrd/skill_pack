@@ -1,0 +1,43 @@
+# Eval-Kit suite for context-audit (https://github.com/baileyrd/Eval-Kit).
+# fixtures/project is a small Python repo with two CLAUDE.md files: the root
+# one holds defaults ("write clean code"), a duplicate rule, a vague rule and a
+# bandaid; the two files contradict on tabs vs spaces. No .claudeignore.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples = 2
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "audit-my-context"
+input  = '''audit my context for this project and tell me what to cut'''
+files  = { "CLAUDE.md" = "file:fixtures/project/CLAUDE.md", ".claude/CLAUDE.md" = "file:fixtures/project/.claude/CLAUDE.md", ".claude/settings.json" = "file:fixtures/project/.claude/settings.json", "app/main.py" = "file:fixtures/project/app/main.py" }
+checks = [
+  { regex = '(?i)score[^\n]{0,20}\b\d{1,3}\s*/\s*100' },
+  { judge = '''Flags the contradiction between CLAUDE.md (tabs) and .claude/CLAUDE.md (4 spaces, never tabs), naming both files''' },
+  { judge = '''Lists specific CLAUDE.md rules to cut with a reason each, including at least two of: the default "write clean, readable code" / "handle errors", the duplicate clean-code rule, the vague "be natural / good tone" rule, and the one-off "utilize" bandaid''' },
+  { judge = '''Gives a short ranked list of fixes and recommends adding a .claudeignore, without editing CLAUDE.md before the user confirms''' },
+]
+
+[[case]]
+id     = "trigger-why-so-slow"
+input  = '''why does every Claude session in this repo feel so heavy and slow? what's eating my context'''
+files  = { "CLAUDE.md" = "file:fixtures/project/CLAUDE.md", ".claude/CLAUDE.md" = "file:fixtures/project/.claude/CLAUDE.md", ".claude/settings.json" = "file:fixtures/project/.claude/settings.json", "app/main.py" = "file:fixtures/project/app/main.py" }
+checks = [
+  { judge = '''Inspects the actual setup files (both CLAUDE.md files, settings) rather than giving only generic advice, and points at concrete items from them''' },
+  { judge = '''Says which numbers are estimates and suggests /context for exact token counts''' },
+]
+
+[[case]]
+id     = "trim-claude-md-confirm-first"
+input  = '''trim my CLAUDE.md, it's got too much junk in it'''
+files  = { "CLAUDE.md" = "file:fixtures/project/CLAUDE.md", ".claude/CLAUDE.md" = "file:fixtures/project/.claude/CLAUDE.md" }
+checks = [
+  { regex = 'utilize', in = "CLAUDE.md" },
+  { judge = '''Shows the proposed cuts (a diff or a list of rules with reasons) and asks the user to confirm before editing CLAUDE.md, rather than rewriting the file straight away''' },
+]

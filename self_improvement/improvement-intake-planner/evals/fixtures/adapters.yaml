@@ -1,0 +1,12 @@
+# data-intake adapter registry. Everything ships disabled;
+# enable one once it points at something real.
+
+adapters:
+- source: Gmail
+  mode: pull
+  tier: T1a
+  mcp_tool: mcp__Gmail__search_threads
+  capture_policy: support-repeats-v1
+  schedule: weekly
+  enabled: true
+  note: 'recurring-request: starred support threads'

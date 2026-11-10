@@ -47,6 +47,8 @@ loop-closing step already built in. Mostly aimed at the skills in this repo;
 | [`learn-it/`](meta/learn-it) | Distills a session's actual patterns/anti-patterns/gotchas into a new (or updated) skill matching this repo's own authoring conventions, reported for approval before anything is written. |
 | [`my-skill-creator/`](meta/my-skill-creator) | This repo's own fork of Anthropic's `skill-creator` (draft → test → eval → iterate → optimize description → package), with `skill_pack`'s own authoring conventions applied automatically and a `skill-retro` wrap-up step built into every skill it drafts or improves by default. |
 | [`find-skills/`](meta/find-skills) | Finds a skill someone else already wrote: checks the skills.sh leaderboard, searches `npx skills find`, and screens install count and source reputation before recommending. The only `meta/` skill pointed outward rather than at this repo. |
+| [`context-audit/`](meta/context-audit) | Audits a Claude Code setup for token waste: a script scores MCP servers, skills, settings, effort, LSP, hooks, compaction and `.claudeignore`, then every CLAUDE.md rule is tested for defaults, contradictions, redundancy, bandaids and vagueness. Returns a 0-100 score with fixes ranked by impact. |
+| [`zen/`](meta/zen) | Fortnightly declutter of a whole Claude setup (skills, agents, plugins, hooks, connectors, scheduled jobs, chats, artifacts): a read-only scan, one review page where the owner rules on each item, then only approved changes, archived rather than deleted and undoable. |
 
 ### [`web_dev/`](web_dev) — web framework code generation
 
@@ -72,6 +74,19 @@ structured review of what already exists.
 | [`webapp-reverse-engineer/`](dev_practices/webapp-reverse-engineer) | Deconstructs a running web application from client-observable signals — DOM, network traffic, JS bundles, headers — into a tech-stack report and optional rebuild blueprint. Scoped to the user's own access; observes how authorization is enforced rather than probing for a way past it. |
 | [`microkernel-architecture-audit/`](dev_practices/microkernel-architecture-audit) | Audits a microkernel-style system across eight dimensions — core/plugin boundaries, IPC contracts, capability-based security, WASM sandbox integrity, plugin lifecycle, dependency inversion, async concurrency, test coverage — with archetype-aware language for Rust/Tauri and FastAPI targets plus a generic fallback. |
 | [`project-expert/`](dev_practices/project-expert) | Builds an in-repo project expert (formerly `project-handoff`): a `<slug>-expert` subagent plus a path-scoped CLAUDE.md routing rule, backed by a handoff pack (SPEC, DECISIONS with provenance tags, pre-answered Q&A, OPEN_QUESTIONS), so threads ask it design questions and only intent, scope or taste reaches you. Works with or without a pack and a design chat: handoff mode from a chat, harvest mode from repo docs, merged PRs, remind-me and cards; checks open PRs for an existing pack first; points at an existing decision log instead of copying it; lists every unsourced open question. Refresh, resolve and migrate modes; cloud-safe fallback; acceptance checks. |
+
+### [`self_improvement/`](self_improvement) — harvest signal for a self-improving setup
+
+The harvest half of a self-improvement loop: decide which connected sources
+carry recurring correction, drift or demand signal, then pull curated events
+into `evidence/intake/raw-events/` for human review. Read-only and weekly by
+default. The downstream half (turning events into proposed skill or context
+changes) is not in this pack yet.
+
+| Skill | Does |
+|---|---|
+| [`improvement-intake-planner/`](self_improvement/improvement-intake-planner) | Run first. Scaffolds the `evidence/` workspace, maps connected MCP servers to the kind of signal they carry, and writes a harvest plan plus adapter stanzas that all ship disabled. |
+| [`data-intake/`](self_improvement/data-intake) | Runs the plan: validates the event envelope, sorts to a source folder, dedupes by source and event id, checkpoints state. Pulls MCP sources in session, runs script adapters, drains a push dropzone. |
 
 ### [`diagrams/`](diagrams) — the diagram is the deliverable
 
