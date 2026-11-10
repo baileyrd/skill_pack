@@ -16,3 +16,12 @@ project-expert lives at
   projects with an existing log, branch-from-unmerged-docs-branch delivery, and
   six acceptance checks. Builds on project-handoff v1.3.0 templates rather than
   duplicating them.
+
+- **Fixed (found by a blind dry run on baileyrd/portfolio_intelligence, where an
+  open PR already held a pack):** the pack check runs first and also looks at
+  open PRs and branches, judged by changed files; `remind_me_search` is given a
+  query (the tool rejects `include_raw` without one); agent-written docs and
+  reviews under the user's login are `[default]`, not `[stated]`; QA seeding
+  overrides harvest's empty QA; repo with only AGENTS.md gets a CLAUDE.md plus a
+  pointer; slug spelling and board-key aliases; acceptance replaces the
+  post-merge smoke test; reversal check uses a `[stated]` prohibition.
