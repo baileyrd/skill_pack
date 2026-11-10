@@ -28,6 +28,12 @@ this log tracks commits against `main`.
   inferred; QA is seeded only from sourced answers; AGENTS.md-only repos get a
   CLAUDE.md plus a pointer; SPEC header order; optional "Hard lines" in the
   expert; board-key spelling and filter caveats.
+- **Fixed after a third blind run:** step 1 lists PR file names with REST
+  (`get_files` returns patches even at `perPage=1`; `list_pull_requests` returns
+  bodies); a verbatim user turn may be lifted from a discounted capture; cloud
+  `gh` GraphQL 403 falls back to REST; QA wording matches in templates; alias
+  upsert skipped when aliases exist; user-identity mapping; PR author can't be
+  the reviewer.
 - **Known gap:** the fixed skill has not yet had a clean blind run (the second
   dry run leaked PR content through `get_files`; step 1 now says to list names).
 

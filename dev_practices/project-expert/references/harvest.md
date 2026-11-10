@@ -16,23 +16,27 @@ tops it up later.
 
 1. **Ground.** Settle the slug, the pack root (`<root>`) and who the user is:
    their GitHub login (`get_me`), board actor (`board_whoami`), and remind-me
-   writer. Provenance depends on this. The board actor may be a service name (`admin`) and
+   writer. Provenance depends on this. If one person shows up under several names
+   (a memory name, a GitHub login, a board actor), map them with the project's
+   remind-me entity or ask once; unmapped means all agent-posted text is a
+   non-quote. The board actor may be a service name (`admin`) and
    agent text is often posted under the owner's login: neither makes the text
    the user's words. Glob for existing packs
    (`**/handoff/SPEC.md`) and experts (`.claude/agents/*-expert.md`); note them.
 2. **Alias first.** Look the project up (`remind_me_project`). If memories use
    variant tags (`tickdigest`, `tick_digest`), `remind_me_entity_upsert`
    (`kind: project`, `aliases: [...]`) so every variant resolves to one project
-   before any search. Do this before step 3 or the harvest silently misses
+   before any search; skip the upsert when `remind_me_project` already lists
+   them. Do this before step 3 or the harvest silently misses
    memories.
 3. **Read the sources.** Collect candidates: claim, locator, date, actor.
 
    | Source | How |
    |---|---|
    | Repo docs | README, ARCHITECTURE, CLAUDE.md, `docs/`, ADRs. Code only to check a claim. |
-   | Merged PRs + reviews | `gh pr list --state merged --json number,title,body,author,mergedAt`, then per PR `gh pr view N --json reviews,comments` and `gh api repos/<o>/<r>/pulls/N/comments`. No gh (cloud)? GitHub MCP `list_pull_requests` and `pull_request_read`. |
-   | remind-me | `remind_me_search` with a `query` (project name) plus tags `[<slug>]`, `include_raw: true`; the tool rejects `include_raw`/`detail` without a query. Results are trimmed to a token budget: fetch the trimmed ids with `remind_me_get`. Keep `written_by` and the memory id. Discount memories written by earlier runs of this skill. |
-   | Design chat | `WebFetch` the link. A share page that renders without the conversation is unread: say so, don't infer it. |
+   | Merged PRs + reviews | Cloud `gh` often fails on GraphQL (403), so use REST: `gh api 'repos/<o>/<r>/pulls?state=closed'` (keep `merged_at`), then per PR `pulls/N/reviews`, `pulls/N/comments`, `issues/N/comments`. Local `gh pr list --state merged --json ...` works too. No gh: GitHub MCP `list_pull_requests` and `pull_request_read`. |
+   | remind-me | `remind_me_search` with a `query` (project name) plus tags `[<slug>]`, `include_raw: true`; the tool rejects `include_raw`/`detail` without a query. Results are trimmed to a token budget: fetch the trimmed ids with `remind_me_get`. Keep `written_by` and the memory id. Filter results to this project; a `project-expert` tag also matches skill-development memories. Discount memories written by earlier runs of this skill. |
+   | Design chat | `WebFetch` the link. A share page that renders without the conversation is unread: say so, don't infer it. No link given? Try `recent_chats` / `conversation_search` if those tools exist, else `unknown`. |
    | Existing decision log | A found `DECISIONS.md` or ADR folder is the source: point to it, keep its numbering. |
    | Board | `board_list` ignores some filters and can return every card; filter by `.project` yourself. Try both `_` and `-` project spellings. |
    | Cards | `board_list` for the project, `card_get` for each card; take comments and the actor. |

@@ -55,9 +55,11 @@ Harvest is stricter: `[stated]` needs a quote of the user's own words (their
 prompt, a chat turn, a memory that quotes them) and there is no `[agreed]`.
 Not quotes, so `[default]`: agent-written docs, PRs and reviews posted under the
 user's login; "owner approved" claims in docs (a lead to chase, not a source);
-a model-written memory that paraphrases the user, unless the original turn is
-readable. Discount memories and transcripts written by an earlier run of this
-skill; they repeat that run's guesses. Quotes may be trimmed but not reworded.
+a model-written memory that paraphrases the user. A verbatim "User:" turn in a
+dialog capture counts as a quote even if a model saved the capture. Discount the
+summaries, memories and transcripts an earlier run of this skill wrote (they
+repeat its guesses), but you may lift a verbatim user turn out of one. Quotes
+may be trimmed, not reworded.
 
 ## Layout and naming
 
@@ -81,9 +83,11 @@ skill; they repeat that run's guesses. Quotes may be trimmed but not reworded.
 1. **Fork: is there already a pack?** Before any sweep, glob
    `**/handoff/SPEC.md` and `.claude/agents/*-expert.md`, then check what is not
    on the default branch: open PRs and remote branches touching `**/handoff/` or
-   `.claude/agents/`. List a PR's changed file *names* (`pull_request_read`
-   `get_files` with `perPage=1`, paging, or filter the names); a title proves
-   nothing and full patches flood context. An open PR that adds a pack **is the
+   `.claude/agents/`. PRs can't be searched by path, so list the open ones and then each one's
+   changed file *names* with REST: `gh api repos/<o>/<r>/pulls/N/files --jq
+   '.[].filename'`. The GitHub MCP `get_files` returns whole patches even with
+   `perPage=1`, and `list_pull_requests` returns full bodies; avoid both when
+   you must stay blind. A title proves nothing. An open PR that adds a pack **is the
    pack**: do not build a second. Report it and ask once: extend it, supersede
    it, or leave it. Pack on main: refresh (below) and wire only the expert and
    routing row. None anywhere: continue.
@@ -126,7 +130,8 @@ skill; they repeat that run's guesses. Quotes may be trimmed but not reworded.
    sha, sources read, counts per tag.
 7. **Deliver.** Reachable repo: branch `handoff/<slug>` from the default branch,
    or from the unmerged docs branch that holds the decision log (say so in the
-   PR). One PR, reviewer requested, the repo's PR template if any. The body lists
+   PR). One PR, the repo's PR template if any. Request the named reviewer; the PR
+   author can't be one, so with none named say in the body that review is needed. The body lists
    the intake `[default]`s, every unreadable source, and **every OPEN_QUESTIONS
    item you could not source**. `remind_me_add` the PR (opened, branch, why).
    No repo yet: `SendUserFile` (offer to create the repo; don't unasked).

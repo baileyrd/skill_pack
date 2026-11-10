@@ -79,7 +79,7 @@ in the user's words. Never edit a row; supersede it with a new one.
 ```markdown
 # Implementer Q&A — <slug>
 Questions an implementer would ask, answered from the design chat.
-Harvest packs start this file empty; the expert adds only questions actually asked.
+Harvest packs seed only questions the sources settle, each citing its source; the expert adds the rest as they are asked.
 
 ## Data
 - **Q:** What's the identity key for a file? **A:** content hash (BLAKE3) + size. [agreed]
