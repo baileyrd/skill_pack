@@ -66,3 +66,5 @@ link	my_loops/docs-loop/evals/fixtures/repo/README.md	docs/design.md
 inline-path	diagrams/visual/evals/fixtures/plan.md	svc/sweeper.py
 inline-path	diagrams/visual/evals/fixtures/plan.md	tests/test_expiry.py
 inline-path	dev_practices/project-handoff/references/templates.md	docs/handoff/
+inline-path	dev_practices/project-expert/SKILL.md	docs/handoff/
+inline-path	dev_practices/project-expert/SKILL.md	.claude/agents/
