@@ -8,7 +8,8 @@
 #   python3 -m evalkit run     evals/suite.toml --jobs 4
 #   python3 -m evalkit compare evals/suite.toml control skill
 
-samples = 2
+samples       = 2
+allowed_tools = ["Bash"]    # lets the skill run check_doc.py unattended
 
 [variant.control]
 
@@ -54,4 +55,5 @@ checks = [
   { judge = '''Produces a standalone document (a file or a complete document in the reply) with a title and a short summary that leads with the outcome: the backup failure was fixed by adding the backup role to the bucket policy'''},
   { judge = '''The document names the root cause (the Tuesday bucket policy change caused AccessDenied on PutObject) and how the fix was verified (dry run, then the next nightly run passed)''' },
   { judge = '''The two-night failure alert appears as a follow-up or action item, not as something already done, and the document reads on its own without phrases like "as discussed above"''' },
+  { judge = '''The chat stated only: backups failing since Tuesday; AccessDenied on PutObject after Tuesday's bucket policy change; Dana tightened the policy; fix is adding the backup role's ARN to allowed principals; a dry run succeeded; it was applied and tonight's run passed; an alert for two failed nights in a row should be added. The document adds no owners, roles for the speakers, dates of events, or reasons beyond those facts, or marks any such addition as an assumption inside the document. The date the write-up was made is fine''' },
 ]

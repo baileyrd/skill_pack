@@ -28,8 +28,12 @@ path the conversation took to get there unless that path explains a decision.
 
 - **Only what the chat settled.** A decision is something a participant
   agreed to or stated as final. A suggestion nobody took up is not one. Never
-  invent owners, dates, numbers or names; write "unassigned" or put the item
-  under open questions.
+  invent owners, dates, numbers, names, roles or reasons; write
+  "unassigned", put the item under open questions, or leave a decision's why
+  out when the chat never gave one. A plausible reason you inferred is still
+  invented; so is a "why" column for follow-ups nobody justified, a lessons
+  section the chat never drew, or a job title ("the on-call engineer") for a
+  speaker the chat never described.
 - **Latest word wins.** When the chat changed its mind, record the final
   position; the earlier one goes under rejected options with the reason it
   lost, and only if the reason is useful to the reader.
@@ -74,19 +78,24 @@ path the conversation took to get there unless that path explains a decision.
       document there with the same content.
    3. Otherwise write one HTML file from
       [`assets/template.html`](assets/template.html): replace `{{TITLE}}`,
-      `{{SUBTITLE}}`, `{{BODY}}` and `{{FOOTER}}`, using the classes listed
+      `{{SUBTITLE}}`, `{{BODY}}` and `{{FOOTER}}` (source and date only:
+      "Written up from a chat on 2026-11-10"), using the classes listed
       in the template's header comment. Name it after the title in
-      kebab-case (`auth-token-rotation.html`).
+      kebab-case (`auth-token-rotation.html`) and write it in the user's
+      working directory, never inside this skill's folder.
    4. Markdown instead when the destination is a repo, PR, wiki or chat
       paste: same sections, `# Title` first, no HTML.
 6. **Check.** For a file, run
-   `python3 scripts/check_doc.py <file>` (path relative to this skill's
-   folder; the sync drops the executable bit, so to run it directly first
-   `chmod +x scripts/*.py 2>/dev/null || true`). It fails on a leftover `{{placeholder}}`, an empty title,
+   `python3 <skill-folder>/scripts/check_doc.py <file>` from the user's
+   working directory (the sync drops the executable bit, so to run it
+   directly first `chmod +x scripts/*.py 2>/dev/null || true` in the skill
+   folder). It fails on a leftover `{{placeholder}}`, an empty title,
    external scripts, styles, fonts or images, and strings shaped like keys
    or tokens. Fix every finding and run it again; deliver only on a clean
-   pass. Then reread once as the cold reader: does every decision have its
-   why, and is there any reference that only makes sense inside the chat?
+   pass. If running it is refused, check those four by eye and say the
+   script did not run. Then reread once as the cold reader: does each
+   decision carry the why the chat gave, and is any reference meaningful only
+   inside the chat?
 7. **Deliver.** Give the path or link and a two-line summary of what the
    document covers. Don't paste the whole document back into the chat.
 

@@ -9,7 +9,8 @@ has a better word for it.
 For a chat that weighed options and settled something.
 
 1. Context: the problem and constraints, in a short paragraph.
-2. Decisions: one entry each, the decision in bold and the why beneath it.
+2. Decisions: one entry each, the decision in bold and, beneath it, the
+   why the chat gave (none given: no why line).
    Use the `decision` class in HTML.
 3. Outcomes: what now exists (PRs, files, measurements), with links.
 4. Rejected options: a table of option, why not.
@@ -41,7 +42,7 @@ For a chat that chased a failure.
 
 1. Symptom and impact.
 2. Root cause, stated plainly.
-3. Fix and how it was verified.
+3. Fix and how it was verified, without adding a rationale nobody stated.
 4. Timeline, only if order matters to the cause.
 5. Follow-ups that stop a repeat.
 
