@@ -5,6 +5,12 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
 ### Added
+- `writing/chat-to-artifact` (v1.0.0) — turns a chat into a self-contained
+  document in the Claude Docs format: one offline HTML file holding every
+  Claude Docs element (diagrams, charts, images included) by default, a live
+  Claude Doc via the connector, Markdown for repos. Check and image-inlining
+  scripts, unit tests and a 4-case Eval-Kit suite. Agent-neutral.
+  Opens the `writing/` category.
 - `meta/context-audit` and `meta/zen` (v1.0.0) — Claude setup hygiene: a
   token-waste audit with a score, and a reviewed, reversible declutter.
   Imported from uploads; non-spec frontmatter dropped, retro steps added.

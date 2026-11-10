@@ -25,6 +25,7 @@ already proven it makes.
 | Test module | Covers |
 | --- | --- |
 | `test_check_references.py` | `docs-loop`'s reference checker: slug generation, code-span masking, path classification, component roots, historical downgrade, baseline keys |
+| `test_check_doc.py` | `chat-to-artifact`'s document check: filled template passes, leftover placeholders, CDN scripts/styles/`@import`, plain links not flagged, empty title, pasted keys and URL credentials, Claude Docs head in HTML and Markdown, un-inlined and missing images; `embed_images.py` inlining, missing and non-image files |
 | `test_check_repo.py` | Frontmatter parsing used by the `manifests` check |
 
 ## What isn't tested, and why

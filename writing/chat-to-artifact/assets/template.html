@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--
+  chat-to-artifact template: a Claude Docs document as one self-contained file.
+  Fill the double-brace placeholders below (TITLE twice, DATE, AUTHOR, LEAD,
+  BODY); with no author, delete the " · " and the mention chip. Delete this
+  comment when done. No scripts, no remote URLs: images go in as relative
+  paths, then scripts/embed_images.py inlines them.
+  BODY building blocks, one per Claude Docs element:
+    <h2>Section</h2> <h3>Sub</h3> <p>... <strong>bold</strong> <a href="...">link</a></p>
+    <ul><li><strong>Point.</strong> One sentence of support.</li></ul>
+    <ol><li>Step</li></ol>
+    <ul class="tasks"><li><input type="checkbox" disabled> Open task</li>
+                      <li><input type="checkbox" disabled checked> Done task</li></ul>
+    <div class="table-wrap"><table><thead><tr><th>Code</th>...</tr></thead>
+      <tbody><tr><td>G1</td>...</tr></tbody></table></div>
+    <span class="chip">2026-11-10</span>  <span class="chip mention">Priya</span>  (dates and people in text)
+    <span class="tag">open</span> <span class="tag done">done</span>        (a status cell)
+    <figure><svg viewBox="0 0 720 240" role="img" aria-label="...">...</svg>
+      <figcaption>rollout · 3 steps</figcaption></figure>   (diagram or chart, drawn inline)
+    <figure><img src="shot.png" alt="..."><figcaption>...</figcaption></figure>   (image)
+    <div class="callout">Warning or caveat</div>
+    <pre><code>...</code></pre>
+  Inside an SVG use fill="currentColor" or var(--fg), var(--muted), var(--line),
+  var(--accent), var(--ok), so it follows light and dark mode.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  :root {
+    --bg: #faf9f5; --fg: #1f1e1d; --muted: #6b6a66; --line: #e5e3da;
+    --card: #ffffff; --accent: #a54f31; --accent-bg: #f6ebe4; --ok: #2f6a47;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1f1e1d; --fg: #ecebe6; --muted: #a3a29c; --line: #3a3935;
+      --card: #292826; --accent: #e08a68; --accent-bg: #3a2d26; --ok: #7cc49a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 48px 24px 64px; }
+  h1 { font: 600 2rem/1.2 ui-serif, Georgia, serif; margin: 0 0 10px; }
+  .byline { color: var(--muted); margin: 0 0 20px; }
+  .lead { font-size: 1.08rem; margin: 0 0 8px; }
+  h2 { font: 600 1.3rem/1.3 ui-serif, Georgia, serif; margin: 36px 0 12px; }
+  h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+  a { color: var(--accent); }
+  .chip {
+    display: inline-block; padding: 0 8px; border-radius: 6px; font-size: .92em;
+    background: var(--card); border: 1px solid var(--line); color: var(--fg);
+  }
+  .chip.mention { background: var(--accent-bg); border-color: transparent; color: var(--accent); }
+  .chip.mention::before { content: "@"; }
+  .tag {
+    display: inline-block; font-size: .8rem; padding: 1px 8px; border-radius: 99px;
+    background: var(--accent-bg); color: var(--accent);
+  }
+  .tag.done { color: var(--ok); }
+  ul.tasks { list-style: none; padding-left: 4px; }
+  ul.tasks input { margin-right: 8px; accent-color: var(--accent); }
+  li { margin: 4px 0; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .93rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  figure { margin: 18px 0; }
+  figure svg, figure img { display: block; width: 100%; height: auto; }
+  figure img { border: 1px solid var(--line); border-radius: 8px; }
+  figure svg { color: var(--fg); font-family: inherit; }
+  figcaption { color: var(--muted); font-size: .85rem; margin-top: 6px; }
+  .callout { border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 14px; margin: 12px 0; }
+  code { font-family: var(--mono); font-size: .9em; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+  @media print {
+    body { background: #fff; color: #000; }
+    main { padding: 0; max-width: none; }
+    a { color: inherit; }
+    figure, tr { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+<h1>{{TITLE}}</h1>
+<p class="byline"><span class="chip">{{DATE}}</span> · <span class="chip mention">{{AUTHOR}}</span></p>
+<p class="lead">{{LEAD}}</p>
+{{BODY}}
+</main>
+</body>
+</html>

@@ -87,6 +87,15 @@ producing an artifact.
 | [`visual/`](diagrams/visual) | Turns the current work into one self-contained HTML page with inline SVG diagrams — a branch recap (hunks pulled from git), a read-only plan, an explored folder/architecture, or a zoomable drill-down map of a skill pack — then audits its own output in headless Chrome for edge crossings and label overlap. Adapted from BuilderIO/skills and tt-a1i/archify (MIT). |
 | [`canvas-design/`](diagrams/canvas-design) | Makes original static art (poster, cover, print) as one PNG/PDF: writes a short design philosophy for an invented movement, renders it in code with bundled OFL fonts, then refines rather than adds. Adapted from Anthropic's `canvas-design` (Apache-2.0). |
 
+### [`writing/`](writing) — the document is the deliverable
+
+Skills whose output is prose meant to be read by someone else: a finished,
+self-contained document rather than code, a diagram, or a change to a repo.
+
+| Skill | Does |
+|---|---|
+| [`chat-to-artifact/`](writing/chat-to-artifact) | Turns a chat discussion (live or a pasted transcript) into one polished, self-contained document for a reader who wasn't there: decisions with their reasons, outcomes, rejected options, open questions and action items, only what the chat settled, secrets stripped. Writes the Claude Docs format with all its elements (dated byline, tables, tasks, chips, inline SVG diagrams and charts, embedded images) as one offline HTML file any agent can produce, a live Claude Doc when that connector is present, or Markdown for repos. `embed_images.py` inlines images; `check_doc.py` checks the head, placeholders, remote resources and leaked keys. Agent-neutral: Claude, Codex, Gemini CLI, Cursor. |
+
 ## Versioning
 
 Every authored skill's `SKILL.md` frontmatter carries a `metadata.version` (quoted semver, bumped by hand on meaningful changes; never top-level, which claude.ai rejects on upload), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.
