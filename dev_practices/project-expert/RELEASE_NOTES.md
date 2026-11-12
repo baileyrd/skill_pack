@@ -6,6 +6,20 @@ this log tracks commits against `main`.
 
 ---
 
+## v2.1.0 — Commit what the pack cites
+**2026-11-12**
+
+- **Added:** step 5 commits every document the spec or pack cites (concept doc,
+  .docx, Claude Doc, chat artifact) into the repo as Markdown under
+  `docs/concept/` or `<root>/sources/`, marked not binding, because a cloud
+  session cannot open a chat link. Unreachable files go to OPEN_QUESTIONS and
+  the PR body as unreadable.
+- **Added:** acceptance (step 8) greps the spec and pack for cited documents;
+  each must resolve to a repo file or be listed as unreadable.
+- Pulled from Nano's edit of the claude.ai account copy.
+
+---
+
 ## v2.0.0 — Renamed from project-handoff; merged with the expert builder
 **2026-11-10**
 
