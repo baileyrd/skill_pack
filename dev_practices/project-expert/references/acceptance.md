@@ -12,6 +12,7 @@ fallback). Pick real questions from this project's own sources.
 | 4 | Pass the user's answer back to the expert once | exactly one DECISIONS row and one `remind_me_add`; asking again adds neither |
 | 5 | Inspect: nothing depends on a local plugin, mod or machine config | expert file and routing live in the repo |
 | 6 | Read the PR body | lists every unsourced OPEN_QUESTIONS item and unreadable source |
+| 7 | Bootstrap only: run repo-config's `audit.sh` (or check its file list by hand) | the full governance set is present; DECISIONS.md points at its ADR folder |
 
 Check 4 by counting rows before and after, and `remind_me_search` for the
 decision. Post the results as a PR comment and `remind_me_add` them (tag

@@ -8,6 +8,8 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 - `dev_practices/project-expert` v2.1.0 — commits every document the pack
   cites into the repo as Markdown (a chat link is not a readable source);
   acceptance checks each citation resolves. Pulled from the claude.ai account copy.
+  Adds bootstrap mode: a new README-only repo is configured with repo-config
+  first, in the same PR.
 ### Added
 - `writing/chat-to-artifact` (v1.0.0) — turns a chat into a self-contained
   document in the Claude Docs format: one offline HTML file holding every
