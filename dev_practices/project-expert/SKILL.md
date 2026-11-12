@@ -38,8 +38,6 @@ Modes (all share the core procedure below):
 - **Refresh**: pack exists, project moved on. Append what was decided since.
 - **Resolve**: "answer the open questions for X". Read OPEN_QUESTIONS.md, answer
   from the record, write answers back.
-- **Bootstrap**: not a separate mode; every run with a repo audits its config
-  first and fills the gaps (a README-only repo gets the whole set). See core step 1.
 - **Migrate**: v1.x repo (`project-expert.md` agent, per-project CLAUDE.md block).
 
 ## Provenance: the rule that makes the pack trustworthy
