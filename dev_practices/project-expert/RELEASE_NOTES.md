@@ -18,10 +18,10 @@ this log tracks commits against `main`.
   when charts, diagrams or images carry meaning (Markdown may flatten them).
 - **Added:** acceptance (step 8) greps the spec and pack for cited documents;
   each must resolve to a repo file or be listed as unreadable.
-- **Added:** bootstrap mode. Step 1 first classifies the repo (none, new, active).
-  A new repo (README and boilerplate only) gets repo-config on the handoff branch
-  before the pack, its questions answered from the sources, and its ADR folder
-  becomes the decision log the pack points at. Acceptance check 7 audits the set.
+- **Added:** repo config first. Step 1 runs repo-config's audit on any existing
+  repo and fills the gaps on the handoff branch before the pack (a README-only
+  repo gets the whole set), answering its questions from the sources. A new ADR
+  folder becomes the decision log the pack points at. Acceptance check 7 audits it.
 - Pulled from Nano's edit of the claude.ai account copy.
 
 ---

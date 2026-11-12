@@ -5,8 +5,8 @@ description: >-
   by a handoff pack (SPEC, DECISIONS with why, rejected options and provenance, QA,
   OPEN_QUESTIONS), so threads and orchestrators ask it design questions instead of the user. It
   answers from the pack, logs defaults and escalates only intent, scope or taste. Works with or
-  without a pack and with or without a design chat. A new README-only repo is configured with
-  repo-config first. Handoff mode builds from a chat; harvest mode
+  without a pack and with or without a design chat. Audits the repo with repo-config and fills
+  its gaps in the same PR. Handoff mode builds from a chat; harvest mode
   from repo docs, merged PRs, remind-me and cards; refresh appends; resolve answers Claude Code's
   open questions. Cloud-safe, monorepo-aware, points at an existing decision log instead of
   copying it. Formerly project-handoff. Use for "hand this off", "build an expert for X",
@@ -38,8 +38,8 @@ Modes (all share the core procedure below):
 - **Refresh**: pack exists, project moved on. Append what was decided since.
 - **Resolve**: "answer the open questions for X". Read OPEN_QUESTIONS.md, answer
   from the record, write answers back.
-- **Bootstrap**: the repo is new (README and boilerplate only). repo-config sets
-  it up first, then the pack and expert land in the same PR. See core step 1.
+- **Bootstrap**: not a separate mode; every run with a repo audits its config
+  first and fills the gaps (a README-only repo gets the whole set). See core step 1.
 - **Migrate**: v1.x repo (`project-expert.md` agent, per-project CLAUDE.md block).
 
 ## Provenance: the rule that makes the pack trustworthy
@@ -83,15 +83,15 @@ may be trimmed, not reworded.
 
 ## Core procedure
 
-1. **Fork: repo state, then pack.** First classify the repo. *None*: the request,
-   remind-me and the session's repos name none; build the pack as files and offer
-   to create one (don't unasked). *New*: tracked files are only README, LICENSE,
-   `.gitignore`, `.gitattributes`; bootstrap: run repo-config on the handoff
-   branch before the pack, answering its questions from the sources so it asks
-   only what they leave open. Its ADR folder is then the existing decision log
-   (DECISIONS.md points at it). No repo-config installed: say so in the PR body,
-   don't hand-write its file set. *Active*: anything else. Then: is there already
-   a pack? Before any sweep, glob
+1. **Fork: repo config, then pack.** No repo (the request, remind-me and the
+   session's repos name none): build the pack as files and offer to create one
+   (don't unasked). Otherwise run repo-config's audit on the repo. Any gap (all of
+   it for a README-only repo) is filled by repo-config on the handoff branch
+   before the pack, answering its questions from the sources so it asks only what
+   they leave open; it adapts existing files, never overwrites. A new ADR folder
+   becomes the existing decision log (DECISIONS.md points at it). No repo-config
+   installed: list the gaps in the PR body, don't hand-write the set. Then: is
+   there already a pack? Before any sweep, glob
    `**/handoff/SPEC.md` and `.claude/agents/*-expert.md`, then check what is not
    on the default branch: open PRs and remote branches touching `**/handoff/` or
    `.claude/agents/`. PRs can't be searched by path, so list the open ones and then each one's
