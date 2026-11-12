@@ -5,7 +5,8 @@ description: >-
   by a handoff pack (SPEC, DECISIONS with why, rejected options and provenance, QA,
   OPEN_QUESTIONS), so threads and orchestrators ask it design questions instead of the user. It
   answers from the pack, logs defaults and escalates only intent, scope or taste. Works with or
-  without a pack and with or without a design chat. Handoff mode builds from a chat; harvest mode
+  without a pack and with or without a design chat. Audits the repo with repo-config and fills
+  its gaps in the same PR. Handoff mode builds from a chat; harvest mode
   from repo docs, merged PRs, remind-me and cards; refresh appends; resolve answers Claude Code's
   open questions. Cloud-safe, monorepo-aware, points at an existing decision log instead of
   copying it. Formerly project-handoff. Use for "hand this off", "build an expert for X",
@@ -14,7 +15,7 @@ compatibility: >-
   Best with the rusty-remind-me MCP server and GitHub access (gh or a connected repo). Without
   them it still produces the pack as files to drop into the repo. WebFetch is optional.
 metadata:
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # project-expert
@@ -80,7 +81,15 @@ may be trimmed, not reworded.
 
 ## Core procedure
 
-1. **Fork: is there already a pack?** Before any sweep, glob
+1. **Fork: repo config, then pack.** No repo (the request, remind-me and the
+   session's repos name none): build the pack as files and offer to create one
+   (don't unasked). Otherwise run repo-config's audit on the repo. Any gap (all of
+   it for a README-only repo) is filled by repo-config on the handoff branch
+   before the pack, answering its questions from the sources so it asks only what
+   they leave open; it adapts existing files, never overwrites. A new ADR folder
+   becomes the existing decision log (DECISIONS.md points at it). No repo-config
+   installed: list the gaps in the PR body, don't hand-write the set. Then: is
+   there already a pack? Before any sweep, glob
    `**/handoff/SPEC.md` and `.claude/agents/*-expert.md`, then check what is not
    on the default branch: open PRs and remote branches touching `**/handoff/` or
    `.claude/agents/`. PRs can't be searched by path, so list the open ones and then each one's
@@ -120,6 +129,14 @@ may be trimmed, not reworded.
    pre-answered questions, each citing its source, only what sources settle.
    Keep volatile facts (test counts, board state) out unless re-verified. Keep
    it terse: the pack is searched, not read.
+   **Commit what the pack cites.** Any document the spec or pack names as a
+   reference (a concept doc, .docx, Claude Doc or artifact made in the chat) goes
+   into the repo under `docs/concept/` or `<root>/sources/`, converted to Markdown
+   (`pandoc -t gfm`; a Claude Doc via the Docs export `markdown`) and marked not
+   binding. If it relies on charts, diagrams or images, add the `html` export beside
+   it so the visuals survive. A chat link alone is not a source a
+   cloud session can read. If you can't get the file, list it in OPEN_QUESTIONS
+   and the PR body as unreadable; never leave a reference that points outside the repo.
 6. **Persist to remind-me** (skip if absent and say so). Handoff: one
    `remind_me_auto_capture` of the full dialog, tags `[<slug>, project-expert]`,
    `metadata.chat_url`; that is the end-of-chat capture. Then `remind_me_add`
@@ -138,7 +155,9 @@ may be trimmed, not reworded.
    Handoff mode ends with a kickoff prompt of at most 6 lines pointing at
    `<root>/` and the first slice; the files are the source of truth.
 8. **Acceptance.** Run [references/acceptance.md](references/acceptance.md)
-   with a separate agent, not the author. A fail means not done.
+   with a separate agent, not the author. A fail means not done. Also grep the
+   spec and pack for every document they cite as a reference: each must resolve
+   to a file in the repo or be listed as unreadable in OPEN_QUESTIONS.
 9. **Wrap-up retro** (end of file).
 
 ## Handoff mode sources

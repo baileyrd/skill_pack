@@ -6,6 +6,26 @@ this log tracks commits against `main`.
 
 ---
 
+## v2.1.0 — Commit what the pack cites
+**2026-11-12**
+
+- **Added:** step 5 commits every document the spec or pack cites (concept doc,
+  .docx, Claude Doc, chat artifact) into the repo as Markdown under
+  `docs/concept/` or `<root>/sources/`, marked not binding, because a cloud
+  session cannot open a chat link. Unreachable files go to OPEN_QUESTIONS and
+  the PR body as unreadable.
+  A Claude Doc uses the Docs `markdown` export, with the `html` export beside it
+  when charts, diagrams or images carry meaning (Markdown may flatten them).
+- **Added:** acceptance (step 8) greps the spec and pack for cited documents;
+  each must resolve to a repo file or be listed as unreadable.
+- **Added:** repo config first. Step 1 runs repo-config's audit on any existing
+  repo and fills the gaps on the handoff branch before the pack (a README-only
+  repo gets the whole set), answering its questions from the sources. A new ADR
+  folder becomes the decision log the pack points at. Acceptance check 7 audits it.
+- Pulled from Nano's edit of the claude.ai account copy.
+
+---
+
 ## v2.0.0 — Renamed from project-handoff; merged with the expert builder
 **2026-11-10**
 

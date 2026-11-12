@@ -66,6 +66,7 @@ link	my_loops/docs-loop/evals/fixtures/repo/README.md	docs/design.md
 inline-path	diagrams/visual/evals/fixtures/plan.md	svc/sweeper.py
 inline-path	diagrams/visual/evals/fixtures/plan.md	tests/test_expiry.py
 inline-path	dev_practices/project-expert/references/templates.md	docs/handoff/
+inline-path	dev_practices/project-expert/SKILL.md	docs/concept/
 
 # context-audit reads the CLAUDE.md files of the project it audits; this is a
 # path in that target project, not in this repo.

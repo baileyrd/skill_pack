@@ -4,6 +4,11 @@ All notable changes to this repo are documented here.
 Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
 
 ## [Unreleased]
+### Changed
+- `dev_practices/project-expert` v2.1.0 — commits every document the pack
+  cites into the repo as Markdown (a chat link is not a readable source);
+  acceptance checks each citation resolves. Pulled from the claude.ai account copy.
+  Audits every repo with repo-config first and fills its gaps in the same PR.
 ### Added
 - `writing/chat-to-artifact` (v1.0.0) — turns a chat into a self-contained
   document in the Claude Docs format: one offline HTML file holding every
