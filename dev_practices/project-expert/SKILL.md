@@ -123,7 +123,9 @@ may be trimmed, not reworded.
    **Commit what the pack cites.** Any document the spec or pack names as a
    reference (a concept doc, .docx, Claude Doc or artifact made in the chat) goes
    into the repo under `docs/concept/` or `<root>/sources/`, converted to Markdown
-   (`pandoc -t gfm`) and marked not binding. A chat link alone is not a source a
+   (`pandoc -t gfm`; a Claude Doc via the Docs export `markdown`) and marked not
+   binding. If it relies on charts, diagrams or images, add the `html` export beside
+   it so the visuals survive. A chat link alone is not a source a
    cloud session can read. If you can't get the file, list it in OPEN_QUESTIONS
    and the PR body as unreadable; never leave a reference that points outside the repo.
 6. **Persist to remind-me** (skip if absent and say so). Handoff: one

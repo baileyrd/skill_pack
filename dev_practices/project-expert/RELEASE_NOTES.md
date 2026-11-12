@@ -14,6 +14,8 @@ this log tracks commits against `main`.
   `docs/concept/` or `<root>/sources/`, marked not binding, because a cloud
   session cannot open a chat link. Unreachable files go to OPEN_QUESTIONS and
   the PR body as unreadable.
+  A Claude Doc uses the Docs `markdown` export, with the `html` export beside it
+  when charts, diagrams or images carry meaning (Markdown may flatten them).
 - **Added:** acceptance (step 8) greps the spec and pack for cited documents;
   each must resolve to a repo file or be listed as unreadable.
 - Pulled from Nano's edit of the claude.ai account copy.
