@@ -10,6 +10,11 @@ Format: Added / Changed / Deprecated / Removed / Fixed / Security, newest first.
   acceptance checks each citation resolves. Pulled from the claude.ai account copy.
   Audits every repo with repo-config first and fills its gaps in the same PR.
 ### Added
+- `image_prompts/character-sheet` (v1.0.0) — writes a tailored,
+  model-agnostic image prompt for a character turnaround sheet from a
+  reference image or description; seven views by default, overridable;
+  generic fallback with no reference. 4-case Eval-Kit suite.
+  Opens the `image_prompts/` category.
 - `writing/chat-to-artifact` (v1.0.0) — turns a chat into a self-contained
   document in the Claude Docs format: one offline HTML file holding every
   Claude Docs element (diagrams, charts, images included) by default, a live

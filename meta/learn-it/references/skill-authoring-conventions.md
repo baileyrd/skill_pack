@@ -162,6 +162,9 @@ Six category folders exist (verify with `ls -d */`):
 - `diagrams/` — the picture is the deliverable (`fireworks-tech-graph`, `visual`).
   Defined by *output*: `dev_practices/` reasons about software without
   emitting an artifact, this one emits the artifact.
+- `writing/` — the document is the deliverable (`chat-to-artifact`).
+- `image_prompts/` — the prompt for an image model is the deliverable
+  (`character-sheet`). The skill writes text; it never renders the image.
 
 One further top-level folder is **not** a category and holds no skill
 directories — `trying/` contains exported `.skill` zip archives. Nothing in it
@@ -169,7 +172,7 @@ has a `SKILL.md`, so `build_skill_zips.py` and `install_skills.py` skip it
 entirely: neither versioned, packaged, nor installed. A skill does not "live"
 there in any working sense.
 
-A skill that clearly fits one of the six goes there. A skill that fits none
+A skill that clearly fits one of these goes there. A skill that fits none
 is a real decision, not a default — flag it rather than forcing a fit or
 silently creating a new category. If a new one genuinely is warranted,
 `ARCHITECTURE.md`'s "Structure" section names the category folders explicitly

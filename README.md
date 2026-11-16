@@ -96,6 +96,16 @@ self-contained document rather than code, a diagram, or a change to a repo.
 |---|---|
 | [`chat-to-artifact/`](writing/chat-to-artifact) | Turns a chat discussion (live or a pasted transcript) into one polished, self-contained document for a reader who wasn't there: decisions with their reasons, outcomes, rejected options, open questions and action items, only what the chat settled, secrets stripped. Writes the Claude Docs format with all its elements (dated byline, tables, tasks, chips, inline SVG diagrams and charts, embedded images) as one offline HTML file any agent can produce, a live Claude Doc when that connector is present, or Markdown for repos. `embed_images.py` inlines images; `check_doc.py` checks the head, placeholders, remote resources and leaked keys. Agent-neutral: Claude, Codex, Gemini CLI, Cursor. |
 
+### [`image_prompts/`](image_prompts) — the prompt is the deliverable
+
+Skills whose output is a prompt for an image model: the skill studies the
+input and writes the text, and the user runs it wherever they generate
+images. Distinct from `diagrams/`, which renders the picture itself.
+
+| Skill | Does |
+|---|---|
+| [`character-sheet/`](image_prompts/character-sheet) | Writes a tailored, model-agnostic prompt for a character turnaround sheet from a reference image or description: one detected style, visible traits only (unseen ones marked for the model to infer), seven views by default (four head closeups, three full-body) and overridable. Falls back to a generic reusable prompt when there is no reference. |
+
 ## Versioning
 
 Every authored skill's `SKILL.md` frontmatter carries a `metadata.version` (quoted semver, bumped by hand on meaningful changes; never top-level, which claude.ai rejects on upload), and a `RELEASE_NOTES.md` next to it logs what changed and why — reverse chronological, one entry per change, modeled on `repo-config`'s original log. `notebooklm` is the one exception: it's vendored from `notebooklm-py`'s own release, carries that package's version instead, and isn't versioned independently here.
