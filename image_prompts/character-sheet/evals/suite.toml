@@ -1,0 +1,62 @@
+# Eval-Kit suite for character-sheet (https://github.com/baileyrd/Eval-Kit).
+# The skill emits a prompt, not an image, so checks target the prompt text.
+# fixtures/hero.png is an original flat-vector character: spiky orange hair,
+# green eyes, a red scar on the viewer's-left cheek, teal buttoned jacket with
+# a yellow badge, yellow scarf, grey trousers, brown boots, front view only.
+# The back is never shown, so a faithful prompt must not describe it.
+#
+#   python3 -m evalkit run     evals/suite.toml --jobs 4
+#   python3 -m evalkit compare evals/suite.toml control skill
+
+samples       = 2
+allowed_tools = ["Read"]    # to look at the fixture image
+
+[variant.control]
+
+[variant.skill]
+subject = ".."
+
+[[case]]
+id     = "tailored-from-image"
+input  = '''hero.png is my character. make me a character sheet prompt for him'''
+files  = { "hero.png" = "file:fixtures/hero.png" }
+checks = [
+  { regex = '```' },
+  { regex = '(?i)white background' },
+  { regex = '(?i)\bseven\b|\b7\b' },
+  { regex = '(?i)teal' },
+  { regex = '(?i)orange' },
+  { judge = '''The reply contains one complete image-generation prompt in a code block that describes this specific character: orange spiky hair, green eyes, a teal buttoned jacket, a yellow scarf, and a scar or mark on one cheek''' },
+  { judge = '''The prompt names a single flat or vector illustrated style with outlines for the output, and does not ask for photorealistic skin texture or pores, and does not offer an "if photorealistic / if 3D render" conditional''' },
+  { judge = '''The prompt does not invent a specific design for the back of the character (for example a back logo, a hood, a ponytail or a backpack). The back is either left to the image model to infer consistently or not described''' },
+  { judge = '''The prompt lays out four head closeups (front, left profile, right profile, back) and three full-body views (front, side, back), and tells the user to attach the reference image when using it''' },
+]
+
+[[case]]
+id     = "text-description-layout-override"
+input  = '''I need a turnaround sheet prompt. no image yet. she's a photoreal woman in her 60s, silver bob, round tortoiseshell glasses, navy wool peacoat, red leather gloves. add a row of four expressions: neutral, smiling, angry, surprised'''
+checks = [
+  { regex = '```' },
+  { regex = '(?i)\beleven\b|\b11\b' },
+  { regex = '(?i)surprised' },
+  { judge = '''The prompt names photorealistic as the one output style and includes the silver bob, tortoiseshell glasses, navy peacoat and red leather gloves''' },
+  { judge = '''The prompt lists eleven panels in total: four head closeups, three full-body views and four named expressions (neutral, smiling, angry, surprised), and every place it states a total view count says eleven, never seven''' },
+  { judge = '''The prompt does not invent traits the user did not give, such as an eye colour, a specific trouser or shoe design, or jewellery, as fixed requirements''' },
+]
+
+[[case]]
+id     = "no-reference-fallback"
+input  = '''give me a character reference sheet prompt I can reuse with any image I upload'''
+checks = [
+  { regex = '```' },
+  { regex = '(?i)\bseven\b|\b7\b' },
+  { judge = '''The reply gives a reusable prompt straight away, without first demanding an image, and the prompt tells the image model to detect the reference's own style (illustrated, photorealistic or 3D) and match it''' },
+  { judge = '''The prompt describes no specific character traits (no particular hair colour, outfit or face), since no reference was given''' },
+]
+
+[[case]]
+id     = "does-not-trigger-rpg-sheet"
+input  = '''make me a D&D 5e character sheet for a level 3 halfling rogue'''
+checks = [
+  { judge = '''The reply is about a tabletop RPG character (ability scores, class features, equipment or similar) and is not an image-generation prompt for a multi-view turnaround grid''' },
+]
